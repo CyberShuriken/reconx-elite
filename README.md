@@ -1,87 +1,62 @@
-# ReconX
+# ReconX Elite
 
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-ReconX is a full-stack bug bounty reconnaissance and security testing dashboard for a single target domain per project entry. It combines FastAPI, Celery, Redis, PostgreSQL, and React into one containerized monorepo.
-
-## Monorepo Structure
-
-```text
-reconx/
-├── backend/
-├── frontend/
-├── worker/
-├── docker-compose.yml
-└── README.md
-=======
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-ReconX is a full-stack bug bounty reconnaissance and security testing dashboard for a **single target domain per project entry**. It combines FastAPI, Celery, Redis, PostgreSQL, and React to run recon/security pipelines asynchronously and display results in a clean UI.
+ReconX Elite is a full-stack bug bounty reconnaissance platform built around FastAPI, Celery, Redis, PostgreSQL, and React. It manages authenticated target tracking, staged recon scans, attack-surface prioritization, JavaScript intelligence, heuristic correlation, notes, bookmarks, schedules, notifications, and report downloads from one monorepo.
 
 ## Architecture
 
 ```text
-frontend (React/Vite) -> backend (FastAPI) -> PostgreSQL
-                                   |
-                                   -> Redis broker -> worker (Celery + CLI tools)
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
+frontend (React/Vite, static container)
+  -> backend (FastAPI)
+     -> PostgreSQL
+     -> Redis
+     -> Celery worker
+        -> subfinder / httpx / gau / nuclei
 ```
 
-## Features
+## Key capabilities
 
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
-- JWT auth (`register` / `login`)
-- Target management (add/list/view)
-- Async scan execution with Celery
-- CLI tool integration (`subfinder`, `httpx`, `gau`, `nuclei`)
-- Structured scan results in PostgreSQL
-- React dashboard with polling scan status
-- Input validation + domain ownership guardrails
-- Basic rate limiting on API routes
+- JWT access + refresh auth with automatic frontend refresh handling.
+- Target management with strict domain normalization.
+- Scan pipeline staged as `subfinder -> httpx -> gau -> nuclei`.
+- Soft-fail enrichment, JavaScript analysis, heuristic correlation, and ranked attack-path generation.
+- Recon data for subdomains, endpoints, vulnerabilities, JavaScript assets, and attack paths.
+- Notes, bookmarks, scheduled scans, notifications, scan diffs, and downloadable reports.
+- Docker Compose stack with production-style frontend serving and Alembic migrations.
 
-## Prerequisites
+## Repository layout
 
-### Local (non-Docker)
+```text
+.
+├── backend/
+│   ├── alembic/
+│   ├── app/
+│   └── requirements.txt
+├── frontend/
+│   ├── src/
+│   └── Dockerfile
+├── worker/
+├── docker-compose.yml
+└── .env.example
+```
 
-- Python 3.11+
-- Node.js 20+
-- PostgreSQL 15+
-- Redis 7+
-- Security tooling in PATH:
-  - `subfinder`
-  - `httpx`
-  - `gau`
-  - `nuclei`
+## Required tools
 
-### Docker
+ReconX Elite expects these CLI tools inside the backend and worker runtime:
 
-- Docker Desktop (or Docker Engine + Compose)
-- For full scanning support, install tools in backend and worker images (already defined in Dockerfiles).
+- `subfinder`
+- `httpx`
+- `gau`
+- `nuclei`
 
-## Environment Variables
+The provided Dockerfiles install pinned versions of all four tools.
 
-Copy and adjust:
+## Environment setup
+
+1. Copy the root example file.
+2. Adjust secrets and origins for your environment.
 
 ```bash
-cp backend/.env.example backend/.env
+cp .env.example .env
 ```
 
 Important variables:
@@ -89,80 +64,26 @@ Important variables:
 - `DATABASE_URL`
 - `REDIS_URL`
 - `JWT_SECRET_KEY`
-- `ACCESS_TOKEN_EXPIRE_MINUTES`
-- `SCAN_ALLOWED_SCHEMES`
+- `CORS_ALLOWED_ORIGINS`
+- `SCAN_THROTTLE_SECONDS`
+- `VITE_API_BASE_URL`
 
-## Running with Docker
-
-```bash
-docker-compose up --build
-```
-
-Services:
-
-- Backend API: `http://localhost:8000`
-- Frontend: `http://localhost:5173`
-- PostgreSQL: `localhost:5432`
-- Redis: `localhost:6379`
-
-## API Endpoints
-
-Auth:
-
-- `POST /auth/register`
-- `POST /auth/login`
-
-Targets:
-
-- `POST /targets`
-- `GET /targets`
-- `GET /targets/{id}`
-
-Scans:
-
-- `POST /scan/{target_id}`
-
-Health:
-
-- `GET /health`
-
-Interactive docs:
-
-- `http://localhost:8000/docs`
-
-## CLI Tool Integration Notes
-
-ReconX uses Python `subprocess` to call the CLI binaries directly. No scan results are mocked.
-
-- `subfinder` discovers subdomains
-- `httpx` identifies live hosts
-- `gau` collects known URLs
-- `nuclei` checks vulnerabilities via templates
-
-If any tool is missing, the scan records a warning/error in the scan metadata.
-
-## Security Notes
-
-- Scans are only run against domains explicitly added by authenticated users.
-- Domain input is validated using strict hostname checks.
-- API includes rate limiting middleware.
-- Frontend includes an explicit legal disclaimer to authorize testing only owned/approved assets.
-
-## Development
-
-Backend:
+## Local backend workflow
 
 ```bash
 cd backend
+python -m venv .venv
+.venv\Scripts\activate
 pip install -r requirements.txt
+alembic upgrade head
 uvicorn app.main:app --reload
 ```
 
-Worker:
+Run the worker in a second shell:
 
 ```bash
-cd worker
-pip install -r requirements.txt
+cd backend
+.venv\Scripts\activate
 celery -A app.tasks.celery_app.celery_app worker --loglevel=info
 ```
 
@@ -173,102 +94,85 @@ cd frontend
 npm install
 npm run dev
 ```
-=======
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-- JWT authentication (`register/login`)
-- Target management (add/list/detail)
-- Async scan execution (Celery)
-- Recon integrations:
-  - `subfinder` (subdomain enumeration)
-  - `httpx` (live host detection)
-  - `gau` (URL collection)
-  - `nuclei` (template-based findings)
-- Basic status tracking (`pending/running/completed/failed`)
-- Polling-based real-time scan updates in frontend
-- Security controls:
-  - Domain normalization/validation
-  - Scan only for previously added targets
-  - In-memory API rate limiting middleware
-  - UI disclaimer
 
-## Project structure
+## Docker usage
 
-```text
-/reconx
-├── backend/
-├── frontend/
-├── worker/
-├── docker-compose.yml
-└── README.md
+```bash
+cp .env.example .env
+docker compose up --build
 ```
 
-## API Endpoints
+Expected services:
+
+- Backend API: [http://localhost:8000](http://localhost:8000)
+- Frontend: [http://localhost:5173](http://localhost:5173)
+- PostgreSQL: `localhost:5432`
+- Redis: `localhost:6379`
+
+Both backend and worker run `alembic upgrade head` on container start so fresh databases pick up the baseline schema automatically.
+
+## API routes
+
+Auth:
 
 - `POST /auth/register`
 - `POST /auth/login`
+- `POST /auth/refresh`
+
+Targets:
+
 - `POST /targets`
 - `GET /targets`
 - `GET /targets/{id}`
+- `PUT /targets/{id}`
+
+Scans:
+
 - `POST /scan/{target_id}`
+- `POST /scan/{target_id}/config`
+- `GET /scans/{scan_id}`
+
+Bookmarks / notes / schedules:
+
+- `GET /bookmarks`
+- `POST /bookmarks`
+- `DELETE /bookmarks/{id}`
+- `PUT /vulnerabilities/{id}`
+- `GET /schedules`
+- `POST /schedules`
+- `PUT /schedules/{id}`
+- `DELETE /schedules/{id}`
+
+Reports and notifications:
+
+- `GET /notifications`
+- `PUT /notifications/{id}/read`
+- `GET /reports/{target_id}/json`
+- `GET /reports/{target_id}/pdf`
+
+Health:
+
 - `GET /health`
 
-> Authenticated routes require `Authorization: Bearer <token>`.
+Interactive OpenAPI docs are available at [http://localhost:8000/docs](http://localhost:8000/docs).
 
-## Local run with Docker
+## Testing
 
-### 1) Prerequisites
-- Docker
-- Docker Compose
-
-### 2) Start stack
+Backend unit checks:
 
 ```bash
-docker-compose up --build
+cd backend
+python -m unittest discover -s tests
 ```
 
-Services:
-- Frontend: http://localhost:5173
-- Backend API docs: http://localhost:8000/docs
-- PostgreSQL: localhost:5432
-- Redis: localhost:6379
+Recommended smoke checks after startup:
 
-## Required recon tools
+- Register, login, and refresh a user session.
+- Create a target and verify `GET /targets`.
+- Trigger default and configured scans.
+- Poll `GET /scans/{scan_id}` until completion.
+- Verify bookmarks, notes, schedules, reports, and notifications.
 
-The worker container installs tools automatically at build time using `go install`:
-- `subfinder`
-- `httpx`
-- `nuclei`
-- `gau`
+## Legal notice
 
-If running worker outside Docker, install them manually and ensure they are in `$PATH`.
-
-## Environment variables
-
-Used by backend and worker:
-
-- `DATABASE_URL` (default `postgresql+psycopg2://reconx:reconx@db:5432/reconx`)
-- `REDIS_URL` (default `redis://redis:6379/0`)
-- `SECRET_KEY`
-- `ALGORITHM` (optional, default `HS256`)
-- `ACCESS_TOKEN_EXPIRE_MINUTES` (optional)
-
-## Notes
-
-- This project creates DB tables at API startup using SQLAlchemy metadata (`create_all`) for fast local onboarding.
-- For production, add migrations via Alembic and harden CORS/rate-limiting with distributed storage.
-- Always run scans only with explicit authorization.
-<<<<<<< ours
-<<<<<<< ours
-<<<<<<< ours
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
-=======
->>>>>>> theirs
+Use ReconX Elite only against domains, subdomains, applications, and infrastructure you own or are explicitly authorized to assess. Running recon or vulnerability tooling without permission can violate law, platform policy, or contractual scope.
