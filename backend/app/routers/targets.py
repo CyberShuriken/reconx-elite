@@ -48,7 +48,11 @@ def create_target(
 
 @router.get("", response_model=list[TargetListItemOut])
 @limiter.limit(settings.read_rate_limit)
-def list_targets(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def list_targets(
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
     targets = (
         db.query(Target)
         .options(
@@ -124,6 +128,7 @@ def update_target(
 @limiter.limit(settings.read_rate_limit)
 def get_target(
     target_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -14,7 +14,11 @@ router = APIRouter(prefix="/notifications", tags=["notifications"])
 
 @router.get("", response_model=list[NotificationOut])
 @limiter.limit(settings.read_rate_limit)
-def list_notifications(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def list_notifications(
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
     return (
         db.query(Notification)
         .filter(Notification.user_id == user.id)
@@ -27,6 +31,7 @@ def list_notifications(db: Session = Depends(get_db), user: User = Depends(get_c
 @limiter.limit(settings.write_rate_limit)
 def mark_read(
     notification_id: int,
+    request: Request,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):

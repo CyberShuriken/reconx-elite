@@ -124,7 +124,12 @@ def trigger_scan_with_config(
 
 @router.get("/scans/{scan_id}", response_model=ScanStatusOut)
 @limiter.limit(settings.read_rate_limit)
-def get_scan(scan_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def get_scan(
+    scan_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
     scan = (
         db.query(Scan)
         .options(selectinload(Scan.logs))

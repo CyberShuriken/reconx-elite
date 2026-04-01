@@ -1,4 +1,8 @@
 import unittest
+from pathlib import Path
+import sys
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 
 from app.services.scan_parser import parse_httpx_enrich_output, parse_nuclei_output
 

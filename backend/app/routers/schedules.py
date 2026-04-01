@@ -65,7 +65,11 @@ def create_schedule(
 
 @router.get("", response_model=list[ScheduledScanOut])
 @limiter.limit(settings.read_rate_limit)
-def list_schedules(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def list_schedules(
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
     return db.query(ScheduledScan).filter(ScheduledScan.user_id == user.id).all()
 
 

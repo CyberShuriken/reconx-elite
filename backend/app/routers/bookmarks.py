@@ -61,7 +61,11 @@ def create_bookmark(
 
 @router.get("", response_model=list[BookmarkOut])
 @limiter.limit(settings.read_rate_limit)
-def list_bookmarks(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+def list_bookmarks(
+    request: Request,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
     return (
         db.query(Bookmark)
         .filter(Bookmark.user_id == user.id)
