@@ -27,7 +27,7 @@ RUN set -eux; \
     chmod +x /usr/local/bin/subfinder /usr/local/bin/httpx /usr/local/bin/nuclei /usr/local/bin/gau
 
 COPY backend/requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+RUN pip install --no-cache-dir --default-timeout=180 --retries=10 -r /tmp/requirements.txt
 
 COPY backend/app /app/app
 COPY backend/alembic /app/alembic
