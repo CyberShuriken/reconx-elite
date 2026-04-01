@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import shlex
 from datetime import datetime, timedelta, timezone
 
@@ -368,6 +367,8 @@ def scan_stage_httpx(payload: dict) -> dict:
             )
             if enrich_result.status != "success":
                 _append_warning(scan, db, enrich_result.error or "subdomain enrichment failed")
+        else:
+            _soft_log(scan, db, "enrichment", {"count": 0, "parsed_json": {}})
 
         live_set = set(live_hosts)
         subdomain_rows = db.query(Subdomain).filter(Subdomain.scan_id == scan.id).all()
@@ -415,7 +416,6 @@ def scan_stage_gau(payload: dict) -> dict:
         normalized = normalize_and_dedupe_urls(urls, source="gau")
         _upsert_endpoints(db, scan.id, normalized)
 
-        endpoint_rows = db.query(Endpoint).filter(Endpoint.scan_id == scan.id).all()
         js_candidates = select_javascript_assets(normalized)
         asset_rows, derived_endpoints = analyze_javascript_assets(js_candidates, {target.domain} | {row.hostname for row in scan.subdomains})
         if asset_rows:
@@ -474,6 +474,14 @@ def scan_stage_nuclei(payload: dict) -> dict:
                 },
                 nuclei_result,
             )
+        else:
+            _log_step(
+                db,
+                scan.id,
+                "nuclei",
+                "success",
+                {"count": 0, "scan_config": scan_config, "parsed_json": {"vulnerabilities": []}},
+            )
         if nuclei_result and nuclei_result.status != "success":
             _fail_scan(scan, db, stage="nuclei", message=nuclei_result.error or "nuclei failed")
             raise RuntimeError(nuclei_result.error or "nuclei failed")
@@ -496,7 +504,7 @@ def scan_stage_nuclei(payload: dict) -> dict:
             )
             if headers_result.status != "success":
                 _append_warning(scan, db, headers_result.error or "header analysis failed")
-        elif not endpoints:
+        else:
             _soft_log(scan, db, "header_analysis", {"count": 0, "parsed_json": {"vulnerabilities": []}})
 
         heuristic_findings = synthesize_heuristic_findings(endpoints, js_assets, subdomains)
