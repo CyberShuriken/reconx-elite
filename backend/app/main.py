@@ -4,8 +4,10 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
+from app import models  # noqa: F401
 from app.core.config import settings
 from app.core.database import Base, engine
+from app.core.middleware import AuthGuardMiddleware, RequestLoggingMiddleware
 from app.routers import auth, scans, targets
 
 # Ensure tables exist for local/dev setup.
@@ -13,6 +15,8 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title=settings.app_name)
 app.add_middleware(SlowAPIMiddleware)
+app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(AuthGuardMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

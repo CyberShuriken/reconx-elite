@@ -10,8 +10,10 @@ class Settings(BaseSettings):
     jwt_secret_key: str
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 120
+    refresh_token_expire_minutes: int = 10080
     scan_allowed_schemes: str = "http,https"
     nuclei_templates: str = ""
+    scan_throttle_seconds: int = 20
 
 
 settings = Settings()

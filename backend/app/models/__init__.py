@@ -1,8 +1,21 @@
+from app.models.audit_log import AuditLog
 from app.models.endpoint import Endpoint
+from app.models.refresh_token import RefreshToken
 from app.models.scan import Scan
+from app.models.scan_log import ScanLog
 from app.models.subdomain import Subdomain
 from app.models.target import Target
 from app.models.user import User
 from app.models.vulnerability import Vulnerability
 
-__all__ = ["User", "Target", "Scan", "Subdomain", "Endpoint", "Vulnerability"]
+__all__ = [
+    "User",
+    "Target",
+    "Scan",
+    "ScanLog",
+    "RefreshToken",
+    "AuditLog",
+    "Subdomain",
+    "Endpoint",
+    "Vulnerability",
+]

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session, selectinload
 
 from app.core.database import get_db
@@ -6,6 +6,7 @@ from app.core.deps import get_current_user
 from app.models.scan import Scan
 from app.models.target import Target
 from app.models.user import User
+from app.routers.auth import limiter
 from app.schemas.target import TargetCreate, TargetOut
 from app.services.domain import normalize_domain
 
@@ -13,7 +14,13 @@ router = APIRouter(prefix="/targets", tags=["targets"])
 
 
 @router.post("", response_model=TargetOut)
-def create_target(payload: TargetCreate, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+@limiter.limit("60/minute")
+def create_target(
+    request: Request,
+    payload: TargetCreate,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
     try:
         domain = normalize_domain(payload.domain)
     except ValueError as exc:
@@ -31,7 +38,8 @@ def create_target(payload: TargetCreate, db: Session = Depends(get_db), user: Us
 
 
 @router.get("", response_model=list[TargetOut])
-def list_targets(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+@limiter.limit("120/minute")
+def list_targets(request: Request, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     return (
         db.query(Target)
         .options(selectinload(Target.scans))
@@ -42,13 +50,20 @@ def list_targets(db: Session = Depends(get_db), user: User = Depends(get_current
 
 
 @router.get("/{target_id}", response_model=TargetOut)
-def get_target(target_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+@limiter.limit("120/minute")
+def get_target(
+    request: Request,
+    target_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
     target = (
         db.query(Target)
         .options(
             selectinload(Target.scans).selectinload(Scan.subdomains),
             selectinload(Target.scans).selectinload(Scan.endpoints),
             selectinload(Target.scans).selectinload(Scan.vulnerabilities),
+            selectinload(Target.scans).selectinload(Scan.logs),
         )
         .filter(Target.id == target_id, Target.owner_id == user.id)
         .first()

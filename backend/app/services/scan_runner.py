@@ -1,137 +1,78 @@
-import json
-import shlex
-import subprocess
-from typing import Any
-
 from app.core.config import settings
+from app.services.scan_parser import (
+    parse_gau_output,
+    parse_httpx_headers_output,
+    parse_httpx_live_output,
+    parse_nuclei_output,
+    parse_subfinder_output,
+)
+from app.services.tool_executor import ToolExecutionResult, execute_with_retry
 
 
-def run_command(command: list[str]) -> tuple[list[str], str | None]:
-    try:
-        proc = subprocess.run(command, capture_output=True, text=True, check=False)
-    except FileNotFoundError:
-        return [], f"tool_not_found:{command[0]}"
-
-    if proc.returncode != 0:
-        return [], f"command_failed:{' '.join(shlex.quote(c) for c in command)}:{proc.stderr.strip()}"
-    lines = [line.strip() for line in proc.stdout.splitlines() if line.strip()]
-    return lines, None
+def run_subfinder(domain: str) -> tuple[list[str], ToolExecutionResult]:
+    result = execute_with_retry("subfinder", ["subfinder", "-silent", "-d", domain], timeout_seconds=120)
+    if result.status != "success":
+        return [], result
+    return parse_subfinder_output(result.stdout), result
 
 
-def run_subfinder(domain: str) -> tuple[list[str], str | None]:
-    return run_command(["subfinder", "-silent", "-d", domain])
-
-
-def run_httpx(hosts: list[str]) -> tuple[list[str], str | None]:
+def run_httpx(hosts: list[str]) -> tuple[list[str], ToolExecutionResult | None]:
     if not hosts:
         return [], None
-    command = ["httpx", "-silent", "-json"]
-    try:
-        proc = subprocess.run(
-            command,
-            input="\n".join(hosts) + "\n",
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    except FileNotFoundError:
-        return [], "tool_not_found:httpx"
-
-    if proc.returncode != 0:
-        return [], f"command_failed:httpx:{proc.stderr.strip()}"
-
-    live_hosts = []
-    for line in proc.stdout.splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            payload = json.loads(line)
-            host = payload.get("input")
-            if host:
-                live_hosts.append(host)
-        except json.JSONDecodeError:
-            continue
-    return sorted(set(live_hosts)), None
+    result = execute_with_retry(
+        "httpx",
+        ["httpx", "-silent", "-json"],
+        stdin_payload="\n".join(hosts) + "\n",
+        timeout_seconds=180,
+    )
+    if result.status != "success":
+        return [], result
+    return parse_httpx_live_output(result.stdout), result
 
 
-def run_gau(domain: str) -> tuple[list[str], str | None]:
-    return run_command(["gau", "--subs", domain])
+def run_gau(domain: str) -> tuple[list[str], ToolExecutionResult]:
+    result = execute_with_retry("gau", ["gau", "--subs", domain], timeout_seconds=180)
+    if result.status != "success":
+        return [], result
+    return parse_gau_output(result.stdout), result
 
 
-def run_nuclei(targets: list[str]) -> tuple[list[dict[str, Any]], str | None]:
+def run_nuclei(targets: list[str], config: dict | None = None) -> tuple[list[dict], ToolExecutionResult | None]:
     if not targets:
         return [], None
-
     command = ["nuclei", "-silent", "-jsonl"]
+    selected_templates = (config or {}).get("selected_templates") or []
+    severity_filter = (config or {}).get("severity_filter") or []
+    if selected_templates:
+        command.extend(["-tags", ",".join(selected_templates)])
+    if severity_filter:
+        command.extend(["-severity", ",".join(severity_filter)])
     if settings.nuclei_templates:
         command.extend(["-t", settings.nuclei_templates])
-
-    try:
-        proc = subprocess.run(
-            command,
-            input="\n".join(targets) + "\n",
-            capture_output=True,
-            text=True,
-            check=False,
-        )
-    except FileNotFoundError:
-        return [], "tool_not_found:nuclei"
-
-    if proc.returncode != 0:
-        return [], f"command_failed:nuclei:{proc.stderr.strip()}"
-
-    vulns: list[dict[str, Any]] = []
-    for line in proc.stdout.splitlines():
-        line = line.strip()
-        if not line:
-            continue
-        try:
-            data = json.loads(line)
-        except json.JSONDecodeError:
-            continue
-
-        info = data.get("info", {})
-        vulns.append(
-            {
-                "template_id": data.get("template-id", "unknown-template"),
-                "severity": info.get("severity", "unknown"),
-                "matcher_name": data.get("matcher-name"),
-                "host": data.get("host"),
-                "description": info.get("description"),
-            }
-        )
-    return vulns, None
+    result = execute_with_retry(
+        "nuclei",
+        command,
+        stdin_payload="\n".join(targets) + "\n",
+        timeout_seconds=300,
+    )
+    if result.status != "success":
+        return [], result
+    return parse_nuclei_output(result.stdout), result
 
 
-def check_headers(urls: list[str]) -> list[dict[str, Any]]:
-    findings: list[dict[str, Any]] = []
+def check_headers(urls: list[str]) -> tuple[list[dict], ToolExecutionResult | None]:
+    if not urls:
+        return [], None
     scheme_allow = tuple(s.strip() + "://" for s in settings.scan_allowed_schemes.split(","))
-    for url in urls:
-        if not url.startswith(scheme_allow):
-            continue
-        command = ["httpx", "-silent", "-json", "-H", "User-Agent: ReconX", "-u", url]
-        rows, err = run_command(command)
-        if err:
-            continue
-        for row in rows:
-            try:
-                data = json.loads(row)
-            except json.JSONDecodeError:
-                continue
-            headers = {k.lower(): v for k, v in (data.get("header") or {}).items()}
-            missing = []
-            for key in ("content-security-policy", "x-frame-options", "strict-transport-security"):
-                if key not in headers:
-                    missing.append(key)
-            if missing:
-                findings.append(
-                    {
-                        "template_id": "reconx-missing-security-headers",
-                        "severity": "info",
-                        "matcher_name": "missing-headers",
-                        "host": data.get("url") or url,
-                        "description": f"Missing security headers: {', '.join(missing)}",
-                    }
-                )
-    return findings
+    scoped_urls = [u for u in urls if u.startswith(scheme_allow)]
+    if not scoped_urls:
+        return [], None
+    result = execute_with_retry(
+        "httpx-headers",
+        ["httpx", "-silent", "-json", "-H", "User-Agent: ReconX"],
+        stdin_payload="\n".join(scoped_urls) + "\n",
+        timeout_seconds=180,
+    )
+    if result.status != "success":
+        return [], result
+    return parse_httpx_headers_output(result.stdout), result
