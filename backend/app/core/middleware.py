@@ -54,7 +54,8 @@ class AuthGuardMiddleware(BaseHTTPMiddleware):
                     request.state.user_id = claims.get("sub")
                     if request.state.user_id:
                         request.state.rate_limit_key = f"user:{request.state.user_id}"
-            except JWTError:
+            except JWTError as e:
+                logger.warning(f"JWT validation failed for {request.client.host if request.client else 'unknown'}: {e}")
                 if request.url.path.startswith(self.protected_prefixes):
                     return JSONResponse(
                         status_code=status.HTTP_401_UNAUTHORIZED,

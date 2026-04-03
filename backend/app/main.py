@@ -7,7 +7,7 @@ from slowapi.middleware import SlowAPIMiddleware
 from app import models  # noqa: F401
 from app.core.config import settings
 from app.core.middleware import AuthGuardMiddleware, RequestLoggingMiddleware
-from app.routers import admin, auth, blind_xss, bookmarks, notifications, payloads, reports, scans, schedules, ssrf, targets, ticketing, vulnerabilities, websocket
+from app.routers import admin, auth, blind_xss, bookmarks, notifications, payloads, reports, scans, schedules, ssrf, targets, ticketing, vulnerabilities, websocket, validation, out_of_band, manual_testing, intelligence, custom_templates, system, advanced_recon
 app = FastAPI(title=settings.app_name)
 app.add_middleware(
     CORSMiddleware,
@@ -36,6 +36,13 @@ app.include_router(ssrf.router)
 app.include_router(reports.router)
 app.include_router(ticketing.router)
 app.include_router(websocket.router)
+app.include_router(validation.router)
+app.include_router(out_of_band.router)
+app.include_router(manual_testing.router)
+app.include_router(intelligence.router)
+app.include_router(custom_templates.router)
+app.include_router(system.router)
+app.include_router(advanced_recon.router)
 
 
 @app.get("/health")

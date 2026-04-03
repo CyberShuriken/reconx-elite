@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 from uuid import uuid4
 
-from jose import jwt
+from jose import jwt, JWTError, ExpiredSignatureError
 from passlib.context import CryptContext
 
 from app.core.config import settings
@@ -43,4 +43,25 @@ def create_refresh_token(subject: str, role: str, expires_delta: timedelta | Non
 
 
 def decode_token(token: str) -> dict[str, Any]:
-    return jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+    try:
+        payload = jwt.decode(token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm])
+        
+        # Validate required claims
+        if "exp" not in payload:
+            raise ValueError("Token missing expiration claim")
+        if "sub" not in payload:
+            raise ValueError("Token missing subject claim")
+        if "token_type" not in payload:
+            raise ValueError("Token missing token_type claim")
+            
+        # Check expiration
+        if datetime.fromtimestamp(payload["exp"], timezone.utc) < datetime.now(timezone.utc):
+            raise ValueError("Token has expired")
+            
+        return payload
+    except ExpiredSignatureError:
+        raise ValueError("Token has expired")
+    except JWTError as e:
+        raise ValueError(f"Invalid token: {e}")
+    except Exception as e:
+        raise ValueError(f"Token validation error: {e}")

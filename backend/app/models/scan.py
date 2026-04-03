@@ -25,3 +25,7 @@ class Scan(Base):
     payload_opportunities = relationship("PayloadOpportunity", back_populates="scan", cascade="all, delete-orphan")
     logs = relationship("ScanLog", back_populates="scan", cascade="all, delete-orphan")
     diffs = relationship("ScanDiff", back_populates="scan", cascade="all, delete-orphan", foreign_keys="ScanDiff.scan_id")
+    oob_interactions = relationship("OutOfBandInteraction", back_populates="scan", cascade="all, delete-orphan")
+    custom_results = relationship("CustomTemplateResult", back_populates="scan", cascade="all, delete-orphan")
+    discovered_parameters = relationship("DiscoveredParameter", back_populates="scan", cascade="all, delete-orphan")
+    fuzzed_endpoints = relationship("FuzzedEndpoint", back_populates="scan", cascade="all, delete-orphan")

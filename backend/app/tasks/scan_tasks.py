@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.core.config import settings
 from app.core.database import get_sessionmaker
+from app.models.ai_report import AIReport
 from app.models.attack_path import AttackPath
 from app.models.endpoint import Endpoint
 from app.models.javascript_asset import JavaScriptAsset
@@ -20,6 +21,7 @@ from app.models.scheduled_scan import ScheduledScan
 from app.models.subdomain import Subdomain
 from app.models.target import Target
 from app.models.vulnerability import Vulnerability
+from app.services.intelligence_learning import learning_service
 from app.services.intelligence import (
     analyze_javascript_assets,
     build_subdomain_record,
@@ -28,6 +30,15 @@ from app.services.intelligence import (
     rank_attack_paths,
     select_javascript_assets,
     synthesize_heuristic_findings,
+)
+from app.services.ai_service import (
+    analyze_scan_data,
+    analyze_subdomains,
+    analyze_javascript_endpoints,
+    analyze_nuclei_findings,
+    generate_elite_vulnerability_report,
+    estimate_bounty_potential,
+    _should_generate_report,
 )
 from app.services.websocket import (
     notify_scan_completed,
@@ -212,6 +223,12 @@ def _create_vulnerabilities(db: Session, scan_id: int, vulnerabilities: list[dic
         (row.template_id, row.matched_url or "", row.matcher_name or "")
         for row in db.query(Vulnerability).filter(Vulnerability.scan_id == scan_id).all()
     }
+    
+    # Get scan for user ID
+    scan = db.query(Scan).filter(Scan.id == scan_id).first()
+    user_id = scan.target.owner_id if scan else None
+    
+    created_vulns = []
     for vulnerability in vulnerabilities:
         key = (
             vulnerability["template_id"],
@@ -221,8 +238,24 @@ def _create_vulnerabilities(db: Session, scan_id: int, vulnerabilities: list[dic
         if key in existing:
             continue
         existing.add(key)
-        db.add(Vulnerability(scan_id=scan_id, **vulnerability))
+        
+        # Create vulnerability object
+        vuln_obj = Vulnerability(scan_id=scan_id, **vulnerability)
+        db.add(vuln_obj)
+        created_vulns.append(vuln_obj)
+    
     db.commit()
+    
+    # Trigger learning for new vulnerabilities
+    if user_id and created_vulns:
+        for vuln in created_vulns:
+            try:
+                # Async learning will be handled in background
+                # For now, we'll queue it as a background task
+                from app.tasks.learning_tasks import learn_from_vulnerability_task
+                learn_from_vulnerability_task.delay(user_id, vuln.id)
+            except Exception as e:
+                logger.warning(f"Failed to queue learning for vulnerability {vuln.id}: {e}")
 
 
 def _create_attack_paths(db: Session, scan_id: int, attack_paths: list[dict]) -> None:
@@ -339,6 +372,133 @@ def _extract_parameters(url: str) -> list[str]:
         return []
 
 
+async def _generate_ai_reports(db: Session, scan: Scan, all_vulnerabilities: list[dict]) -> None:
+    """Generate AI-powered elite reports for high/critical vulnerabilities.
+    
+    Args:
+        db: Database session
+        scan: Scan object
+        all_vulnerabilities: Combined list of nuclei and heuristic findings
+    """
+    # Check if AI processing is enabled for this target
+    if not scan.target.enable_ai_processing:
+        logger.info(f"AI processing disabled for target {scan.target.domain}")
+        return
+    
+    # Filter for high/critical vulnerabilities
+    high_critical_vulns = [
+        vuln for vuln in all_vulnerabilities 
+        if vuln.get("severity") in ["high", "critical"]
+    ]
+    
+    if not high_critical_vulns:
+        return
+    
+    # Count existing AI reports for this scan
+    existing_reports = db.query(AIReport).join(Vulnerability).filter(
+        Vulnerability.scan_id == scan.id
+    ).count()
+    
+    reports_generated = 0
+    for vuln in high_critical_vulns[:5]:  # Limit to top 5 to manage API usage
+        # Check safety controls
+        if not _should_generate_report(vuln.get("severity", ""), existing_reports + reports_generated):
+            continue
+        
+        try:
+            # Generate elite professional report
+            report_data = await generate_elite_vulnerability_report(vuln)
+            
+            if "error" in report_data:
+                logger.warning(f"Failed to generate AI report: {report_data['error']}")
+                continue
+            
+            # Find the corresponding vulnerability in the database
+            db_vuln = db.query(Vulnerability).filter(
+                Vulnerability.scan_id == scan.id,
+                Vulnerability.template_id == vuln.get("template_id"),
+                Vulnerability.matched_url == vuln.get("matched_url")
+            ).first()
+            
+            if not db_vuln:
+                logger.warning(f"Could not find matching vulnerability for report")
+                continue
+            
+            # Create AI report record
+            ai_report = AIReport(
+                vulnerability_id=db_vuln.id,
+                title=report_data.get("title", f"{vuln.get('template_id', 'Unknown')} on {vuln.get('matched_url', 'N/A')}"),
+                summary=report_data.get("summary", ""),
+                severity=report_data.get("severity", vuln.get("severity", "unknown")),
+                confidence_score=report_data.get("confidence_score", "medium"),
+                cwe_mapping=report_data.get("cwe_mapping", "[]"),
+                owasp_mapping=report_data.get("owasp_mapping", "[]"),
+                cvss_score=report_data.get("cvss_score", "0.0"),
+                technical_details=report_data.get("technical_details", ""),
+                proof_of_concept=report_data.get("proof_of_concept", ""),
+                business_impact=report_data.get("business_impact", ""),
+                bounty_estimate=report_data.get("bounty_estimate", "$0-$0"),
+                remediation_steps=report_data.get("remediation_steps", ""),
+                ai_model_version=report_data.get("ai_model_version", "gemini-1.5-pro"),
+                processing_time_ms=report_data.get("processing_time_ms", 0),
+                data_sent_hash=report_data.get("data_sent_hash", ""),
+                is_ai_assisted=report_data.get("is_ai_assisted", True)
+            )
+            
+            db.add(ai_report)
+            db.commit()
+            
+            # Log successful report generation
+            _soft_log(
+                scan, 
+                db, 
+                "ai_report_generated", 
+                {
+                    "vulnerability_id": db_vuln.id,
+                    "template_id": vuln.get("template_id"),
+                    "severity": vuln.get("severity"),
+                    "url": vuln.get("matched_url"),
+                    "report_id": ai_report.id,
+                    "confidence_score": report_data.get("confidence_score"),
+                    "processing_time_ms": report_data.get("processing_time_ms")
+                }
+            )
+            
+            reports_generated += 1
+            
+            # Send notification for critical findings
+            if vuln.get("severity") == "critical":
+                await notify_critical_vulnerability(
+                    scan.id,
+                    vuln.get("matched_url"),
+                    vuln.get("template_id"),
+                    report_data.get("summary", "")
+                )
+            
+        except Exception as e:
+            logger.error(f"Error generating AI report: {e}")
+            _soft_log(
+                scan, 
+                db, 
+                "ai_report_generation_failed", 
+                {"error": str(e)[:200], "template_id": vuln.get("template_id")},
+                warning="AI report generation failed"
+            )
+    
+    if reports_generated > 0:
+        logger.info(f"Generated {reports_generated} AI reports for scan {scan.id}")
+        _soft_log(
+            scan, 
+            db, 
+            "ai_report_generation", 
+            {
+                "reports_generated": reports_generated,
+                "total_high_critical": len(high_critical_vulns),
+                "note": "Professional reports stored in database"
+            }
+        )
+
+
 def _compute_diff_and_notifications(db: Session, scan: Scan, target: Target) -> None:
     previous_scan = (
         db.query(Scan)
@@ -444,22 +604,57 @@ async def scan_stage_subfinder(scan_id: int) -> dict:
         for host in subdomains:
             db.add(Subdomain(scan_id=scan.id, hostname=host))
         db.commit()
+        
+        # AI-powered subdomain analysis for high-value targets
+        try:
+            ai_analysis = await analyze_subdomains(subdomains)
+            if ai_analysis and "high_value_targets" in ai_analysis:
+                _soft_log(
+                    scan, 
+                    db, 
+                    "ai_subdomain_analysis", 
+                    {
+                        "high_value_count": len(ai_analysis.get("high_value_targets", [])),
+                        "potential_leaks": len(ai_analysis.get("potential_leaks", [])),
+                        "suggested_templates": ai_analysis.get("suggested_nuclei_templates", []),
+                        "total_processed": ai_analysis.get("total_processed", 0),
+                        "batches_processed": ai_analysis.get("batches_processed", 0)
+                    }
+                )
+                # Store AI insights in scan metadata for later use
+                metadata = scan.metadata_json or {}
+                metadata["ai_subdomain_analysis"] = ai_analysis
+                _update_scan(scan, db, metadata_json=metadata)
+        except Exception as e:
+            _soft_log(scan, db, "ai_subdomain_analysis", {"error": str(e)[:200]}, warning="AI subdomain analysis failed")
+        
         return {"scan_id": scan.id, "subdomains": subdomains}
     finally:
         db.close()
 
 
 @celery_app.task(name="app.tasks.scan_tasks.scan_stage_httpx")
-def scan_stage_httpx(payload: dict) -> dict:
+async def scan_stage_httpx(payload: dict) -> dict:
+    # Validate payload structure
+    if not isinstance(payload, dict):
+        raise ValueError("Invalid payload: expected dictionary")
+    
+    scan_id = payload.get("scan_id")
+    if not scan_id or not isinstance(scan_id, int):
+        raise ValueError("Invalid or missing scan_id in payload")
+    
     db = get_sessionmaker()()
     try:
-        scan_id = payload["scan_id"]
-        scan, target = _load_scan(scan_id, db)
+        scan, target = await _load_scan(scan_id, db)
         if not scan or not target:
             return payload
         _set_stage(scan, db, "httpx", 2)
 
         subdomains = payload.get("subdomains") or [row.hostname for row in scan.subdomains]
+        if not subdomains:
+            _soft_log(scan, db, "httpx", {"error": "No subdomains to test"}, warning="No subdomains available")
+            return payload
+        
         live_hosts, httpx_result = run_httpx(subdomains)
         if httpx_result:
             _log_step(
@@ -504,22 +699,58 @@ def scan_stage_httpx(payload: dict) -> dict:
             row.waf = record["waf"]
             row.cdn_waf = record["cdn_waf"]
         db.commit()
+        
+        # AI-powered live host analysis
+        try:
+            if live_hosts:
+                httpx_output = "\n".join(live_hosts)
+                ai_analysis = await analyze_live_hosts(httpx_output)
+                if ai_analysis and "high_value_targets" in ai_analysis:
+                    _soft_log(
+                        scan, 
+                        db, 
+                        "ai_live_host_analysis", 
+                        {
+                            "high_value_count": len(ai_analysis.get("high_value_targets", [])),
+                            "potential_leaks": len(ai_analysis.get("potential_leaks", [])),
+                            "suggested_templates": ai_analysis.get("suggested_nuclei_templates", [])
+                        }
+                    )
+                    # Store AI insights in scan metadata
+                    metadata = scan.metadata_json or {}
+                    metadata["ai_live_host_analysis"] = ai_analysis
+                    _update_scan(scan, db, metadata_json=metadata)
+        except Exception as e:
+            _soft_log(scan, db, "ai_live_host_analysis", {"error": str(e)[:200]}, warning="AI live host analysis failed")
+        
         return payload | {"live_hosts": live_hosts}
     finally:
         db.close()
 
 
 @celery_app.task(name="app.tasks.scan_tasks.scan_stage_gau")
-def scan_stage_gau(payload: dict) -> dict:
+async def scan_stage_gau(payload: dict) -> dict:
+    # Validate payload structure
+    if not isinstance(payload, dict):
+        raise ValueError("Invalid payload: expected dictionary")
+    
+    scan_id = payload.get("scan_id")
+    if not scan_id or not isinstance(scan_id, int):
+        raise ValueError("Invalid or missing scan_id in payload")
+    
     db = get_sessionmaker()()
     try:
-        scan_id = payload["scan_id"]
-        scan, target = _load_scan(scan_id, db)
+        scan, target = await _load_scan(scan_id, db)
         if not scan or not target:
             return payload
         _set_stage(scan, db, "gau", 3)
 
-        urls, gau_result = run_gau(target.domain)
+        live_hosts = payload.get("live_hosts", [])
+        if not live_hosts:
+            _soft_log(scan, db, "gau", {"error": "No live hosts to scan"}, warning="No live hosts available")
+            return payload
+        
+        urls, gau_result = run_gau(live_hosts)
         _log_step(
             db,
             scan.id,
@@ -560,6 +791,33 @@ def scan_stage_gau(payload: dict) -> dict:
         if derived_endpoints:
             _upsert_endpoints(db, scan.id, derived_endpoints)
         nuclei_targets = filter_nuclei_targets(normalized + derived_endpoints)
+        
+        # AI-powered JavaScript and endpoint analysis
+        try:
+            js_urls = [row["url"] for row in js_candidates if row.get("url")]
+            endpoint_urls = [row["normalized_url"] for row in normalized + derived_endpoints]
+            if js_urls or endpoint_urls:
+                ai_analysis = await analyze_javascript_endpoints(js_urls, endpoint_urls)
+                if ai_analysis and "high_value_targets" in ai_analysis:
+                    _soft_log(
+                        scan, 
+                        db, 
+                        "ai_javascript_analysis", 
+                        {
+                            "high_value_count": len(ai_analysis.get("high_value_targets", [])),
+                            "potential_leaks": len(ai_analysis.get("potential_leaks", [])),
+                            "suggested_templates": ai_analysis.get("suggested_nuclei_templates", []),
+                            "js_files_analyzed": len(js_urls),
+                            "endpoints_analyzed": len(endpoint_urls)
+                        }
+                    )
+                    # Store AI insights in scan metadata
+                    metadata = scan.metadata_json or {}
+                    metadata["ai_javascript_analysis"] = ai_analysis
+                    _update_scan(scan, db, metadata_json=metadata)
+        except Exception as e:
+            _soft_log(scan, db, "ai_javascript_analysis", {"error": str(e)[:200]}, warning="AI JavaScript analysis failed")
+        
         return payload | {"nuclei_targets": nuclei_targets}
     finally:
         db.close()
@@ -567,16 +825,28 @@ def scan_stage_gau(payload: dict) -> dict:
 
 @celery_app.task(name="app.tasks.scan_tasks.scan_stage_nuclei")
 async def scan_stage_nuclei(payload: dict) -> dict:
+    # Validate payload structure
+    if not isinstance(payload, dict):
+        raise ValueError("Invalid payload: expected dictionary")
+    
+    scan_id = payload.get("scan_id")
+    if not scan_id or not isinstance(scan_id, int):
+        raise ValueError("Invalid or missing scan_id in payload")
+    
     db = get_sessionmaker()()
     try:
-        scan_id = payload["scan_id"]
         scan, target = await _load_scan(scan_id, db)
         if not scan or not target:
             return payload
         _set_stage(scan, db, "nuclei", 4)
 
         scan_config = scan.scan_config_json or {}
-        nuclei_targets = payload.get("nuclei_targets") or []
+        nuclei_targets = payload.get("nuclei_targets", [])
+        if not nuclei_targets:
+            _soft_log(scan, db, "nuclei", {"error": "No targets to scan"}, warning="No nuclei targets available")
+            # Continue with empty targets to complete the scan
+            nuclei_targets = []
+        
         vulnerabilities, nuclei_result = run_nuclei(nuclei_targets, scan_config)
         if nuclei_result:
             command_preview = " ".join(shlex.quote(part) for part in nuclei_result.command)
@@ -606,6 +876,30 @@ async def scan_stage_nuclei(payload: dict) -> dict:
             raise RuntimeError(nuclei_result.error or "nuclei failed")
 
         _create_vulnerabilities(db, scan.id, vulnerabilities)
+        
+        # AI-powered nuclei findings analysis for vulnerability chaining
+        try:
+            if vulnerabilities:
+                nuclei_output = "\n".join([f"{vuln.get('template_id', 'unknown')}: {vuln.get('matched_url', 'N/A')} - {vuln.get('severity', 'unknown')}" for vuln in vulnerabilities[:50]])
+                ai_analysis = await analyze_nuclei_findings(nuclei_output)
+                if ai_analysis and "high_value_targets" in ai_analysis:
+                    _soft_log(
+                        scan, 
+                        db, 
+                        "ai_nuclei_analysis", 
+                        {
+                            "high_value_count": len(ai_analysis.get("high_value_targets", [])),
+                            "potential_leaks": len(ai_analysis.get("potential_leaks", [])),
+                            "suggested_templates": ai_analysis.get("suggested_nuclei_templates", []),
+                            "vulnerabilities_analyzed": min(len(vulnerabilities), 50)
+                        }
+                    )
+                    # Store AI insights in scan metadata
+                    metadata = scan.metadata_json or {}
+                    metadata["ai_nuclei_analysis"] = ai_analysis
+                    _update_scan(scan, db, metadata_json=metadata)
+        except Exception as e:
+            _soft_log(scan, db, "ai_nuclei_analysis", {"error": str(e)[:200]}, warning="AI nuclei analysis failed")
 
         endpoints = db.query(Endpoint).filter(Endpoint.scan_id == scan.id).order_by(Endpoint.priority_score.desc()).all()
         js_assets = db.query(JavaScriptAsset).filter(JavaScriptAsset.scan_id == scan.id).all()
@@ -637,6 +931,12 @@ async def scan_stage_nuclei(payload: dict) -> dict:
             "success",
             {"count": len(heuristic_findings), "parsed_json": {"vulnerabilities": heuristic_findings[:100]}},
         )
+        
+        # Generate professional reports for high/critical findings
+        await _generate_ai_reports(db, scan, vulnerabilities + heuristic_findings)
+
+        # NEW: Advanced Reconnaissance Stages
+        await _run_advanced_recon_stages(db, scan, target)
 
         refreshed_scan, _ = _load_scan(scan.id, db)
         if not refreshed_scan:
@@ -741,3 +1041,175 @@ def check_scheduled_scans() -> dict:
         return {"checked": len(due_schedules), "created": created}
     finally:
         db.close()
+
+
+async def _run_advanced_recon_stages(db: Session, scan: Scan, target: Target) -> None:
+    """Run advanced reconnaissance stages: parameter discovery and content fuzzing."""
+    
+    try:
+        # Get stealth configuration for target
+        from app.models.advanced_recon import StealthConfig
+        stealth_config = db.query(StealthConfig).filter(
+            StealthConfig.target_id == target.id
+        ).first()
+        
+        if not stealth_config:
+            # Create default stealth config
+            stealth_config = StealthConfig(
+                target_id=target.id,
+                scan_mode="balanced",
+                requests_per_second=5,
+                random_delay_min=100,
+                random_delay_max=500,
+                concurrent_threads=2,
+                max_retries=3,
+                retry_backoff_factor=2,
+                rotate_user_agents=True,
+                use_jitter=True,
+                jitter_percentage=20,
+                respect_robots_txt=True,
+            )
+            db.add(stealth_config)
+            db.commit()
+        
+        # Get endpoints for parameter discovery
+        endpoints = db.query(Endpoint).filter(Endpoint.scan_id == scan.id).all()
+        endpoint_urls = [endpoint.url for endpoint in endpoints[:50]]  # Limit to 50 endpoints
+        
+        if endpoint_urls:
+            # Stage 5: Parameter Discovery
+            _log_step(
+                db,
+                scan.id,
+                "parameter_discovery",
+                "running",
+                {"endpoint_count": len(endpoint_urls), "scan_mode": stealth_config.scan_mode}
+            )
+            
+            # Run parameter discovery
+            from app.services.advanced_recon_engine import parameter_discovery, stealth_scanner
+            param_discovery = parameter_discovery()
+            
+            async with stealth_scanner(stealth_config) as scanner:
+                discovered_params = await param_discovery.discover_parameters(
+                    endpoint_urls[0], scanner, scan.id  # Use first endpoint as base
+                )
+                
+                # Store discovered parameters
+                for param in discovered_params:
+                    db.add(param)
+                db.commit()
+            
+            _log_step(
+                db,
+                scan.id,
+                "parameter_discovery",
+                "success",
+                {"parameters_discovered": len(discovered_params)}
+            )
+            
+            # Stage 6: Content Fuzzing
+            _log_step(
+                db,
+                scan.id,
+                "content_fuzzing",
+                "running",
+                {"scan_mode": stealth_config.scan_mode}
+            )
+            
+            # Run content fuzzing on base URLs
+            from app.services.advanced_recon_engine import content_fuzzer
+            fuzzing_engine = content_fuzzer()
+            
+            base_urls = [f"https://{target.domain}"]
+            fuzzed_endpoints = []
+            
+            async with stealth_scanner(stealth_config) as scanner:
+                # Fuzz admin paths
+                admin_endpoints = await fuzzing_engine.fuzz_content(
+                    base_urls[0], "admin", scanner, scan.id
+                )
+                fuzzed_endpoints.extend(admin_endpoints)
+                
+                # Fuzz API paths
+                api_endpoints = await fuzzing_engine.fuzz_content(
+                    base_urls[0], "api", scanner, scan.id
+                )
+                fuzzed_endpoints.extend(api_endpoints)
+                
+                # Store fuzzed endpoints
+                for endpoint in fuzzed_endpoints:
+                    db.add(endpoint)
+                db.commit()
+            
+            _log_step(
+                db,
+                scan.id,
+                "content_fuzzing",
+                "success",
+                {"endpoints_discovered": len(fuzzed_endpoints)}
+            )
+            
+            # Stage 7: Adaptive Analysis
+            _log_step(
+                db,
+                scan.id,
+                "adaptive_analysis",
+                "running",
+                {"endpoints_analyzed": len(endpoints)}
+            )
+            
+            # Run adaptive analysis
+            from app.services.advanced_recon_engine import adaptive_scanner
+            adaptive = adaptive_scanner()
+            
+            adaptive_results = []
+            for endpoint in endpoints[:20]:  # Limit to 20 endpoints
+                try:
+                    import httpx
+                    async with httpx.AsyncClient(timeout=10) as client:
+                        response = await client.get(endpoint.url)
+                        analysis = adaptive.analyze_endpoint(endpoint.url, response)
+                        
+                        adaptive_results.append({
+                            "endpoint_url": endpoint.url,
+                            "analysis": analysis,
+                            "recommendations": analysis.get("recommended_techniques", []),
+                            "priority": analysis.get("priority_level", "medium")
+                        })
+                except Exception as e:
+                    logger.warning(f"Adaptive analysis failed for {endpoint.url}: {e}")
+                    continue
+            
+            # Store adaptive results in scan metadata
+            metadata = scan.metadata_json or {}
+            metadata["adaptive_analysis"] = adaptive_results
+            metadata["advanced_recon_completed"] = datetime.now(timezone.utc).isoformat()
+            _update_scan(scan, db, metadata_json=metadata)
+            
+            _log_step(
+                db,
+                scan.id,
+                "adaptive_analysis",
+                "success",
+                {"adaptive_results": len(adaptive_results)}
+            )
+        
+        else:
+            _log_step(
+                db,
+                scan.id,
+                "advanced_recon",
+                "skipped",
+                {"reason": "no_endpoints_available"}
+            )
+            
+    except Exception as e:
+        logger.error(f"Advanced recon stages failed for scan {scan.id}: {e}")
+        _log_step(
+            db,
+            scan.id,
+            "advanced_recon",
+            "failed",
+            {"error": str(e)}
+        )

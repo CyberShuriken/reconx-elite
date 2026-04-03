@@ -1,3 +1,9 @@
+from app.models.advanced_recon import StealthConfig, DiscoveredParameter, FuzzedEndpoint, SmartWordlist
+from app.models.custom_templates import CustomNucleiTemplate, CustomTemplateResult
+from app.models.learning_models import LearningPattern, SuccessfulPayload, HighValueEndpoint
+from app.models.out_of_band_interaction import OutOfBandInteraction
+from app.models.exploit_validation import ExploitValidation
+from app.models.ai_report import AIReport
 from app.models.audit_log import AuditLog
 from app.models.attack_path import AttackPath
 from app.models.blind_xss_hit import BlindXssHit
@@ -30,6 +36,18 @@ __all__ = [
     "Subdomain",
     "Endpoint",
     "Vulnerability",
+    "OutOfBandInteraction",
+    "ExploitValidation",
+    "AIReport",
+    "LearningPattern",
+    "SuccessfulPayload",
+    "HighValueEndpoint",
+    "CustomNucleiTemplate",
+    "CustomTemplateResult",
+    "StealthConfig",
+    "DiscoveredParameter",
+    "FuzzedEndpoint",
+    "SmartWordlist",
     "JavaScriptAsset",
     "PayloadOpportunity",
     "ScheduledScan",

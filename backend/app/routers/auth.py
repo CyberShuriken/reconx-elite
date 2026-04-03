@@ -70,7 +70,7 @@ def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)
 def refresh_token(payload: RefreshRequest, request: Request, db: Session = Depends(get_db)):
     try:
         claims = decode_token(payload.refresh_token)
-    except JWTError as exc:
+    except (JWTError, ValueError) as exc:
         raise HTTPException(status_code=401, detail="Invalid refresh token") from exc
 
     if claims.get("token_type") != "refresh":

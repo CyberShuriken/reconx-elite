@@ -25,4 +25,5 @@ class Endpoint(Base):
 
     scan = relationship("Scan", back_populates="endpoints")
     bookmarks = relationship("Bookmark", back_populates="endpoint", cascade="all, delete-orphan")
+    discovered_parameters = relationship("DiscoveredParameter", back_populates="endpoint", cascade="all, delete-orphan")
     payload_opportunities = relationship("PayloadOpportunity", back_populates="endpoint", cascade="all, delete-orphan")

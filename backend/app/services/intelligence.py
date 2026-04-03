@@ -182,28 +182,66 @@ def compute_priority_score(tags: list[str], query_params: list[str]) -> tuple[in
 
 def normalize_endpoint_url(raw_url: str, *, source: str, js_source: str | None = None) -> dict | None:
     candidate = (raw_url or "").strip()
-    if not candidate:
+    
+    # Validate input length to prevent DoS
+    if len(candidate) > 2048 or len(candidate) < 3:
         return None
-    parsed = urlparse(candidate)
+    
+    # Basic XSS/Injection prevention - check for dangerous characters
+    if any(char in candidate for char in ['<', '>', '"', "'", '\x00']):
+        return None
+    
+    # Check for control characters that could cause issues
+    if any(ord(char) < 32 and char not in ['\t', '\n', '\r'] for char in candidate):
+        return None
+    
+    try:
+        parsed = urlparse(candidate)
+    except Exception:
+        return None
+    
     if parsed.scheme.lower() not in settings.allowed_schemes or not parsed.hostname:
         return None
+    
+    # Validate hostname length
+    if len(parsed.hostname) > 253:
+        return None
+    
     hostname, port = _normalize_hostname(parsed)
     if not hostname:
         return None
+    
     path = parsed.path or "/"
+    
+    # Validate path length
+    if len(path) > 1024:
+        return None
+    
     suffix = _path_suffix(path)
-    query_pairs = parse_qsl(parsed.query, keep_blank_values=True)
-    query_keys = sorted({key for key, _ in query_pairs if key})
+    
+    # Limit query params to prevent DoS
+    query_string = parsed.query
+    if len(query_string) > 1024:
+        query_string = query_string[:1024]
+    
+    query_pairs = parse_qsl(query_string, keep_blank_values=True)
+    if len(query_pairs) > 50:  # Limit number of query params
+        query_pairs = query_pairs[:50]
+    
+    query_keys = sorted({key for key, _ in query_pairs if key if len(key) <= 100})  # Limit key length
+    
     path_part = path.rstrip("/") or "/"
     authority = hostname if port is None else f"{hostname}:{port}"
     normalized_url = f"{parsed.scheme.lower()}://{authority}{path_part}"
     if query_keys:
         normalized_url += "?" + "&".join(query_keys)
+    
     category = classify_endpoint(normalized_url)
     tags = auto_tag_endpoint(normalized_url)
     score, reasons, is_interesting = compute_priority_score(tags, query_keys)
+    
     return {
-        "url": candidate,
+        "url": candidate[:2048],  # Ensure stored URL is length-limited
         "hostname": hostname,
         "normalized_url": normalized_url,
         "path": path_part,
@@ -211,7 +249,7 @@ def normalize_endpoint_url(raw_url: str, *, source: str, js_source: str | None =
         "priority_score": score,
         "focus_reasons": reasons,
         "source": source,
-        "js_source": js_source,
+        "js_source": js_source[:256] if js_source else None,  # Limit js_source length
         "category": category,
         "tags": tags,
         "is_interesting": is_interesting,

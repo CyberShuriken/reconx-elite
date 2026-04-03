@@ -60,6 +60,9 @@ Backend unit tests (stdlib `unittest`, no database required):
 # Run all tests
 python -m unittest discover -s tests
 
+# Run specific security tests
+python -m unittest tests.test_security_fixes
+
 # Run a single test file
 python -m unittest tests.test_scan_parsers
 
@@ -137,8 +140,176 @@ Cascade deletes are set on all scan children (`cascade="all, delete-orphan"`).
 ### Environment variables
 
 All env vars are declared in `backend/app/core/config.py` (`Settings` class). The root `.env.example` is the authoritative reference. Notable non-obvious vars:
+
 - `BACKEND_CALLBACK_URL` — base URL of the backend, used when generating SSRF callback payloads (not in `.env.example` but present in `Settings`).
 - `NUCLEI_TEMPLATES` — optional path to a local nuclei templates directory; if empty, nuclei uses its default templates.
 - `TAKEOVER_CNAME_INDICATORS` — comma-separated CNAME suffixes used to flag subdomain takeover candidates.
 - `SCAN_THROTTLE_SECONDS` — per-user cooldown between scan triggers (default 20s).
 - `SCAN_NUCLEI_TARGET_CAP` / `SCAN_HEADER_PROBE_CAP` — hard limits on how many URLs are passed to nuclei / header probing.
+
+## Security Best Practices (Post-Audit)
+
+### Critical Security Controls Implemented
+
+1. **JWT Token Security**
+   - Required claim validation (exp, sub, token_type)
+   - Proper expiration checking
+   - Secure token rotation in refresh flow
+   - Error handling that doesn't leak sensitive information
+
+2. **Input Validation & Sanitization**
+   - URL length limits (max 2048 chars)
+   - XSS prevention (blocked characters: < > " ' \x00)
+   - Hostname validation (max 253 chars)
+   - Query parameter limits (max 50 params, max 100 chars each)
+   - Path validation (max 1024 chars)
+
+3. **Database Security**
+   - Connection pooling (pool_size=20, max_overflow=30)
+   - Connection recycling (3600s)
+   - Proper session management with try/finally blocks
+   - Transaction rollback on errors
+
+4. **Celery Task Security**
+   - Payload validation in all scan stages
+   - Type checking for scan_id (must be int)
+   - Graceful handling of missing/empty data
+   - Proper error logging without sensitive data leakage
+
+5. **Rate Limiting & Authentication**
+   - IP-based rate limiting for unauthenticated requests
+   - User-based rate limiting for authenticated requests
+   - JWT validation with detailed error logging
+   - Protected route prefixes enforced at middleware level
+
+### Security Testing
+
+Run security tests regularly:
+
+```bash
+python -m unittest tests.test_security_fixes -v
+```
+
+Security tests cover:
+
+- JWT token validation and expiration
+- URL normalization and XSS prevention
+- Database connection pool configuration
+- Input validation in authentication
+- Rate limiting configuration
+- Error handling without information leakage
+
+### Security Monitoring
+
+Monitor these security events:
+
+- JWT validation failures (logged with IP addresses)
+- Authentication failures and rate limit hits
+- URL normalization rejections (potential attacks)
+- Database connection pool exhaustion
+- Celery task payload validation failures
+
+### Security Configuration
+
+Critical security settings in `.env`:
+
+```bash
+# Strong JWT secret (change in production)
+JWT_SECRET_KEY=your-strong-secret-key-here
+
+# Reasonable token expiration
+ACCESS_TOKEN_EXPIRE_MINUTES=120
+REFRESH_TOKEN_EXPIRE_MINUTES=10080
+
+# Rate limiting
+REGISTER_RATE_LIMIT=10/minute
+LOGIN_RATE_LIMIT=20/minute
+SCAN_RATE_LIMIT=12/minute
+
+# Database connection pool
+# (Handled automatically by the application)
+```
+
+## Development Guidelines
+
+### Security-First Development
+
+1. **Always validate inputs** - Use Pydantic models for API inputs, validate all user-provided data
+2. **Never trust client data** - Sanitize and validate all inputs, especially URLs and user content
+3. **Use parameterized queries** - SQLAlchemy handles this automatically, but be aware of raw SQL
+4. **Implement proper error handling** - Catch specific exceptions, never expose internal details
+5. **Log security events** - Authentication failures, validation errors, suspicious activities
+6. **Follow principle of least privilege** - Minimal permissions required for each operation
+
+### Code Review Checklist
+
+- [ ] Input validation implemented
+- [ ] Error handling doesn't leak sensitive data
+- [ ] Database sessions properly closed
+- [ ] JWT tokens properly validated
+- [ ] Rate limiting applied where appropriate
+- [ ] Security tests added for new features
+- [ ] No hardcoded secrets or credentials
+- [ ] Proper logging implemented
+
+### Testing Requirements
+
+All new features must include:
+
+- Unit tests for core functionality
+- Security tests for input validation
+- Integration tests for API endpoints
+- Error handling tests for edge cases
+
+Run full test suite before merging:
+
+```bash
+python -m unittest discover -s tests
+```
+
+## Deployment Security
+
+### Production Checklist
+
+- [ ] Change default JWT secret key
+- [ ] Use HTTPS everywhere
+- [ ] Configure proper CORS origins
+- [ ] Set up monitoring and alerting
+- [ ] Enable security headers (CSP, HSTS)
+- [ ] Configure backup and recovery
+- [ ] Set up log aggregation
+- [ ] Perform security testing
+
+### Docker Security
+
+- Use official base images
+- Run containers as non-root user
+- Limit container capabilities
+- Scan images for vulnerabilities
+- Use secrets management for sensitive data
+
+## Incident Response
+
+### Security Incident Types
+
+1. **Authentication Bypass** - Immediate investigation, rotate secrets, audit logs
+2. **Data Exposure** - Assess scope, notify users, implement mitigations
+3. **Denial of Service** - Rate limiting, scaling, investigation
+4. **Injection Attacks** - Input validation review, security testing
+
+### Response Procedures
+
+1. **Detection** - Monitor security logs, alerts, anomalies
+2. **Containment** - Isolate affected systems, block malicious IPs
+3. **Investigation** - Analyze logs, identify root cause, assess impact
+4. **Recovery** - Patch vulnerabilities, restore services, monitor
+5. **Post-Mortem** - Document findings, improve controls, update procedures
+
+## Compliance & Standards
+
+- **OWASP Top 10** - All identified vulnerabilities addressed
+- **GDPR** - Data protection measures implemented
+- **SOC 2** - Security controls in place
+- **ISO 27001** - Security framework alignment
+
+Regular security assessments should be conducted to maintain compliance and security posture.

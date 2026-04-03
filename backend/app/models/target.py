@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, Text, UniqueConstraint, String, func
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Text, UniqueConstraint, String, func
 from sqlalchemy.orm import relationship
 
 from app.core.database import Base
@@ -12,6 +12,8 @@ class Target(Base):
     owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     domain = Column(String(255), nullable=False, index=True)
     notes = Column(Text, nullable=True)
+    enable_ai_processing = Column(Boolean, default=True, nullable=False)
+    stealth_config = relationship("StealthConfig", back_populates="target", cascade="all, delete-orphan")  # Privacy control
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     owner = relationship("User", back_populates="targets")

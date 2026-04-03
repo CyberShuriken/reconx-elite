@@ -60,7 +60,19 @@ class Settings(BaseSettings):
         "trafficmanager.net,fastly.net,readme.io,pantheonsite.io"
     )
 
-    backend_callback_url: str = "http://localhost:8000"
+    gemini_api_key: str = ""
+    callback_url: str = "http://localhost:8000"
+
+    # Advanced Reconnaissance Settings
+    advanced_recon_enabled: bool = True
+    default_scan_mode: str = "balanced"  # aggressive, balanced, stealth
+    max_parameter_discovery_endpoints: int = 50
+    max_content_fuzzing_requests: int = 100
+    max_adaptive_analysis_endpoints: int = 20
+    parameter_discovery_timeout_seconds: int = 300
+    content_fuzzing_timeout_seconds: int = 600
+    adaptive_analysis_timeout_seconds: int = 300
+
 
     @cached_property
     def cors_allowed_origins_list(self) -> list[str]:
