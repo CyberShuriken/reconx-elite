@@ -1,5 +1,7 @@
 """API endpoints for system validation and health monitoring."""
 
+from datetime import datetime, timezone
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import Dict, Optional
@@ -17,8 +19,8 @@ async def health_check():
     """Basic health check endpoint."""
     return {
         "status": "healthy",
-        "timestamp": "2025-01-01T00:00:00Z",
-        "service": "ReconX Elite API"
+        "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "service": "ReconX Elite API",
     }
 
 

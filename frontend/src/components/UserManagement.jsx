@@ -38,7 +38,11 @@ function UserTable({ users, onEdit, onDelete, onToggleAdmin }) {
       <div style={{ marginBottom: "1rem", display: "flex", gap: "1rem" }}>
         <label>
           Filter by role:
-          <select value={filterRole} onChange={(e) => setFilterRole(e.target.value)} style={{ marginLeft: "0.5rem", padding: "0.5rem" }}>
+          <select
+            value={filterRole}
+            onChange={(e) => setFilterRole(e.target.value)}
+            style={{ marginLeft: "0.5rem", padding: "0.5rem" }}
+          >
             <option value="">All roles</option>
             <option value="user">User</option>
             <option value="admin">Admin</option>
@@ -50,13 +54,22 @@ function UserTable({ users, onEdit, onDelete, onToggleAdmin }) {
         <table className="data-table" style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "2px solid #ddd" }}>
-              <th style={{ padding: "1rem", textAlign: "left", cursor: "pointer" }} onClick={() => toggleSort("email")}>
+              <th
+                style={{ padding: "1rem", textAlign: "left", cursor: "pointer" }}
+                onClick={() => toggleSort("email")}
+              >
                 Email {sortBy === "email" && (sortOrder === "asc" ? "↑" : "↓")}
               </th>
-              <th style={{ padding: "1rem", textAlign: "left", cursor: "pointer" }} onClick={() => toggleSort("role")}>
+              <th
+                style={{ padding: "1rem", textAlign: "left", cursor: "pointer" }}
+                onClick={() => toggleSort("role")}
+              >
                 Role {sortBy === "role" && (sortOrder === "asc" ? "↑" : "↓")}
               </th>
-              <th style={{ padding: "1rem", textAlign: "left", cursor: "pointer" }} onClick={() => toggleSort("created_at")}>
+              <th
+                style={{ padding: "1rem", textAlign: "left", cursor: "pointer" }}
+                onClick={() => toggleSort("created_at")}
+              >
                 Created {sortBy === "created_at" && (sortOrder === "asc" ? "↑" : "↓")}
               </th>
               <th style={{ padding: "1rem", textAlign: "left" }}>Actions</th>
@@ -81,7 +94,9 @@ function UserTable({ users, onEdit, onDelete, onToggleAdmin }) {
                     {user.role}
                   </span>
                 </td>
-                <td style={{ padding: "1rem" }}>{new Date(user.created_at).toLocaleDateString()}</td>
+                <td style={{ padding: "1rem" }}>
+                  {new Date(user.created_at).toLocaleDateString()}
+                </td>
                 <td style={{ padding: "1rem" }}>
                   <div style={{ display: "flex", gap: "0.5rem" }}>
                     <button
@@ -228,7 +243,12 @@ function UserForm({ initialUser = null, onSubmit, onCancel }) {
         <button type="submit" className="primary-button" style={{ padding: "0.75rem 2rem" }}>
           {initialUser ? "Update User" : "Create User"}
         </button>
-        <button type="button" onClick={onCancel} className="ghost-button" style={{ padding: "0.75rem 2rem" }}>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="ghost-button"
+          style={{ padding: "0.75rem 2rem" }}
+        >
           Cancel
         </button>
       </div>
@@ -238,15 +258,52 @@ function UserForm({ initialUser = null, onSubmit, onCancel }) {
 
 function ConfirmDialog({ title, message, onConfirm, onCancel }) {
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0, 0, 0, 0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
-      <div style={{ background: "white", padding: "2rem", borderRadius: "8px", maxWidth: "400px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0, 0, 0, 0.5)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 1000,
+      }}
+    >
+      <div
+        style={{
+          background: "white",
+          padding: "2rem",
+          borderRadius: "8px",
+          maxWidth: "400px",
+          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+        }}
+      >
         <h2 style={{ marginBottom: "1rem" }}>{title}</h2>
         <p style={{ marginBottom: "2rem", color: "#666" }}>{message}</p>
         <div style={{ display: "flex", gap: "1rem" }}>
-          <button onClick={onConfirm} style={{ padding: "0.75rem 2rem", background: "#d00", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}>
+          <button
+            onClick={onConfirm}
+            style={{
+              padding: "0.75rem 2rem",
+              background: "#d00",
+              color: "white",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
             Confirm
           </button>
-          <button onClick={onCancel} style={{ padding: "0.75rem 2rem", background: "#ddd", border: "none", borderRadius: "4px", cursor: "pointer" }}>
+          <button
+            onClick={onCancel}
+            style={{
+              padding: "0.75rem 2rem",
+              background: "#ddd",
+              border: "none",
+              borderRadius: "4px",
+              cursor: "pointer",
+            }}
+          >
             Cancel
           </button>
         </div>
@@ -336,8 +393,32 @@ export default function UserManagement() {
     <section className="panel-card">
       <h2>User Management</h2>
 
-      {error && <div style={{ padding: "1rem", marginBottom: "1rem", background: "#fee", borderLeft: "4px solid #f00", color: "#d00" }}>{error}</div>}
-      {success && <div style={{ padding: "1rem", marginBottom: "1rem", background: "#efe", borderLeft: "4px solid #0a0", color: "#0a0" }}>{success}</div>}
+      {error && (
+        <div
+          style={{
+            padding: "1rem",
+            marginBottom: "1rem",
+            background: "#fee",
+            borderLeft: "4px solid #f00",
+            color: "#d00",
+          }}
+        >
+          {error}
+        </div>
+      )}
+      {success && (
+        <div
+          style={{
+            padding: "1rem",
+            marginBottom: "1rem",
+            background: "#efe",
+            borderLeft: "4px solid #0a0",
+            color: "#0a0",
+          }}
+        >
+          {success}
+        </div>
+      )}
 
       {!showForm && !editingUser && (
         <button
@@ -350,7 +431,15 @@ export default function UserManagement() {
       )}
 
       {showForm && (
-        <div style={{ marginBottom: "2rem", padding: "1.5rem", background: "#f9f9f9", borderRadius: "4px", borderLeft: "4px solid #0066cc" }}>
+        <div
+          style={{
+            marginBottom: "2rem",
+            padding: "1.5rem",
+            background: "#f9f9f9",
+            borderRadius: "4px",
+            borderLeft: "4px solid #0066cc",
+          }}
+        >
           <h3>Create New User</h3>
           <UserForm
             onSubmit={handleCreateUser}
@@ -363,7 +452,15 @@ export default function UserManagement() {
       )}
 
       {editingUser && (
-        <div style={{ marginBottom: "2rem", padding: "1.5rem", background: "#f9f9f9", borderRadius: "4px", borderLeft: "4px solid #FF9800" }}>
+        <div
+          style={{
+            marginBottom: "2rem",
+            padding: "1.5rem",
+            background: "#f9f9f9",
+            borderRadius: "4px",
+            borderLeft: "4px solid #FF9800",
+          }}
+        >
           <h3>Edit User</h3>
           <UserForm
             initialUser={editingUser}
@@ -376,7 +473,12 @@ export default function UserManagement() {
         </div>
       )}
 
-      <UserTable users={users} onEdit={setEditingUser} onDelete={(user) => setConfirmDialog(user)} onToggleAdmin={handleToggleAdmin} />
+      <UserTable
+        users={users}
+        onEdit={setEditingUser}
+        onDelete={(user) => setConfirmDialog(user)}
+        onToggleAdmin={handleToggleAdmin}
+      />
 
       {confirmDialog && (
         <ConfirmDialog

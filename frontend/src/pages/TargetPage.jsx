@@ -53,7 +53,9 @@ export default function TargetPage() {
       setTargetNotes(targetResponse.data.notes || "");
       const latestScan = targetResponse.data.scans?.[0];
       setVulnNotes(
-        Object.fromEntries((latestScan?.vulnerabilities || []).map((item) => [item.id, item.notes || ""])),
+        Object.fromEntries(
+          (latestScan?.vulnerabilities || []).map((item) => [item.id, item.notes || ""]),
+        ),
       );
       setError("");
     } catch (requestError) {
@@ -256,7 +258,9 @@ export default function TargetPage() {
 
   async function saveVulnNotes(vulnerabilityId) {
     try {
-      await api.put(`/vulnerabilities/${vulnerabilityId}`, { notes: vulnNotes[vulnerabilityId] || "" });
+      await api.put(`/vulnerabilities/${vulnerabilityId}`, {
+        notes: vulnNotes[vulnerabilityId] || "",
+      });
       await loadPage();
     } catch (requestError) {
       setError(requestError.response?.data?.detail || "Could not save vulnerability notes");
@@ -316,7 +320,11 @@ export default function TargetPage() {
   }
 
   if (isLoading) {
-    return <main className="page-shell"><div className="panel-card">Loading target...</div></main>;
+    return (
+      <main className="page-shell">
+        <div className="panel-card">Loading target...</div>
+      </main>
+    );
   }
 
   return (
@@ -328,14 +336,27 @@ export default function TargetPage() {
           </Link>
           <h1>{target?.domain}</h1>
           <p className="lede">
-            Latest stage: <span className={`status-pill status-${latestScan?.status || "idle"}`}>{latestScan?.metadata_json?.stage || latestScan?.status || "not-scanned"}</span>
+            Latest stage:{" "}
+            <span className={`status-pill status-${latestScan?.status || "idle"}`}>
+              {latestScan?.metadata_json?.stage || latestScan?.status || "not-scanned"}
+            </span>
           </p>
         </div>
         <div className="button-row">
-          <a className="ghost-button link-button" href={`${backendBaseUrl}/reports/${targetId}/json`} rel="noreferrer" target="_blank">
+          <a
+            className="ghost-button link-button"
+            href={`${backendBaseUrl}/reports/${targetId}/json`}
+            rel="noreferrer"
+            target="_blank"
+          >
             JSON report
           </a>
-          <a className="ghost-button link-button" href={`${backendBaseUrl}/reports/${targetId}/pdf`} rel="noreferrer" target="_blank">
+          <a
+            className="ghost-button link-button"
+            href={`${backendBaseUrl}/reports/${targetId}/pdf`}
+            rel="noreferrer"
+            target="_blank"
+          >
             PDF report
           </a>
           <button className="primary-button" onClick={triggerScan} type="button">
@@ -358,7 +379,12 @@ export default function TargetPage() {
             placeholder="Capture scope notes, escalation paths, or account context here."
             rows={5}
           />
-          <button className="primary-button" disabled={isSaving} onClick={saveTargetNotes} type="button">
+          <button
+            className="primary-button"
+            disabled={isSaving}
+            onClick={saveTargetNotes}
+            type="button"
+          >
             {isSaving ? "Saving..." : "Save notes"}
           </button>
         </article>
@@ -400,7 +426,10 @@ export default function TargetPage() {
             <span className="pill">{schedules.length}</span>
           </div>
           <div className="button-row">
-            <select value={scheduleFrequency} onChange={(event) => setScheduleFrequency(event.target.value)}>
+            <select
+              value={scheduleFrequency}
+              onChange={(event) => setScheduleFrequency(event.target.value)}
+            >
               <option value="daily">Daily</option>
               <option value="weekly">Weekly</option>
             </select>
@@ -414,13 +443,24 @@ export default function TargetPage() {
                 <div className="list-row" key={schedule.id}>
                   <div>
                     <strong>{schedule.frequency}</strong>
-                    <div className="table-subcopy">Next run: {schedule.next_run ? new Date(schedule.next_run).toLocaleString() : "unset"}</div>
+                    <div className="table-subcopy">
+                      Next run:{" "}
+                      {schedule.next_run ? new Date(schedule.next_run).toLocaleString() : "unset"}
+                    </div>
                   </div>
                   <div className="button-row">
-                    <button className="ghost-button" onClick={() => toggleSchedule(schedule)} type="button">
+                    <button
+                      className="ghost-button"
+                      onClick={() => toggleSchedule(schedule)}
+                      type="button"
+                    >
                       {schedule.enabled ? "Pause" : "Enable"}
                     </button>
-                    <button className="ghost-button danger-button" onClick={() => deleteSchedule(schedule.id)} type="button">
+                    <button
+                      className="ghost-button danger-button"
+                      onClick={() => deleteSchedule(schedule.id)}
+                      type="button"
+                    >
                       Delete
                     </button>
                   </div>
@@ -435,14 +475,20 @@ export default function TargetPage() {
 
       <section className="panel-card filter-bar">
         <div className="filter-row">
-          <select value={environmentFilter} onChange={(event) => setEnvironmentFilter(event.target.value)}>
+          <select
+            value={environmentFilter}
+            onChange={(event) => setEnvironmentFilter(event.target.value)}
+          >
             <option value="all">All environments</option>
             <option value="prod">Prod</option>
             <option value="staging">Staging</option>
             <option value="dev">Dev</option>
             <option value="unknown">Unknown</option>
           </select>
-          <select value={severityFilter} onChange={(event) => setSeverityFilter(event.target.value)}>
+          <select
+            value={severityFilter}
+            onChange={(event) => setSeverityFilter(event.target.value)}
+          >
             <option value="all">All severities</option>
             <option value="critical">Critical</option>
             <option value="high">High</option>
@@ -466,7 +512,11 @@ export default function TargetPage() {
             ))}
           </select>
           <label className="toggle-inline">
-            <input checked={focusMode} onChange={(event) => setFocusMode(event.target.checked)} type="checkbox" />
+            <input
+              checked={focusMode}
+              onChange={(event) => setFocusMode(event.target.checked)}
+              type="checkbox"
+            />
             Focus mode
           </label>
         </div>
@@ -509,7 +559,8 @@ export default function TargetPage() {
             <section className="panel-card">
               <h2>Latest diff</h2>
               <p className="muted-copy">
-                {latestDiff.new_subdomains.length} new subdomains, {latestDiff.new_endpoints.length} new endpoints, {latestDiff.new_vulnerabilities.length} new findings.
+                {latestDiff.new_subdomains.length} new subdomains, {latestDiff.new_endpoints.length}{" "}
+                new endpoints, {latestDiff.new_vulnerabilities.length} new findings.
               </p>
             </section>
           ) : null}
@@ -534,7 +585,9 @@ export default function TargetPage() {
                     <tr key={item.id}>
                       <td>
                         <strong>{item.hostname}</strong>
-                        <div className="table-subcopy">{(item.tags || []).join(", ") || "no tags"}</div>
+                        <div className="table-subcopy">
+                          {(item.tags || []).join(", ") || "no tags"}
+                        </div>
                       </td>
                       <td>{item.environment}</td>
                       <td>{item.is_live ? "Live" : "No response"}</td>
@@ -604,9 +657,15 @@ export default function TargetPage() {
                         className="notes-area compact"
                         rows={3}
                         value={vulnNotes[item.id] || ""}
-                        onChange={(event) => setVulnNotes({ ...vulnNotes, [item.id]: event.target.value })}
+                        onChange={(event) =>
+                          setVulnNotes({ ...vulnNotes, [item.id]: event.target.value })
+                        }
                       />
-                      <button className="ghost-button" onClick={() => saveVulnNotes(item.id)} type="button">
+                      <button
+                        className="ghost-button"
+                        onClick={() => saveVulnNotes(item.id)}
+                        type="button"
+                      >
                         Save
                       </button>
                     </td>
@@ -635,7 +694,11 @@ export default function TargetPage() {
               />
               <button
                 className="ghost-button"
-                onClick={() => navigator.clipboard.writeText(filteredEndpoints.map((item) => item.url).join("\n"))}
+                onClick={() =>
+                  navigator.clipboard.writeText(
+                    filteredEndpoints.map((item) => item.url).join("\n"),
+                  )
+                }
                 type="button"
               >
                 Copy URLs
@@ -654,23 +717,35 @@ export default function TargetPage() {
                 </thead>
                 <tbody>
                   {filteredEndpoints.map((item) => {
-                    const isBookmarked = bookmarks.some((bookmark) => bookmark.endpoint_id === item.id);
+                    const isBookmarked = bookmarks.some(
+                      (bookmark) => bookmark.endpoint_id === item.id,
+                    );
                     const isSsrfRisk = (item.tags || []).includes("ssrf-candidate");
                     return (
                       <tr key={item.id} className={isSsrfRisk ? "ssrf-risk" : ""}>
                         <td>
                           <strong>{item.normalized_url}</strong>
-                          <div className="table-subcopy">{(item.tags || []).join(", ") || "general"}</div>
+                          <div className="table-subcopy">
+                            {(item.tags || []).join(", ") || "general"}
+                          </div>
                         </td>
                         <td>{item.source}</td>
                         <td>{item.priority_score}</td>
                         <td>{(item.focus_reasons || []).join(", ") || "-"}</td>
                         <td>
                           <div className="button-row">
-                            <button className="ghost-button" onClick={() => window.open(item.url, "_blank", "noopener,noreferrer")} type="button">
+                            <button
+                              className="ghost-button"
+                              onClick={() => window.open(item.url, "_blank", "noopener,noreferrer")}
+                              type="button"
+                            >
                               Open
                             </button>
-                            <button className="ghost-button" onClick={() => toggleBookmark(item.id)} type="button">
+                            <button
+                              className="ghost-button"
+                              onClick={() => toggleBookmark(item.id)}
+                              type="button"
+                            >
                               {isBookmarked ? "Unbookmark" : "Bookmark"}
                             </button>
                           </div>
@@ -695,7 +770,8 @@ export default function TargetPage() {
                     <div>
                       <strong>{asset.url}</strong>
                       <div className="table-subcopy">
-                        {asset.extracted_endpoints.length} extracted endpoints, {asset.secrets_json.length} secret candidates
+                        {asset.extracted_endpoints.length} extracted endpoints,{" "}
+                        {asset.secrets_json.length} secret candidates
                       </div>
                     </div>
                     <span className={`status-pill status-${asset.status}`}>{asset.status}</span>
@@ -733,7 +809,9 @@ export default function TargetPage() {
             ))
           ) : (
             <section className="panel-card">
-              <p className="muted-copy">No ranked attack paths were produced for the latest scan.</p>
+              <p className="muted-copy">
+                No ranked attack paths were produced for the latest scan.
+              </p>
             </section>
           )}
         </section>
@@ -741,20 +819,20 @@ export default function TargetPage() {
 
       {activeTab === "visualizations" ? (
         <div className="visualizations-container">
-          <AttackPathVisualization 
+          <AttackPathVisualization
             attackPaths={attackPaths}
             vulnerabilities={vulnerabilities}
             endpoints={endpoints}
             subdomains={subdomains}
           />
-          
-          <SubdomainTreeMap 
+
+          <SubdomainTreeMap
             subdomains={subdomains}
             vulnerabilities={vulnerabilities}
             endpoints={endpoints}
           />
-          
-          <VulnerabilityHeatmap 
+
+          <VulnerabilityHeatmap
             vulnerabilities={vulnerabilities}
             endpoints={endpoints}
             subdomains={subdomains}
@@ -763,15 +841,10 @@ export default function TargetPage() {
       ) : null}
 
       {activeTab === "ticketing" ? (
-        <TicketingIntegration 
-          vulnerabilities={vulnerabilities}
-          targetDomain={target?.domain}
-        />
+        <TicketingIntegration vulnerabilities={vulnerabilities} targetDomain={target?.domain} />
       ) : null}
 
-      {activeTab === "blind-xss" ? (
-        <BlindHitsPanel targetId={targetId} />
-      ) : null}
+      {activeTab === "blind-xss" ? <BlindHitsPanel targetId={targetId} /> : null}
     </main>
   );
 }

@@ -29,16 +29,8 @@ body {
   min-height: 100vh;
   color: var(--ink);
   background:
-    radial-gradient(
-      circle at top left,
-      rgba(211, 111, 74, 0.28),
-      transparent 28%
-    ),
-    radial-gradient(
-      circle at bottom right,
-      rgba(31, 111, 120, 0.18),
-      transparent 26%
-    ),
+    radial-gradient(circle at top left, rgba(211, 111, 74, 0.28), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(31, 111, 120, 0.18), transparent 26%),
     linear-gradient(180deg, #fdf7ef 0%, var(--bg) 100%);
 }
 
@@ -160,11 +152,7 @@ button:hover {
 }
 
 .highlight-card {
-  background: linear-gradient(
-    135deg,
-    rgba(211, 111, 74, 0.16),
-    rgba(255, 248, 239, 0.96)
-  );
+  background: linear-gradient(135deg, rgba(211, 111, 74, 0.16), rgba(255, 248, 239, 0.96));
 }
 
 .eyebrow {
@@ -364,11 +352,7 @@ th {
 }
 
 .notification-item.unread {
-  background: linear-gradient(
-    135deg,
-    rgba(211, 111, 74, 0.12),
-    rgba(255, 255, 255, 0.85)
-  );
+  background: linear-gradient(135deg, rgba(211, 111, 74, 0.12), rgba(255, 255, 255, 0.85));
 }
 
 .notification-item p,
@@ -427,11 +411,7 @@ th {
   flex-direction: column;
   justify-content: center;
   background:
-    radial-gradient(
-      circle at top right,
-      rgba(31, 111, 120, 0.2),
-      transparent 38%
-    ),
+    radial-gradient(circle at top right, rgba(31, 111, 120, 0.2), transparent 38%),
     linear-gradient(135deg, rgba(255, 248, 239, 0.92), rgba(243, 223, 210, 0.9));
 }
 
@@ -965,12 +945,12 @@ th {
     max-height: 400px;
     margin-top: 1rem;
   }
-  
+
   .visualization-controls {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .legend {
     order: -1;
   }
@@ -980,21 +960,21 @@ th {
   .graph-container {
     height: 350px;
   }
-  
+
   .heatmap-stats {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .legend-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .severity-bar {
     grid-template-columns: 80px 1fr 30px;
     gap: 0.5rem;
   }
-  
+
   .treemap-legend {
     grid-template-columns: 1fr;
   }
@@ -1136,16 +1116,16 @@ th {
   .quick-stats {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .stat-number {
     font-size: 1.5rem;
   }
-  
+
   .metrics-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
   }
-  
+
   .metric-card {
     padding: 1rem;
   }
@@ -1217,15 +1197,15 @@ th {
 }
 
 .alert-success {
-  background: #D1FAE5;
-  color: #065F46;
-  border: 1px solid #10B981;
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #10b981;
 }
 
 .alert-error {
-  background: #FEE2E2;
-  color: #991B1B;
-  border: 1px solid #EF4444;
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #ef4444;
 }
 
 .selection-info {
@@ -1346,22 +1326,22 @@ th {
 }
 
 .result-item.success {
-  background: #D1FAE5;
-  border: 1px solid #10B981;
+  background: #d1fae5;
+  border: 1px solid #10b981;
 }
 
 .result-item.error {
-  background: #FEE2E2;
-  border: 1px solid #EF4444;
+  background: #fee2e2;
+  border: 1px solid #ef4444;
 }
 
 .success-indicator {
-  color: #10B981;
+  color: #10b981;
   font-weight: bold;
 }
 
 .error-indicator {
-  color: #EF4444;
+  color: #ef4444;
   font-weight: bold;
 }
 
@@ -1376,7 +1356,7 @@ th {
 }
 
 .error-message {
-  color: #991B1B;
+  color: #991b1b;
   font-size: 0.875rem;
 }
 
@@ -1385,16 +1365,16 @@ th {
   .config-fields {
     grid-template-columns: 1fr;
   }
-  
+
   .vuln-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .vuln-header {
     flex-wrap: wrap;
     gap: 0.5rem;
   }
-  
+
   .severity-indicator {
     font-size: 0.625rem;
   }
@@ -1415,7 +1395,7 @@ th {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  background: #6B7280;
+  background: #6b7280;
   border: 2px solid white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   transition: background-color 0.3s ease;
@@ -1618,16 +1598,16 @@ th {
     max-height: 100vh;
     border-radius: 0;
   }
-  
+
   .notifications-list {
     max-height: calc(100vh - 80px);
   }
-  
+
   .notification-indicator {
     top: 0.5rem;
     right: 0.5rem;
   }
-  
+
   .unread-badge {
     font-size: 0.625rem;
     padding: 0.2rem 0.4rem;

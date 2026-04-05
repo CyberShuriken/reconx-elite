@@ -82,13 +82,24 @@ function AuditLogPreview() {
             {logs.map((log) => (
               <tr key={log.id} style={{ borderBottom: "1px solid #eee" }}>
                 <td style={{ padding: "1rem" }}>
-                  <code style={{ background: "#f0f0f0", padding: "0.25rem 0.5rem", borderRadius: "3px", fontSize: "0.875rem" }}>
+                  <code
+                    style={{
+                      background: "#f0f0f0",
+                      padding: "0.25rem 0.5rem",
+                      borderRadius: "3px",
+                      fontSize: "0.875rem",
+                    }}
+                  >
                     {log.action}
                   </code>
                 </td>
-                <td style={{ padding: "1rem" }}>{log.user_id ? `User #${log.user_id}` : "System"}</td>
+                <td style={{ padding: "1rem" }}>
+                  {log.user_id ? `User #${log.user_id}` : "System"}
+                </td>
                 <td style={{ padding: "1rem", fontSize: "0.875rem" }}>{log.ip_address || "N/A"}</td>
-                <td style={{ padding: "1rem", fontSize: "0.875rem" }}>{new Date(log.created_at).toLocaleString()}</td>
+                <td style={{ padding: "1rem", fontSize: "0.875rem" }}>
+                  {new Date(log.created_at).toLocaleString()}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -134,37 +145,85 @@ export default function SystemHealth() {
 
   return (
     <section className="panel-card">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "2rem",
+        }}
+      >
         <h2 style={{ margin: 0 }}>System Health</h2>
-        <button onClick={loadHealth} className="ghost-button" style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>
+        <button
+          onClick={loadHealth}
+          className="ghost-button"
+          style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}
+        >
           🔄 Refresh
         </button>
       </div>
 
-      {error && <div style={{ padding: "1rem", marginBottom: "1rem", background: "#fee", borderLeft: "4px solid #f00", color: "#d00" }}>{error}</div>}
+      {error && (
+        <div
+          style={{
+            padding: "1rem",
+            marginBottom: "1rem",
+            background: "#fee",
+            borderLeft: "4px solid #f00",
+            color: "#d00",
+          }}
+        >
+          {error}
+        </div>
+      )}
 
-      {lastUpdate && <p style={{ fontSize: "0.875rem", color: "#666", marginBottom: "1.5rem" }}>Last updated: {lastUpdate.toLocaleTimeString()}</p>}
+      {lastUpdate && (
+        <p style={{ fontSize: "0.875rem", color: "#666", marginBottom: "1.5rem" }}>
+          Last updated: {lastUpdate.toLocaleTimeString()}
+        </p>
+      )}
 
       {health && (
         <div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+              gap: "1rem",
+              marginBottom: "2rem",
+            }}
+          >
             <HealthIndicator label="Overall Status" status={health.status} />
             <HealthIndicator label="PostgreSQL Database" status={health.postgresql} />
             <HealthIndicator label="Redis Cache" status={health.redis} />
             <HealthIndicator label="Celery Worker" status={health.celery_worker} />
           </div>
 
-          <div style={{ padding: "1.5rem", background: "#f5f5f5", borderRadius: "4px", marginBottom: "2rem" }}>
+          <div
+            style={{
+              padding: "1.5rem",
+              background: "#f5f5f5",
+              borderRadius: "4px",
+              marginBottom: "2rem",
+            }}
+          >
             <h3 style={{ marginTop: 0 }}>System Status Summary</h3>
             <ul style={{ margin: 0, paddingLeft: "1.5rem", lineHeight: 1.8 }}>
               <li>
-                <strong>Database:</strong> {health.postgresql === "healthy" ? "✓ Ready to accept connections" : "✗ Connection issues detected"}
+                <strong>Database:</strong>{" "}
+                {health.postgresql === "healthy"
+                  ? "✓ Ready to accept connections"
+                  : "✗ Connection issues detected"}
               </li>
               <li>
-                <strong>Cache:</strong> {health.redis === "healthy" ? "✓ Ready for task queueing" : "✗ Cannot access cache"}
+                <strong>Cache:</strong>{" "}
+                {health.redis === "healthy" ? "✓ Ready for task queueing" : "✗ Cannot access cache"}
               </li>
               <li>
-                <strong>Task Queue:</strong> {health.celery_worker === "healthy" ? "✓ Workers are active" : "✗ No active workers"}
+                <strong>Task Queue:</strong>{" "}
+                {health.celery_worker === "healthy"
+                  ? "✓ Workers are active"
+                  : "✗ No active workers"}
               </li>
             </ul>
           </div>

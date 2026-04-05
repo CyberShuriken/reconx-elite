@@ -11,55 +11,95 @@ function TicketingForm({ vulnerability, onSuccess, onError }) {
   const platformConfigs = {
     jira: {
       fields: [
-        { name: "url", label: "Jira URL", type: "url", placeholder: "https://your-company.atlassian.net" },
-        { name: "username", label: "Username/Email", type: "text", placeholder: "your-email@company.com" },
-        { name: "api_token", label: "API Token", type: "password", placeholder: "Your Jira API token" },
+        {
+          name: "url",
+          label: "Jira URL",
+          type: "url",
+          placeholder: "https://your-company.atlassian.net",
+        },
+        {
+          name: "username",
+          label: "Username/Email",
+          type: "text",
+          placeholder: "your-email@company.com",
+        },
+        {
+          name: "api_token",
+          label: "API Token",
+          type: "password",
+          placeholder: "Your Jira API token",
+        },
         { name: "project_key", label: "Project Key", type: "text", placeholder: "SEC" },
-        { name: "issue_type", label: "Issue Type", type: "text", placeholder: "Bug" }
-      ]
+        { name: "issue_type", label: "Issue Type", type: "text", placeholder: "Bug" },
+      ],
     },
     github: {
       fields: [
-        { name: "token", label: "Personal Access Token", type: "password", placeholder: "ghp_xxxxxxxxxxxx" },
+        {
+          name: "token",
+          label: "Personal Access Token",
+          type: "password",
+          placeholder: "ghp_xxxxxxxxxxxx",
+        },
         { name: "repository", label: "Repository", type: "text", placeholder: "owner/repo" },
-        { name: "assignee", label: "Assignee (Optional)", type: "text", placeholder: "github-username" }
-      ]
+        {
+          name: "assignee",
+          label: "Assignee (Optional)",
+          type: "text",
+          placeholder: "github-username",
+        },
+      ],
     },
     gitlab: {
       fields: [
         { name: "url", label: "GitLab URL", type: "url", placeholder: "https://gitlab.com" },
-        { name: "token", label: "Personal Access Token", type: "password", placeholder: "glpat-xxxxxxxxxxxxxx" },
-        { name: "project_id", label: "Project ID/Path", type: "text", placeholder: "1234 or group/project" },
-        { name: "assignee_id", label: "Assignee ID (Optional)", type: "number", placeholder: "12345" }
-      ]
-    }
+        {
+          name: "token",
+          label: "Personal Access Token",
+          type: "password",
+          placeholder: "glpat-xxxxxxxxxxxxxx",
+        },
+        {
+          name: "project_id",
+          label: "Project ID/Path",
+          type: "text",
+          placeholder: "1234 or group/project",
+        },
+        {
+          name: "assignee_id",
+          label: "Assignee ID (Optional)",
+          type: "number",
+          placeholder: "12345",
+        },
+      ],
+    },
   };
 
   const handleConfigChange = (field, value) => {
-    setConfig(prev => ({
+    setConfig((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
   const testConnection = async () => {
     setIsLoading(true);
     setTestResult(null);
-    
+
     try {
       const response = await api.post("/ticketing/test-connection", {
         platform,
-        config
+        config,
       });
-      
+
       setTestResult({
         success: true,
-        message: response.data.message
+        message: response.data.message,
       });
     } catch (error) {
       setTestResult({
         success: false,
-        message: error.response?.data?.detail || "Connection test failed"
+        message: error.response?.data?.detail || "Connection test failed",
       });
     } finally {
       setIsLoading(false);
@@ -68,7 +108,7 @@ function TicketingForm({ vulnerability, onSuccess, onError }) {
 
   const createTicket = async () => {
     setIsLoading(true);
-    
+
     try {
       const response = await api.post("/ticketing/create-ticket", {
         vulnerability_id: vulnerability.id,
@@ -77,10 +117,10 @@ function TicketingForm({ vulnerability, onSuccess, onError }) {
         additional_context: {
           created_from: "ReconX Elite UI",
           severity_level: vulnerability.severity,
-          template_id: vulnerability.template_id
-        }
+          template_id: vulnerability.template_id,
+        },
       });
-      
+
       onSuccess(response.data);
     } catch (error) {
       onError(error.response?.data?.detail || "Failed to create ticket");
@@ -111,7 +151,7 @@ function TicketingForm({ vulnerability, onSuccess, onError }) {
       </div>
 
       <div className="config-fields">
-        {currentFields.map(field => (
+        {currentFields.map((field) => (
           <div className="form-group" key={field.name}>
             <label htmlFor={field.name}>{field.label}</label>
             <input
@@ -140,7 +180,7 @@ function TicketingForm({ vulnerability, onSuccess, onError }) {
         >
           {isLoading ? "Testing..." : "Test Connection"}
         </button>
-        
+
         <button
           type="button"
           onClick={createTicket}
@@ -174,12 +214,12 @@ function TicketingIntegration({ vulnerabilities, targetDomain }) {
     if (selectedVulns.size === vulnerabilities.length) {
       setSelectedVulns(new Set());
     } else {
-      setSelectedVulns(new Set(vulnerabilities.map(v => v.id)));
+      setSelectedVulns(new Set(vulnerabilities.map((v) => v.id)));
     }
   };
 
   const handleTicketSuccess = (result) => {
-    setResults(prev => [...prev, result]);
+    setResults((prev) => [...prev, result]);
     setError("");
     // Remove the vulnerability from selection if single ticket
     if (!showBulkForm) {
@@ -197,7 +237,7 @@ function TicketingIntegration({ vulnerabilities, targetDomain }) {
       high: "#EA580C",
       medium: "#FCD34D",
       low: "#86EFAC",
-      info: "#E5E7EB"
+      info: "#E5E7EB",
     };
     return colors[severity?.toLowerCase()] || "#E5E7EB";
   };
@@ -215,10 +255,7 @@ function TicketingIntegration({ vulnerabilities, targetDomain }) {
             />
             Bulk Mode
           </label>
-          <button
-            onClick={handleSelectAll}
-            className="ghost-button"
-          >
+          <button onClick={handleSelectAll} className="ghost-button">
             {selectedVulns.size === vulnerabilities.length ? "Deselect All" : "Select All"}
           </button>
         </div>
@@ -234,11 +271,11 @@ function TicketingIntegration({ vulnerabilities, targetDomain }) {
         <div className="single-ticket-form">
           <h4>Create Ticket for Selected Vulnerability</h4>
           {vulnerabilities
-            .filter(v => selectedVulns.has(v.id))
-            .map(vulnerability => (
+            .filter((v) => selectedVulns.has(v.id))
+            .map((vulnerability) => (
               <div key={vulnerability.id} className="vulnerability-summary">
                 <div className="vuln-header">
-                  <span 
+                  <span
                     className="severity-indicator"
                     style={{ backgroundColor: getSeverityColor(vulnerability.severity) }}
                   >
@@ -248,7 +285,7 @@ function TicketingIntegration({ vulnerabilities, targetDomain }) {
                 </div>
                 <p className="vuln-url">{vulnerability.matched_url}</p>
                 <p className="vuln-description">{vulnerability.description}</p>
-                
+
                 <TicketingForm
                   vulnerability={vulnerability}
                   onSuccess={handleTicketSuccess}
@@ -261,34 +298,35 @@ function TicketingIntegration({ vulnerabilities, targetDomain }) {
         <div className="bulk-ticket-form">
           <h4>Create Bulk Tickets ({selectedVulns.size} vulnerabilities)</h4>
           <p className="muted-copy">
-            This will create separate tickets for each selected vulnerability using the same configuration.
+            This will create separate tickets for each selected vulnerability using the same
+            configuration.
           </p>
-          
+
           <TicketingForm
-            vulnerability={vulnerabilities.find(v => selectedVulns.has(v.id))}
+            vulnerability={vulnerabilities.find((v) => selectedVulns.has(v.id))}
             onSuccess={handleTicketSuccess}
             onError={handleTicketError}
           />
-          
+
           <div className="bulk-actions">
             <button
               onClick={async () => {
-                const platform = document.querySelector('#platform').value;
+                const platform = document.querySelector("#platform").value;
                 const config = {};
-                
+
                 // Collect config from form
-                document.querySelectorAll('.config-fields input').forEach(input => {
+                document.querySelectorAll(".config-fields input").forEach((input) => {
                   config[input.name] = input.value;
                 });
-                
+
                 try {
                   const response = await api.post("/ticketing/bulk-create-tickets", {
                     vulnerability_ids: Array.from(selectedVulns),
                     platform,
-                    config
+                    config,
                   });
-                  
-                  setResults(prev => [...prev, ...response.data.results]);
+
+                  setResults((prev) => [...prev, ...response.data.results]);
                   setSelectedVulns(new Set());
                   setError("");
                 } catch (error) {
@@ -305,10 +343,10 @@ function TicketingIntegration({ vulnerabilities, targetDomain }) {
         <div className="vulnerability-list">
           <h4>Select Vulnerabilities to Create Tickets</h4>
           <div className="vuln-grid">
-            {vulnerabilities.map(vulnerability => (
+            {vulnerabilities.map((vulnerability) => (
               <div
                 key={vulnerability.id}
-                className={`vuln-card ${selectedVulns.has(vulnerability.id) ? 'selected' : ''}`}
+                className={`vuln-card ${selectedVulns.has(vulnerability.id) ? "selected" : ""}`}
                 onClick={() => handleVulnSelection(vulnerability.id)}
               >
                 <div className="vuln-header">
@@ -318,7 +356,7 @@ function TicketingIntegration({ vulnerabilities, targetDomain }) {
                     onChange={() => handleVulnSelection(vulnerability.id)}
                     onClick={(e) => e.stopPropagation()}
                   />
-                  <span 
+                  <span
                     className="severity-indicator"
                     style={{ backgroundColor: getSeverityColor(vulnerability.severity) }}
                   >
@@ -334,24 +372,20 @@ function TicketingIntegration({ vulnerabilities, targetDomain }) {
         </div>
       )}
 
-      {error && (
-        <div className="alert alert-error">
-          {error}
-        </div>
-      )}
+      {error && <div className="alert alert-error">{error}</div>}
 
       {results.length > 0 && (
         <div className="ticket-results">
           <h4>Created Tickets</h4>
           <div className="results-list">
             {results.map((result, index) => (
-              <div key={index} className={`result-item ${result.success ? 'success' : 'error'}`}>
+              <div key={index} className={`result-item ${result.success ? "success" : "error"}`}>
                 {result.success ? (
                   <div>
                     <span className="success-indicator">✓</span>
-                    <a 
-                      href={result.ticket.ticket_url} 
-                      target="_blank" 
+                    <a
+                      href={result.ticket.ticket_url}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="ticket-link"
                     >

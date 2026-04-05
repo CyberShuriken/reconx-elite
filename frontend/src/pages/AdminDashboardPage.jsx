@@ -51,7 +51,9 @@ export default function AdminDashboardPage() {
         <div>
           <p className="eyebrow">ReconX Elite</p>
           <h1>Admin Dashboard</h1>
-          <p className="lede">Manage users, monitor system health, and configure application settings.</p>
+          <p className="lede">
+            Manage users, monitor system health, and configure application settings.
+          </p>
         </div>
         <div style={{ display: "flex", gap: "1rem" }}>
           <Link to="/" className="ghost-button">
@@ -63,7 +65,19 @@ export default function AdminDashboardPage() {
         </div>
       </header>
 
-      {error && <div className="error-banner" style={{ padding: "1rem", marginBottom: "2rem", background: "#fee", borderLeft: "4px solid #f00" }}>{error}</div>}
+      {error && (
+        <div
+          className="error-banner"
+          style={{
+            padding: "1rem",
+            marginBottom: "2rem",
+            background: "#fee",
+            borderLeft: "4px solid #f00",
+          }}
+        >
+          {error}
+        </div>
+      )}
 
       <nav className="tab-row">
         {[
@@ -112,7 +126,8 @@ export default function AdminDashboardPage() {
           <section className="panel-card">
             <h2>System Overview</h2>
             <p className="muted-copy">
-              Quick access to admin functions. Click on tabs above to manage users, monitor system health, or change configuration.
+              Quick access to admin functions. Click on tabs above to manage users, monitor system
+              health, or change configuration.
             </p>
             <div className="layout-grid">
               <button
@@ -128,7 +143,9 @@ export default function AdminDashboardPage() {
                   transition: "all 0.2s ease",
                 }}
               >
-                <strong style={{ display: "block", marginBottom: "0.5rem", fontSize: "1.1rem" }}>👥 Manage Users</strong>
+                <strong style={{ display: "block", marginBottom: "0.5rem", fontSize: "1.1rem" }}>
+                  👥 Manage Users
+                </strong>
                 <span className="muted-copy">Create, edit, or delete user accounts</span>
               </button>
               <button
@@ -144,7 +161,9 @@ export default function AdminDashboardPage() {
                   transition: "all 0.2s ease",
                 }}
               >
-                <strong style={{ display: "block", marginBottom: "0.5rem", fontSize: "1.1rem" }}>🏥 System Health</strong>
+                <strong style={{ display: "block", marginBottom: "0.5rem", fontSize: "1.1rem" }}>
+                  🏥 System Health
+                </strong>
                 <span className="muted-copy">Monitor PostgreSQL, Redis, Celery</span>
               </button>
               <button
@@ -160,7 +179,9 @@ export default function AdminDashboardPage() {
                   transition: "all 0.2s ease",
                 }}
               >
-                <strong style={{ display: "block", marginBottom: "0.5rem", fontSize: "1.1rem" }}>⚙️ Configuration</strong>
+                <strong style={{ display: "block", marginBottom: "0.5rem", fontSize: "1.1rem" }}>
+                  ⚙️ Configuration
+                </strong>
                 <span className="muted-copy">View and update application settings</span>
               </button>
               <button
@@ -176,7 +197,9 @@ export default function AdminDashboardPage() {
                   transition: "all 0.2s ease",
                 }}
               >
-                <strong style={{ display: "block", marginBottom: "0.5rem", fontSize: "1.1rem" }}>📊 Metrics Dashboard</strong>
+                <strong style={{ display: "block", marginBottom: "0.5rem", fontSize: "1.1rem" }}>
+                  📊 Metrics Dashboard
+                </strong>
                 <span className="muted-copy">View system analytics and usage patterns</span>
               </button>
             </div>
@@ -184,9 +207,7 @@ export default function AdminDashboardPage() {
         </>
       )}
 
-      {activeTab === "metrics" && (
-        <AdminMetricsDashboard metrics={metrics} auditLogs={auditLogs} />
-      )}
+      {activeTab === "metrics" && <AdminMetricsDashboard metrics={metrics} auditLogs={auditLogs} />}
 
       {activeTab === "users" && <UserManagement />}
 

@@ -35,7 +35,9 @@ function InsightBlock({ data }) {
 
   const targets = normalizeTargets(data.high_value_targets);
   const leaks = Array.isArray(data.potential_leaks) ? data.potential_leaks : [];
-  const templates = Array.isArray(data.suggested_nuclei_templates) ? data.suggested_nuclei_templates : [];
+  const templates = Array.isArray(data.suggested_nuclei_templates)
+    ? data.suggested_nuclei_templates
+    : [];
   const flags = Array.isArray(data.security_flags) ? data.security_flags : [];
   const juicy = Array.isArray(data.juicy_js_files) ? data.juicy_js_files : [];
   const errs = Array.isArray(data.errors) ? data.errors.filter(Boolean) : [];
@@ -121,7 +123,9 @@ function InsightBlock({ data }) {
               <li key={`${row.url || idx}-${idx}`}>
                 <div className="mono-cell">{row.url}</div>
                 {row.rationale ? <div className="table-subcopy">{row.rationale}</div> : null}
-                {row.focus_areas ? <div className="table-subcopy">Focus: {row.focus_areas}</div> : null}
+                {row.focus_areas ? (
+                  <div className="table-subcopy">Focus: {row.focus_areas}</div>
+                ) : null}
               </li>
             ))}
           </ul>
@@ -192,7 +196,9 @@ export default function ScanAiInsightsPanel({ scan }) {
         <h2>Gemini scan insights</h2>
         <span className="pill">{sections.length}</span>
       </div>
-      <p className="muted-copy">Automated triage only. Validate findings manually and stay within program scope.</p>
+      <p className="muted-copy">
+        Automated triage only. Validate findings manually and stay within program scope.
+      </p>
 
       {sections.map(({ key, label, data }) => (
         <div className="ai-insight-section" key={key}>

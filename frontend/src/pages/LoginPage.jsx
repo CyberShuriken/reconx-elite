@@ -35,7 +35,8 @@ export default function LoginPage() {
         <p className="eyebrow">ReconX Elite</p>
         <h1>Operate your recon pipeline with a clean attack-surface view.</h1>
         <p className="auth-copy">
-          Use this platform only against infrastructure you own or are explicitly authorized to assess.
+          Use this platform only against infrastructure you own or are explicitly authorized to
+          assess.
         </p>
       </section>
       <section className="auth-card">
@@ -66,7 +67,11 @@ export default function LoginPage() {
             {isSubmitting ? "Working..." : mode === "register" ? "Create account" : "Sign in"}
           </button>
         </form>
-        <button className="ghost-button" onClick={() => setMode(mode === "register" ? "login" : "register")} type="button">
+        <button
+          className="ghost-button"
+          onClick={() => setMode(mode === "register" ? "login" : "register")}
+          type="button"
+        >
           {mode === "register" ? "Already have an account?" : "Need an account?"}
         </button>
       </section>

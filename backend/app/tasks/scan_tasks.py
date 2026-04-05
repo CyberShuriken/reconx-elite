@@ -123,6 +123,14 @@ def _set_stage(scan: Scan, db: Session, stage: str, stage_index: int) -> None:
         stage_total=TOTAL_STAGES,
         progress_percent=int(((stage_index - 1) / TOTAL_STAGES) * 100),
     )
+    logger.info(
+        "scan_stage scan_id=%s stage=%s stage_index=%s stage_total=%s progress_percent=%s",
+        scan.id,
+        stage,
+        stage_index,
+        TOTAL_STAGES,
+        metadata.get("progress_percent"),
+    )
     _update_scan(scan, db, status="running", metadata_json=metadata)
 
 
@@ -151,6 +159,14 @@ def _log_step(
     result: ToolExecutionResult | None = None,
 ) -> None:
     if result:
+        logger.info(
+            "scan_step scan_id=%s step=%s status=%s duration_ms=%s attempts=%s",
+            scan_id,
+            step,
+            status,
+            result.duration_ms,
+            result.attempts,
+        )
         row = ScanLog(
             scan_id=scan_id,
             step=step,

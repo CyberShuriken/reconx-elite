@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api/client";
 
-const severityMap = { xss: "critical", sqli: "critical", ssti: "high", ssrf: "high", openredirect: "medium" };
+const severityMap = {
+  xss: "critical",
+  sqli: "critical",
+  ssti: "high",
+  ssrf: "high",
+  openredirect: "medium",
+};
 const vulnIconMap = {
   xss: "🔴",
   sqli: "🔴",
@@ -110,9 +116,16 @@ export default function TestSuggestionsPanel({ targetId, scan }) {
             <div key={endpointData.id} className="endpoint-opportunity-card">
               <div
                 className="endpoint-header"
-                onClick={() => setExpandedEndpoints((prev) => ({ ...prev, [endpointData.id]: !prev[endpointData.id] }))}
+                onClick={() =>
+                  setExpandedEndpoints((prev) => ({
+                    ...prev,
+                    [endpointData.id]: !prev[endpointData.id],
+                  }))
+                }
               >
-                <span className="toggle-icon">{expandedEndpoints[endpointData.id] ? "▼" : "▶"}</span>
+                <span className="toggle-icon">
+                  {expandedEndpoints[endpointData.id] ? "▼" : "▶"}
+                </span>
                 <div className="endpoint-info">
                   <div className="method-url">
                     <span className="method">{endpointData.source.toUpperCase()}</span>
@@ -120,7 +133,11 @@ export default function TestSuggestionsPanel({ targetId, scan }) {
                   </div>
                   <div className="opportunity-badges">
                     {endpointData.payload_opportunities.map((opp) => (
-                      <span key={opp.id} className={`vuln-badge ${severityMap[opp.vulnerability_type]}`} title={`${opp.vulnerability_type} (${opp.confidence}% confidence)`}>
+                      <span
+                        key={opp.id}
+                        className={`vuln-badge ${severityMap[opp.vulnerability_type]}`}
+                        title={`${opp.vulnerability_type} (${opp.confidence}% confidence)`}
+                      >
                         {vulnIconMap[opp.vulnerability_type]} {opp.vulnerability_type.toUpperCase()}
                       </span>
                     ))}
@@ -134,10 +151,14 @@ export default function TestSuggestionsPanel({ targetId, scan }) {
                   {endpointData.payload_opportunities
                     .sort((a, b) => b.confidence - a.confidence)
                     .map((opp) => (
-                      <div key={opp.id} className={`opportunity-detail ${severityMap[opp.vulnerability_type]}`}>
+                      <div
+                        key={opp.id}
+                        className={`opportunity-detail ${severityMap[opp.vulnerability_type]}`}
+                      >
                         <div className="opp-header">
                           <span className="vuln-type">
-                            {vulnIconMap[opp.vulnerability_type]} {opp.vulnerability_type.toUpperCase()}
+                            {vulnIconMap[opp.vulnerability_type]}{" "}
+                            {opp.vulnerability_type.toUpperCase()}
                           </span>
                           <span className="confidence-badge">{opp.confidence}% confidence</span>
                         </div>

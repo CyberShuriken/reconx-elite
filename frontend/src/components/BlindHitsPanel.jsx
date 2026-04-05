@@ -53,7 +53,9 @@ export default function BlindHitsPanel({ targetId }) {
               <div className="list-content">
                 <div className="list-header">
                   <strong>{hit.ip_address}</strong>
-                  <span className={`status-pill status-${hit.processed === 0 ? "pending" : hit.processed === 1 ? "success" : "muted"}`}>
+                  <span
+                    className={`status-pill status-${hit.processed === 0 ? "pending" : hit.processed === 1 ? "success" : "muted"}`}
+                  >
                     {hit.processed === 0 ? "New" : hit.processed === 1 ? "Processed" : "Ignored"}
                   </span>
                 </div>
@@ -64,13 +66,19 @@ export default function BlindHitsPanel({ targetId }) {
 
                 {hit.user_agent && (
                   <div className="table-subcopy">
-                    User-Agent: {hit.user_agent.length > 50 ? `${hit.user_agent.substring(0, 50)}...` : hit.user_agent}
+                    User-Agent:{" "}
+                    {hit.user_agent.length > 50
+                      ? `${hit.user_agent.substring(0, 50)}...`
+                      : hit.user_agent}
                   </div>
                 )}
 
                 {hit.referrer && (
                   <div className="table-subcopy">
-                    Referrer: {hit.referrer.length > 50 ? `${hit.referrer.substring(0, 50)}...` : hit.referrer}
+                    Referrer:{" "}
+                    {hit.referrer.length > 50
+                      ? `${hit.referrer.substring(0, 50)}...`
+                      : hit.referrer}
                   </div>
                 )}
 
@@ -80,7 +88,8 @@ export default function BlindHitsPanel({ targetId }) {
 
                 {hit.payload_opportunity && (
                   <div className="table-subcopy">
-                    From: {hit.payload_opportunity.endpoint_url} ({hit.payload_opportunity.parameter_name})
+                    From: {hit.payload_opportunity.endpoint_url} (
+                    {hit.payload_opportunity.parameter_name})
                   </div>
                 )}
               </div>

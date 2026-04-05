@@ -23,7 +23,9 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadDashboard().catch((requestError) => {
-      setError(formatApiErrorDetail(requestError.response?.data?.detail) || "Failed to load dashboard");
+      setError(
+        formatApiErrorDetail(requestError.response?.data?.detail) || "Failed to load dashboard",
+      );
     });
   }, []);
 
@@ -62,7 +64,9 @@ export default function DashboardPage() {
         <div>
           <p className="eyebrow">ReconX Elite</p>
           <h1>Recon dashboard</h1>
-          <p className="lede">Track targets, live surface changes, and the assets worth manual attention first.</p>
+          <p className="lede">
+            Track targets, live surface changes, and the assets worth manual attention first.
+          </p>
         </div>
         <div style={{ display: "flex", gap: "1rem" }}>
           {isAdmin && (
@@ -102,7 +106,9 @@ export default function DashboardPage() {
       <section className="layout-grid">
         <form className="panel-card" onSubmit={onAddTarget}>
           <h2>Add target</h2>
-          <p className="muted-copy">Enter a hostname (e.g. example.com) or paste a URL — we keep the hostname only.</p>
+          <p className="muted-copy">
+            Enter a hostname (e.g. example.com) or paste a URL — we keep the hostname only.
+          </p>
           <label>
             Domain
             <input
@@ -129,7 +135,10 @@ export default function DashboardPage() {
           <div className="notification-list">
             {notifications.length ? (
               notifications.slice(0, 6).map((notification) => (
-                <article className={notification.read ? "notification-item" : "notification-item unread"} key={notification.id}>
+                <article
+                  className={notification.read ? "notification-item" : "notification-item unread"}
+                  key={notification.id}
+                >
                   <p>{notification.message}</p>
                   <span>{new Date(notification.created_at).toLocaleString()}</span>
                 </article>
@@ -167,7 +176,9 @@ export default function DashboardPage() {
                   </td>
                   <td>
                     <span className={`status-pill status-${target.latest_scan?.status || "idle"}`}>
-                      {target.latest_scan?.metadata_json?.stage || target.latest_scan?.status || "not-scanned"}
+                      {target.latest_scan?.metadata_json?.stage ||
+                        target.latest_scan?.status ||
+                        "not-scanned"}
                     </span>
                   </td>
                   <td>{target.latest_scan?.endpoint_count || 0} endpoints</td>

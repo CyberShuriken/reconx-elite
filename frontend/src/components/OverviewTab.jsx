@@ -1,6 +1,21 @@
-import { Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-export default function OverviewTab({ summary, severityChartData, progressTimelineData, scanHistoryData }) {
+export default function OverviewTab({
+  summary,
+  severityChartData,
+  progressTimelineData,
+  scanHistoryData,
+}) {
   return (
     <>
       <div className="summary-grid">
