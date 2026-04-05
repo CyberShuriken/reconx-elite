@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
-import { api } from "../api/client";
+import { api, formatApiErrorDetail } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 
 export default function DashboardPage() {
@@ -23,7 +23,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     loadDashboard().catch((requestError) => {
-      setError(requestError.response?.data?.detail || "Failed to load dashboard");
+      setError(formatApiErrorDetail(requestError.response?.data?.detail) || "Failed to load dashboard");
     });
   }, []);
 
@@ -50,7 +50,7 @@ export default function DashboardPage() {
       setDomain("");
       await loadDashboard();
     } catch (requestError) {
-      setError(requestError.response?.data?.detail || "Could not add target");
+      setError(formatApiErrorDetail(requestError.response?.data?.detail) || "Could not add target");
     } finally {
       setIsSubmitting(false);
     }
@@ -102,7 +102,7 @@ export default function DashboardPage() {
       <section className="layout-grid">
         <form className="panel-card" onSubmit={onAddTarget}>
           <h2>Add target</h2>
-          <p className="muted-copy">Strict domain normalization is enforced. Enter a hostname only.</p>
+          <p className="muted-copy">Enter a hostname (e.g. example.com) or paste a URL — we keep the hostname only.</p>
           <label>
             Domain
             <input

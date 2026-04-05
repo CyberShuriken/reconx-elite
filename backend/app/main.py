@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -61,6 +62,35 @@ app.include_router(intelligence.router)
 app.include_router(custom_templates.router)
 app.include_router(system.router)
 app.include_router(advanced_recon.router)
+
+
+def _default_ui_url() -> str:
+    for origin in settings.cors_allowed_origins_list:
+        if origin.strip():
+            return origin.strip()
+    return "http://127.0.0.1:5173"
+
+
+@app.get("/", response_class=HTMLResponse)
+def root() -> HTMLResponse:
+    ui_url = _default_ui_url()
+    body = f"""<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>{settings.app_name}</title>
+</head>
+<body style="font-family:system-ui,sans-serif;max-width:40rem;margin:2rem auto;line-height:1.5">
+  <h1>{settings.app_name}</h1>
+  <p>This port serves the HTTP API. The web app is usually on a different port.</p>
+  <ul>
+    <li><strong>Web UI:</strong> <a href="{ui_url}">{ui_url}</a> (Docker Compose maps this to <code>5173</code> on your machine)</li>
+    <li><strong>Interactive API docs:</strong> <a href="/docs">/docs</a></li>
+    <li><strong>Health:</strong> <a href="/health">/health</a></li>
+  </ul>
+</body>
+</html>"""
+    return HTMLResponse(content=body)
 
 
 @app.get("/health")

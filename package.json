@@ -1,0 +1,13 @@
+{
+  "name": "reconx-elite",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w reconx-elite-frontend",
+    "build": "npm run build -w reconx-elite-frontend",
+    "test": "python run_backend_tests.py",
+    "test:backend": "python run_backend_tests.py"
+  }
+}

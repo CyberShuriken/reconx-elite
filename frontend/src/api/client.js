@@ -14,6 +14,19 @@ export const api = axios.create({
   withCredentials: false,
 });
 
+/** FastAPI may return `detail` as a string or a Pydantic validation list */
+export function formatApiErrorDetail(detail) {
+  if (detail == null) return "";
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    return detail
+      .map((item) => (item && typeof item === "object" && item.msg ? item.msg : JSON.stringify(item)))
+      .join("; ");
+  }
+  if (typeof detail === "object" && detail.msg) return detail.msg;
+  return String(detail);
+}
+
 export function setAuthHandlers(handlers) {
   getTokens = handlers.getTokens;
   refreshTokens = handlers.refreshTokens;
