@@ -41,6 +41,10 @@ class AuthGuardMiddleware(BaseHTTPMiddleware):
     )
 
     async def dispatch(self, request: Request, call_next):
+        # Let CORS preflight requests pass through unauthenticated.
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         auth_header = request.headers.get("Authorization", "")
         request.state.user_id = None
         request.state.rate_limit_key = request.client.host if request.client else "anonymous"
