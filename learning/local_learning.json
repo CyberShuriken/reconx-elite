@@ -1,0 +1,143 @@
+{
+  "verification_results": [
+    {
+      "vulnerability_id": "MANUAL-SQLINJ-20260415-001",
+      "session_id": "reconx-elite-session-001",
+      "verification_status": "confirmed",
+      "confidence_adjustment": 0.4,
+      "manual_notes": "Time-based SQL injection in login form. Original automated scan missed this due to WAF protection. Manual testing with comment-based payload bypass revealed vulnerability in username parameter.",
+      "verified_by": "security_analyst_john",
+      "verified_at": "2026-04-15T04:25:24.603436",
+      "original_confidence": 0.15,
+      "adjusted_confidence": 0.95,
+      "impact_severity": "critical",
+      "reproduction_success": true,
+      "additional_context": {
+        "target": "api.example.com",
+        "endpoint": "/api/v2/auth/login",
+        "parameter": "username",
+        "payload": "admin'/**/AND/**/(SELECT/**/SUBSTRING(password,1,1)/**/FROM/**/users/**/WHERE/**/id=1)='a",
+        "bypass_technique": "comment obfuscation",
+        "waf_detected": true,
+        "database_type": "MySQL",
+        "response_time_delay": "5.2 seconds"
+      }
+    },
+    {
+      "vulnerability_id": "AUTO-XSS-FP-20260415-002",
+      "session_id": "reconx-elite-session-002",
+      "verification_status": "false_positive",
+      "confidence_adjustment": -0.3,
+      "manual_notes": "XSS alert was false positive. The reflected input was in a JSON response within a properly escaped string, not in DOM context. No actual XSS execution possible.",
+      "verified_by": "security_analyst_jane",
+      "verified_at": "2026-04-15T04:25:24.605924",
+      "original_confidence": 0.85,
+      "adjusted_confidence": 0.1,
+      "impact_severity": "none",
+      "reproduction_success": false,
+      "additional_context": {
+        "target": "app.example.com",
+        "endpoint": "/api/search",
+        "parameter": "query",
+        "response_type": "application/json",
+        "context": "json_string_value",
+        "encoding": "properly_escaped"
+      }
+    },
+    {
+      "vulnerability_id": "MANUAL-SSRF-20260415-003",
+      "session_id": "reconx-elite-session-003",
+      "verification_status": "confirmed",
+      "confidence_adjustment": 0.5,
+      "manual_notes": "Blind SSRF in image processing endpoint. Automated scan missed this because the payload was encoded in base64 and required specific headers. Manual testing revealed server makes HTTP requests to arbitrary URLs.",
+      "verified_by": "security_analyst_mike",
+      "verified_at": "2026-04-15T04:25:24.607439",
+      "original_confidence": 0.05,
+      "adjusted_confidence": 0.9,
+      "impact_severity": "high",
+      "reproduction_success": true,
+      "additional_context": {
+        "target": "internal.app.example.com",
+        "endpoint": "/api/v2/process-image",
+        "parameter": "image_data",
+        "payload_encoding": "base64",
+        "required_headers": [
+          "X-Request-ID: manual-test",
+          "Content-Type: application/json"
+        ],
+        "oast_technique": "burp_collaborator",
+        "dns_callback": "received",
+        "internal_network_access": true
+      }
+    }
+  ],
+  "learning_entries": [
+    {
+      "learning_type": "true_positive_pattern",
+      "pattern": "Confirmed vulnerability: Time-based SQL injection in login form. Original automated scan missed this due to WAF protection. Manual testing with comment-based payload bypass revealed vulnerability in username parameter.",
+      "context": "Vulnerability MANUAL-SQLINJ-20260415-001 with confidence 0.15",
+      "outcome": "Manual verification confirmed true positive",
+      "confidence": 0.9,
+      "timestamp": "2026-04-15T04:25:24.603436",
+      "source_session": "reconx-elite-session-001",
+      "applicable_modules": [
+        "business_logic"
+      ]
+    },
+    {
+      "learning_type": "detection_gap",
+      "pattern": "Detection gap: Time-based SQL injection in login form. Original automated scan missed this due to WAF protection. Manual testing with comment-based payload bypass revealed vulnerability in username parameter.",
+      "context": "Low confidence detection (0.15) for confirmed vulnerability",
+      "outcome": "System failed to detect confirmed vulnerability with sufficient confidence",
+      "confidence": 0.8,
+      "timestamp": "2026-04-15T04:25:24.603436",
+      "source_session": "reconx-elite-session-001",
+      "applicable_modules": [
+        "business_logic"
+      ]
+    },
+    {
+      "learning_type": "false_positive_pattern",
+      "pattern": "False positive detected: XSS alert was false positive. The reflected input was in a JSON response within a properly escaped string, not in DOM context. No actual XSS execution possible.",
+      "context": "Vulnerability AUTO-XSS-FP-20260415-002 with confidence 0.85",
+      "outcome": "Manual verification confirmed false positive",
+      "confidence": 0.9,
+      "timestamp": "2026-04-15T04:25:24.605924",
+      "source_session": "reconx-elite-session-002",
+      "applicable_modules": [
+        "xss_bypass"
+      ]
+    },
+    {
+      "learning_type": "true_positive_pattern",
+      "pattern": "Confirmed vulnerability: Blind SSRF in image processing endpoint. Automated scan missed this because the payload was encoded in base64 and required specific headers. Manual testing revealed server makes HTTP requests to arbitrary URLs.",
+      "context": "Vulnerability MANUAL-SSRF-20260415-003 with confidence 0.05",
+      "outcome": "Manual verification confirmed true positive",
+      "confidence": 0.9,
+      "timestamp": "2026-04-15T04:25:24.607439",
+      "source_session": "reconx-elite-session-003",
+      "applicable_modules": [
+        "ssrf_misconfig"
+      ]
+    },
+    {
+      "learning_type": "detection_gap",
+      "pattern": "Detection gap: Blind SSRF in image processing endpoint. Automated scan missed this because the payload was encoded in base64 and required specific headers. Manual testing revealed server makes HTTP requests to arbitrary URLs.",
+      "context": "Low confidence detection (0.05) for confirmed vulnerability",
+      "outcome": "System failed to detect confirmed vulnerability with sufficient confidence",
+      "confidence": 0.8,
+      "timestamp": "2026-04-15T04:25:24.607439",
+      "source_session": "reconx-elite-session-003",
+      "applicable_modules": [
+        "ssrf_misconfig"
+      ]
+    }
+  ],
+  "metadata": {
+    "last_updated": "2026-04-15T04:25:24.608724",
+    "total_verifications": 3,
+    "total_learning_entries": 5,
+    "session_id": "manual_verification_session",
+    "target": "manual_verification_target"
+  }
+}

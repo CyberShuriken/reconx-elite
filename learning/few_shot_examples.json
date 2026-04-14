@@ -1,0 +1,26 @@
+{
+  "few_shot_examples": [
+    {
+      "scenario": "Manual verification confirmed sql_injection vulnerability",
+      "input_data": "\nTarget Analysis Request:\n- Vulnerability ID: MANUAL-SQLINJ-20260415-001\n- Initial Confidence: 0.15\n- Context: Time-based SQL injection in login form. Original automated scan missed this due to WAF protection. Manual testing with comment-based payload bypass revealed vulnerability in username parameter.\n- Severity: critical\n",
+      "expected_output": "\nVulnerability Assessment:\n- Status: CONFIRMED\n- Final Confidence: 0.95\n- Impact: critical\n- Reproducible: True\n- Recommended Action: Immediate remediation required\n",
+      "reasoning": "\nManual verification confirmed this vulnerability despite initial system confidence of 0.15. \nKey indicators: Time-based SQL injection in login form. Original automated scan missed this due to WAF protection. Manual testing with comment-based payload bypass revealed vulnerability in username parameter.\nImpact assessment: critical severity\nReproduction success: True\nThis case demonstrates the need for enhanced detection patterns for similar vulnerabilities.\n",
+      "confidence": 0.95,
+      "module": "business_logic"
+    },
+    {
+      "scenario": "Manual verification confirmed ssrf vulnerability",
+      "input_data": "\nTarget Analysis Request:\n- Vulnerability ID: MANUAL-SSRF-20260415-003\n- Initial Confidence: 0.05\n- Context: Blind SSRF in image processing endpoint. Automated scan missed this because the payload was encoded in base64 and required specific headers. Manual testing revealed server makes HTTP requests to arbitrary URLs.\n- Severity: high\n",
+      "expected_output": "\nVulnerability Assessment:\n- Status: CONFIRMED\n- Final Confidence: 0.9\n- Impact: high\n- Reproducible: True\n- Recommended Action: Immediate remediation required\n",
+      "reasoning": "\nManual verification confirmed this vulnerability despite initial system confidence of 0.05. \nKey indicators: Blind SSRF in image processing endpoint. Automated scan missed this because the payload was encoded in base64 and required specific headers. Manual testing revealed server makes HTTP requests to arbitrary URLs.\nImpact assessment: high severity\nReproduction success: True\nThis case demonstrates the need for enhanced detection patterns for similar vulnerabilities.\n",
+      "confidence": 0.9,
+      "module": "ssrf_misconfig"
+    }
+  ],
+  "metadata": {
+    "last_updated": "2026-04-15T04:23:00.000Z",
+    "total_examples": 0,
+    "session_id": "manual_verification_session",
+    "target": "manual_verification_target"
+  }
+}

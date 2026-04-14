@@ -1,0 +1,230 @@
+{
+  "session_id": "example_com_2024_04_15_14_30_22",
+  "target": "example.com",
+  "created_at": "2024-04-15T14:30:22.123456Z",
+  "completed_at": "2024-04-15T16:45:18.789012Z",
+  "total_duration": "2h 14m 56s",
+  "phases": {
+    "phase_1": {
+      "status": "completed",
+      "completed_at": "2024-04-15T14:45:33.456789Z",
+      "findings": [
+        {
+          "id": "subdomain_001",
+          "type": "new_subdomain",
+          "severity": "info",
+          "data": {
+            "subdomain": "api.example.com",
+            "ip_address": "192.168.1.100",
+            "ports": [80, 443, 8080],
+            "technologies": ["nginx", "nodejs", "express"],
+            "discovery_method": "subfinder"
+          }
+        },
+        {
+          "id": "subdomain_002",
+          "type": "new_subdomain", 
+          "severity": "info",
+          "data": {
+            "subdomain": "admin.example.com",
+            "ip_address": "192.168.1.101",
+            "ports": [80, 443],
+            "technologies": ["apache", "php", "mysql"],
+            "discovery_method": "crt.sh"
+          }
+        },
+        {
+          "id": "js_001",
+          "type": "js_file_change",
+          "severity": "medium",
+          "data": {
+            "file": "https://example.com/assets/app.js",
+            "old_hash": "a1b2c3d4e5f6",
+            "new_hash": "z9y8x7w6v5u4",
+            "change_type": "content_modified",
+            "size_diff": "+2.3KB",
+            "functions_added": ["processPayment", "validateToken"],
+            "sensitive_data": ["api_key", "webhook_url"]
+          }
+        }
+      ]
+    },
+    "phase_2": {
+      "status": "completed",
+      "completed_at": "2024-04-15T15:12:44.123456Z",
+      "findings": [
+        {
+          "id": "tech_001",
+          "type": "technology_stack",
+          "severity": "info",
+          "data": {
+            "frontend": ["react", "redux", "webpack"],
+            "backend": ["nodejs", "express", "mongodb"],
+            "infrastructure": ["aws", "cloudfront", "route53"],
+            "security": ["cloudflare", "letsencrypt"]
+          }
+        }
+      ]
+    },
+    "phase_3": {
+      "status": "completed",
+      "completed_at": "2024-04-15T15:28:17.456789Z",
+      "findings": []
+    },
+    "phase_4": {
+      "status": "completed",
+      "completed_at": "2024-04-15T15:45:02.789012Z",
+      "findings": [
+        {
+          "id": "vuln_001",
+          "type": "sql_injection",
+          "severity": "P1",
+          "confidence": 0.95,
+          "data": {
+            "endpoint": "https://api.example.com/users",
+            "method": "POST",
+            "parameter": "user_id",
+            "payload": "1' OR '1'='1",
+            "response": "200 OK",
+            "evidence": "Database returned all user records"
+          }
+        },
+        {
+          "id": "vuln_002",
+          "type": "xss_reflected",
+          "severity": "P2",
+          "confidence": 0.87,
+          "data": {
+            "endpoint": "https://example.com/search",
+            "method": "GET",
+            "parameter": "q",
+            "payload": "<script>alert(1)</script>",
+            "response": "200 OK",
+            "evidence": "Script executed in search results"
+          }
+        }
+      ]
+    },
+    "phase_5": {
+      "status": "completed",
+      "completed_at": "2024-04-15T16:05:33.123456Z",
+      "findings": []
+    },
+    "phase_6": {
+      "status": "completed",
+      "completed_at": "2024-04-15T16:18:49.456789Z",
+      "findings": [
+        {
+          "id": "report_001",
+          "type": "professional_report",
+          "severity": "P1",
+          "data": {
+            "vulnerability_id": "vuln_001",
+            "cvss_score": 9.8,
+            "curl_command": "curl -X POST 'https://api.example.com/users' -H 'Content-Type: application/json' -d '{\"user_id\":\"1' OR '1'='1\"}'",
+            "poc_generated": true
+          }
+        }
+      ]
+    },
+    "phase_7": {
+      "status": "completed",
+      "completed_at": "2024-04-15T16:32:15.789012Z",
+      "summary": {
+        "attack_chains_found": 1,
+        "chain_id": "chain_001",
+        "chain_components": ["sql_injection", "data_exfiltration"],
+        "confidence": 0.92
+      }
+    },
+    "phase_8": {
+      "status": "completed",
+      "completed_at": "2024-04-15T16:38:27.123456Z",
+      "findings": []
+    },
+    "phase_9": {
+      "status": "completed",
+      "completed_at": "2024-04-15T16:45:18.789012Z",
+      "findings": []
+    }
+  },
+  "consensus_analysis": [
+    {
+      "vulnerability_id": "vuln_001",
+      "severity": "P1",
+      "primary_model": "qwen3_coder_480b",
+      "secondary_model": "llama_3_3_70b",
+      "primary_confidence": 0.95,
+      "secondary_confidence": 0.91,
+      "consensus_score": 0.93,
+      "agreement": true,
+      "flaws_detected": [],
+      "final_determination": "pass",
+      "reasoning": "Both models agree on SQL injection vulnerability with high confidence. Exploit logic is sound and payload is validated.",
+      "debate_triggered": true
+    },
+    {
+      "vulnerability_id": "vuln_002",
+      "severity": "P2",
+      "primary_model": "qwen3_coder_480b",
+      "secondary_model": "llama_3_3_70b",
+      "primary_confidence": 0.87,
+      "secondary_confidence": 0.72,
+      "consensus_score": 0.795,
+      "agreement": false,
+      "flaws_detected": ["Potential false positive due to WAF filtering", "Limited impact scope"],
+      "final_determination": "review",
+      "reasoning": "Primary model confident in XSS, secondary model suggests WAF may prevent exploitation. Recommend manual verification.",
+      "debate_triggered": true
+    }
+  ],
+  "nuclei_templates": [
+    {
+      "template_id": "reconx-vuln_001",
+      "template_name": "example-com-sql-injection",
+      "template_path": "templates/custom/reconx-vuln_001.yaml",
+      "generated_at": "2024-04-15T16:20:33.456789Z",
+      "validation_status": "valid",
+      "validation_errors": [],
+      "template_info": {
+        "id": "reconx-vuln_001",
+        "name": "Example.com SQL Injection",
+        "severity": "critical",
+        "author": "ReconX-Elite"
+      }
+    },
+    {
+      "template_id": "reconx-vuln_002",
+      "template_name": "example-com-xss-reflected",
+      "template_path": "templates/custom/reconx-vuln_002.yaml",
+      "generated_at": "2024-04-15T16:22:15.789012Z",
+      "validation_status": "valid",
+      "validation_errors": [],
+      "template_info": {
+        "id": "reconx-vuln_002",
+        "name": "Example.com Reflected XSS",
+        "severity": "high",
+        "author": "ReconX-Elite"
+      }
+    }
+  ],
+  "watchdog_deltas": {
+    "new_subdomains": ["api.example.com", "admin.example.com"],
+    "js_changes": ["https://example.com/assets/app.js"],
+    "ssl_changes": [],
+    "header_changes": [],
+    "technology_changes": []
+  },
+  "summary": {
+    "total_vulnerabilities": 2,
+    "critical_count": 1,
+    "high_count": 1,
+    "medium_count": 0,
+    "low_count": 0,
+    "new_subdomains": 2,
+    "js_changes": 1,
+    "templates_generated": 2,
+    "consensus_debates": 2,
+    "exploit_chains": 1
+  }
+}
