@@ -42,6 +42,7 @@ celery_app.conf.update(
     worker_prefetch_multiplier=1,
     task_soft_time_limit=1200,
     task_time_limit=1500,
+    broker_connection_retry_on_startup=True,
     beat_schedule={
         "check-scheduled-scans": {
             "task": "app.tasks.scan_tasks.check_scheduled_scans",

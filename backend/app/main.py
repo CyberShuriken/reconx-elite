@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import HTMLResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -17,7 +18,7 @@ from slowapi.middleware import SlowAPIMiddleware
 
 from app import models  # noqa: F401
 from app.core.config import settings
-from app.core.database import db_timeout_handler, SATimeoutError
+from app.core.database import db_timeout_handler, SATimeoutError, init_engine
 from app.core.exception_handlers import http_exception_handler, unhandled_exception_handler
 from app.core.metrics import http_requests_total, http_request_duration_seconds
 from app.core.middleware import AuthGuardMiddleware, RequestLoggingMiddleware
@@ -31,7 +32,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         response.headers["X-XSS-Protection"] = "0"
-        response.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self' http: https: ws: wss:; img-src 'self' data: https:; script-src 'self'; style-src 'self' 'unsafe-inline'"
+        response.headers["Content-Security-Policy"] = "default-src 'self'; connect-src 'self'; img-src 'self' data: https:; script-src 'self'; style-src 'self' 'unsafe-inline'"
         if settings.https_behind_proxy:
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         return response
@@ -53,6 +54,8 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings.validate_runtime_or_raise()
+    # Initialize database engine at startup to prevent race conditions
+    init_engine()
     # Startup: Start Redis subscriber
     from app.services.websocket import redis_subscriber
     subscriber_task = asyncio.create_task(redis_subscriber.start())
@@ -77,6 +80,10 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Accept"],
 )
+if settings.https_behind_proxy:
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=["*"])
+    from fastapi.middleware import HTTPSRedirectMiddleware
+    app.add_middleware(HTTPSRedirectMiddleware)
 app.add_middleware(SlowAPIMiddleware)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestLoggingMiddleware)

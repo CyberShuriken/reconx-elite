@@ -1,6 +1,8 @@
 """7-Phase Orchestrator - Sequential state machine for autonomous vulnerability research."""
 
 import asyncio
+import os
+import socket
 from typing import Any
 
 from backend.ai_router import AIRouter
@@ -13,6 +15,11 @@ from backend.phase_4_5_tactical_strikes import AdvancedInjectionOrchestrator, Ta
 from backend.phase_6_poc_generator import POCGenerator
 from backend.phase_7_markdown_reporter import MarkdownReportGenerator
 from backend.session_manifest import SessionManifest
+
+# Configurable sampling limits
+SUBDOMAIN_SAMPLE_LIMIT = int(os.getenv('SUBDOMAIN_SAMPLE_LIMIT', '5'))
+LIVE_HOST_SAMPLE_LIMIT = int(os.getenv('LIVE_HOST_SAMPLE_LIMIT', '10'))
+POC_GENERATION_LIMIT = int(os.getenv('POC_GENERATION_LIMIT', '5'))
 from backend.tech_profiler import TechProfiler
 from backend.tool_runner import ToolRunner
 from backend.websocket_manager import WebSocketManager
@@ -77,7 +84,16 @@ class SevenPhaseOrchestrator:
             # Non-standard port scanning
             non_std_ports = ['8080', '8443', '9000', '5000', '3000']
             open_ports = {}
-            for subdomain in subdomains[:5]:  # Sample for speed
+            
+            # Apply sampling if needed
+            if len(subdomains) > SUBDOMAIN_SAMPLE_LIMIT:
+                await self.ws_manager.send_log(
+                    self.session_id, 'info',
+                    f'Sampling {SUBDOMAIN_SAMPLE_LIMIT} subdomains from {len(subdomains)} total for port scanning',
+                    phase='phase_1'
+                )
+            
+            for subdomain in subdomains[:SUBDOMAIN_SAMPLE_LIMIT]:
                 for port in non_std_ports:
                     if await self._check_port(subdomain, port):
                         if subdomain not in open_ports:
@@ -108,8 +124,17 @@ class SevenPhaseOrchestrator:
                 phase='phase_1'
             )
         except Exception as e:
-            await self.ws_manager.send_log(self.session_id, 'error', f'Phase 1 failed: {str(e)}', phase='phase_1')
-            self.manifest.update_phase('phase_1', 'failed', [{'error': str(e)}])
+            # Determine if this is a critical error that should halt the pipeline
+            critical_errors = (ConnectionError, TimeoutError, OSError)
+            if isinstance(e, critical_errors):
+                # Critical error - halt pipeline
+                await self.ws_manager.send_log(self.session_id, 'error', f'Phase 1 critical failure: {str(e)}', phase='phase_1')
+                self.manifest.update_phase('phase_1', 'failed', [{'error': str(e), 'critical': True}])
+                raise  # Re-raise to halt pipeline
+            else:
+                # Non-critical error - log but continue
+                await self.ws_manager.send_log(self.session_id, 'warning', f'Phase 1 non-critical error: {str(e)}', phase='phase_1')
+                self.manifest.update_phase('phase_1', 'completed_with_warnings', [{'error': str(e), 'critical': False}])
 
     async def phase_2_context_aware_profiling(self) -> None:
         """Phase 2: Context-Aware Tech Profiling."""
@@ -123,7 +148,16 @@ class SevenPhaseOrchestrator:
             
             # Profile each host
             tech_stack = {}
-            for host in live_hosts[:10]:  # Limit for speed
+            
+            # Apply sampling if needed
+            if len(live_hosts) > LIVE_HOST_SAMPLE_LIMIT:
+                await self.ws_manager.send_log(
+                    self.session_id, 'info',
+                    f'Sampling {LIVE_HOST_SAMPLE_LIMIT} hosts from {len(live_hosts)} total for tech profiling',
+                    phase='phase_2'
+                )
+            
+            for host in live_hosts[:LIVE_HOST_SAMPLE_LIMIT]:
                 profile = await self.tech_profiler.profile_target(host, {}, [])
                 if profile:
                     tech_stack.update(profile)
@@ -151,8 +185,17 @@ class SevenPhaseOrchestrator:
                 phase='phase_2'
             )
         except Exception as e:
-            await self.ws_manager.send_log(self.session_id, 'error', f'Phase 2 failed: {str(e)}', phase='phase_2')
-            self.manifest.update_phase('phase_2', 'failed', [{'error': str(e)}])
+            # Determine if this is a critical error that should halt the pipeline
+            critical_errors = (ConnectionError, TimeoutError, OSError)
+            if isinstance(e, critical_errors):
+                # Critical error - halt pipeline
+                await self.ws_manager.send_log(self.session_id, 'error', f'Phase 2 critical failure: {str(e)}', phase='phase_2')
+                self.manifest.update_phase('phase_2', 'failed', [{'error': str(e), 'critical': True}])
+                raise  # Re-raise to halt pipeline
+            else:
+                # Non-critical error - log but continue
+                await self.ws_manager.send_log(self.session_id, 'warning', f'Phase 2 non-critical error: {str(e)}', phase='phase_2')
+                self.manifest.update_phase('phase_2', 'completed_with_warnings', [{'error': str(e), 'critical': False}])
 
     async def phase_3_authenticated_analysis(self) -> None:
         """Phase 3: Authenticated State Analysis (IDOR detection)."""
@@ -186,8 +229,17 @@ class SevenPhaseOrchestrator:
                 phase='phase_3'
             )
         except Exception as e:
-            await self.ws_manager.send_log(self.session_id, 'error', f'Phase 3 failed: {str(e)}', phase='phase_3')
-            self.manifest.update_phase('phase_3', 'failed', [{'error': str(e)}])
+            # Determine if this is a critical error that should halt the pipeline
+            critical_errors = (ConnectionError, TimeoutError, OSError)
+            if isinstance(e, critical_errors):
+                # Critical error - halt pipeline
+                await self.ws_manager.send_log(self.session_id, 'error', f'Phase 3 critical failure: {str(e)}', phase='phase_3')
+                self.manifest.update_phase('phase_3', 'failed', [{'error': str(e), 'critical': True}])
+                raise  # Re-raise to halt pipeline
+            else:
+                # Non-critical error - log but continue
+                await self.ws_manager.send_log(self.session_id, 'warning', f'Phase 3 non-critical error: {str(e)}', phase='phase_3')
+                self.manifest.update_phase('phase_3', 'completed_with_warnings', [{'error': str(e), 'critical': False}])
 
     async def phase_4_vulnerability_strikes(self) -> None:
         """Phase 4: Vulnerability-Specific Tactical Strikes."""
@@ -219,8 +271,17 @@ class SevenPhaseOrchestrator:
                 phase='phase_4'
             )
         except Exception as e:
-            await self.ws_manager.send_log(self.session_id, 'error', f'Phase 4 failed: {str(e)}', phase='phase_4')
-            self.manifest.update_phase('phase_4', 'failed', [{'error': str(e)}])
+            # Determine if this is a critical error that should halt the pipeline
+            critical_errors = (ConnectionError, TimeoutError, OSError)
+            if isinstance(e, critical_errors):
+                # Critical error - halt pipeline
+                await self.ws_manager.send_log(self.session_id, 'error', f'Phase 4 critical failure: {str(e)}', phase='phase_4')
+                self.manifest.update_phase('phase_4', 'failed', [{'error': str(e), 'critical': True}])
+                raise  # Re-raise to halt pipeline
+            else:
+                # Non-critical error - log but continue
+                await self.ws_manager.send_log(self.session_id, 'warning', f'Phase 4 non-critical error: {str(e)}', phase='phase_4')
+                self.manifest.update_phase('phase_4', 'completed_with_warnings', [{'error': str(e), 'critical': False}])
 
     async def phase_5_advanced_injection(self) -> None:
         """Phase 5: Advanced Injection Testing (GraphQL & Prompt)."""
@@ -258,8 +319,17 @@ class SevenPhaseOrchestrator:
                 phase='phase_5'
             )
         except Exception as e:
-            await self.ws_manager.send_log(self.session_id, 'error', f'Phase 5 failed: {str(e)}', phase='phase_5')
-            self.manifest.update_phase('phase_5', 'failed', [{'error': str(e)}])
+            # Determine if this is a critical error that should halt the pipeline
+            critical_errors = (ConnectionError, TimeoutError, OSError)
+            if isinstance(e, critical_errors):
+                # Critical error - halt pipeline
+                await self.ws_manager.send_log(self.session_id, 'error', f'Phase 5 critical failure: {str(e)}', phase='phase_5')
+                self.manifest.update_phase('phase_5', 'failed', [{'error': str(e), 'critical': True}])
+                raise  # Re-raise to halt pipeline
+            else:
+                # Non-critical error - log but continue
+                await self.ws_manager.send_log(self.session_id, 'warning', f'Phase 5 non-critical error: {str(e)}', phase='phase_5')
+                self.manifest.update_phase('phase_5', 'completed_with_warnings', [{'error': str(e), 'critical': False}])
 
     async def phase_6_poc_generation(self) -> None:
         """Phase 6: Automated PoC Generation."""
@@ -269,7 +339,15 @@ class SevenPhaseOrchestrator:
             findings = self.manifest.data['context_tree'].get('vulnerability_findings', [])
             pocs = []
             
-            for finding in findings[:5]:  # Generate for first 5 findings
+            # Apply sampling if needed
+            if len(findings) > POC_GENERATION_LIMIT:
+                await self.ws_manager.send_log(
+                    self.session_id, 'info',
+                    f'Generating PoCs for {POC_GENERATION_LIMIT} findings from {len(findings)} total',
+                    phase='phase_6'
+                )
+            
+            for finding in findings[:POC_GENERATION_LIMIT]:
                 poc = await self.poc_generator.generate_poc(
                     finding.get('type', 'generic'),
                     finding.get('endpoint', '/'),
@@ -288,8 +366,17 @@ class SevenPhaseOrchestrator:
                 phase='phase_6'
             )
         except Exception as e:
-            await self.ws_manager.send_log(self.session_id, 'error', f'Phase 6 failed: {str(e)}', phase='phase_6')
-            self.manifest.update_phase('phase_6', 'failed', [{'error': str(e)}])
+            # Determine if this is a critical error that should halt the pipeline
+            critical_errors = (ConnectionError, TimeoutError, OSError)
+            if isinstance(e, critical_errors):
+                # Critical error - halt pipeline
+                await self.ws_manager.send_log(self.session_id, 'error', f'Phase 6 critical failure: {str(e)}', phase='phase_6')
+                self.manifest.update_phase('phase_6', 'failed', [{'error': str(e), 'critical': True}])
+                raise  # Re-raise to halt pipeline
+            else:
+                # Non-critical error - log but continue
+                await self.ws_manager.send_log(self.session_id, 'warning', f'Phase 6 non-critical error: {str(e)}', phase='phase_6')
+                self.manifest.update_phase('phase_6', 'completed_with_warnings', [{'error': str(e), 'critical': False}])
 
     async def phase_7_reporting(self) -> None:
         """Phase 7: Adaptive Reporting."""
@@ -317,13 +404,26 @@ class SevenPhaseOrchestrator:
                 phase='phase_7'
             )
         except Exception as e:
-            await self.ws_manager.send_log(self.session_id, 'error', f'Phase 7 failed: {str(e)}', phase='phase_7')
-            self.manifest.update_phase('phase_7', 'failed', [{'error': str(e)}])
+            # Phase 7 is report generation - always non-critical
+            await self.ws_manager.send_log(self.session_id, 'warning', f'Phase 7 report generation error: {str(e)}', phase='phase_7')
+            self.manifest.update_phase('phase_7', 'completed_with_warnings', [{'error': str(e), 'critical': False}])
 
     async def _check_port(self, host: str, port: str) -> bool:
-        """Check if a port is open on a host."""
+        """Check if a port is open on a host using socket connection."""
         try:
-            # This would use actual port scanning tool
-            return False  # Placeholder
-        except Exception:
+            port_int = int(port)
+            # Use asyncio to avoid blocking the event loop
+            loop = asyncio.get_event_loop()
+            
+            def check_connection():
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(3)  # 3 second timeout
+                try:
+                    result = sock.connect_ex((host, port_int))
+                    return result == 0  # 0 means connection successful
+                finally:
+                    sock.close()
+            
+            return await loop.run_in_executor(None, check_connection)
+        except (ValueError, Exception):
             return False

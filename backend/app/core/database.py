@@ -6,12 +6,13 @@ from fastapi.responses import JSONResponse
 
 from app.core.config import settings
 
-# Lazy engine creation to avoid connection issues during import
+# Engine and session maker - initialized at application startup
 _engine = None
 _SessionLocal = None
 
-def get_engine():
-    global _engine
+def init_engine():
+    """Initialize the database engine and session maker at application startup."""
+    global _engine, _SessionLocal
     if _engine is None:
         _engine = create_engine(
             settings.database_url,
@@ -20,8 +21,17 @@ def get_engine():
             max_overflow=settings.db_max_overflow,
             pool_recycle=settings.db_pool_recycle,
             pool_timeout=settings.db_pool_timeout,
-            echo=False
+            echo=False,
+            connect_args={
+                "connect_timeout": 10,
+            }
         )
+        _SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
+
+def get_engine():
+    """Get the initialized database engine."""
+    if _engine is None:
+        raise RuntimeError("Database engine not initialized. Call init_engine() at startup.")
     return _engine
 
 
@@ -40,9 +50,9 @@ async def db_timeout_handler(request: Request, exc: SATimeoutError) -> JSONRespo
     )
 
 def get_sessionmaker():
-    global _SessionLocal
+    """Get the initialized session maker."""
     if _SessionLocal is None:
-        _SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=get_engine())
+        raise RuntimeError("Session maker not initialized. Call init_engine() at startup.")
     return _SessionLocal
 
 Base = declarative_base()

@@ -2,15 +2,16 @@ import re
 from datetime import datetime
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
-DOMAIN_PATTERN = re.compile(r"^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+DOMAIN_PATTERN = re.compile(r"^(?!-)[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*\.[a-z]{2,63}$")
 
 
 class ScanRequest(BaseModel):
     target: str
 
-    @validator('target')
+    @field_validator('target')
+    @classmethod
     def normalize_target(cls, value: str) -> str:
         value = value.strip().lower()
         value = re.sub(r'^https?://', '', value)

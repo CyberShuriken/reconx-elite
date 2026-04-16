@@ -20,6 +20,11 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def rate_limit_key(request: Request) -> str:
     if hasattr(request.state, "rate_limit_key") and request.state.rate_limit_key:
         return request.state.rate_limit_key
+    # Check for X-Forwarded-For header when behind reverse proxy
+    forwarded_for = request.headers.get("X-Forwarded-For")
+    if forwarded_for:
+        # Take the first IP from the chain (original client)
+        return forwarded_for.split(",")[0].strip()
     return get_remote_address(request)
 
 
