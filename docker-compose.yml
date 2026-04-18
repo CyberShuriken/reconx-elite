@@ -48,16 +48,23 @@ services:
       dockerfile: backend/Dockerfile
     env_file:
       - ./.env
+    environment:
+      SERVICE_MODE: migrate
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: ["sh", "-c", "alembic upgrade head"]
     restart: "no"
     user: "1001:1001"
     cap_drop:
       - ALL
+    healthcheck:
+      test: ["CMD", "test", "-f", "/app/alembic.ini"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
     logging:
       driver: "json-file"
       options:
@@ -68,17 +75,6 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    command:
-      [
-        "uvicorn",
-        "app.main:app",
-        "--host",
-        "0.0.0.0",
-        "--port",
-        "8000",
-        "--timeout-graceful-shutdown",
-        "30",
-      ]
     env_file:
       - ./.env
     depends_on:
@@ -107,6 +103,7 @@ services:
       interval: 15s
       timeout: 5s
       retries: 5
+      start_period: 10s
     logging:
       driver: "json-file"
       options:
@@ -119,6 +116,8 @@ services:
       dockerfile: ${WORKER_DOCKERFILE:-worker/Dockerfile}
     env_file:
       - ./.env
+    environment:
+      SERVICE_MODE: worker
     depends_on:
       postgres:
         condition: service_healthy
@@ -154,7 +153,7 @@ services:
       backend:
         condition: service_healthy
     ports:
-      - "5173:8080" # Host:5173 → Container:8080 (nginx)
+      - "5173:8080"
     restart: unless-stopped
     cap_drop:
       - ALL
@@ -189,6 +188,16 @@ services:
     command: >
       sh -c "while true; do sh /backup.sh; sleep ${BACKUP_INTERVAL_SECONDS:-86400}; done"
     restart: unless-stopped
+    cap_drop:
+      - ALL
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
     healthcheck:
       test:
         [

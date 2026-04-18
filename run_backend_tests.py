@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 """Run backend unit tests with cwd=backend (safe from repo root)."""
-from __future__ import annotations
 
 import subprocess
 import sys
@@ -30,6 +29,12 @@ def main() -> int:
         if proc.returncode != 0:
             print(f"Test execution failed with return code {proc.returncode}.", file=sys.stderr)
         return proc.returncode
+    except subprocess.TimeoutExpired:
+        print("Test execution timed out after 300 seconds", file=sys.stderr)
+        return 1
+    except subprocess.SubprocessError as e:
+        print(f"Test execution failed due to subprocess error: {e}", file=sys.stderr)
+        return 1
     except FileNotFoundError:
         # Fallback to unittest if pytest not available
         print("Note: pytest not found, falling back to unittest", file=sys.stderr)
@@ -45,12 +50,9 @@ def main() -> int:
         except subprocess.SubprocessError as e:
             print(f"Test execution failed due to subprocess error: {e}", file=sys.stderr)
             return 1
-    except subprocess.TimeoutExpired:
-        print("Test execution timed out after 300 seconds", file=sys.stderr)
-        return 1
-    except subprocess.SubprocessError as e:
-        print(f"Test execution failed due to subprocess error: {e}", file=sys.stderr)
-        return 1
+        except Exception as e:
+            print(f"Test execution failed due to unexpected error: {e}", file=sys.stderr)
+            return 1
     except Exception as e:
         print(f"Test execution failed due to unexpected error: {e}", file=sys.stderr)
         return 1

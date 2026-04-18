@@ -86,8 +86,6 @@ class PrometheusMiddleware(BaseHTTPMiddleware):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     settings.validate_runtime_or_raise()
-    # Initialize database engine at startup to prevent race conditions
-    init_engine()
     # Startup: Start Redis subscriber
     from app.services.websocket import redis_subscriber
 
@@ -101,6 +99,9 @@ async def lifespan(app: FastAPI):
     except asyncio.CancelledError:
         pass
 
+
+# Initialize database engine early to prevent race conditions
+init_engine()
 
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
 allowed_origins = settings.cors_allowed_origins_list or ["http://localhost:5173"]

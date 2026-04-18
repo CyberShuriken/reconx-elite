@@ -9,14 +9,8 @@ ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
 COPY frontend/package*.json ./frontend/
 
 WORKDIR /app/frontend
-RUN npm ci
-
-# Copy source
-COPY frontend ./
-
-# Build
-RUN npm run build && \
-    test -d /app/frontend/dist || (echo "Build failed"; exit 1)
+RUN npm ci && npm run build && \
+    test -d dist || (echo "Build failed: dist directory not found"; exit 1)
 
 # Runtime stage
 FROM nginx:1.27-alpine

@@ -1,12 +1,72 @@
-.git
+# Build and cache optimization
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Version control
+.git/
 .gitignore
+.github/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
 .env
-node_modules
-frontend/node_modules
-backend/__pycache__
-backend/app/__pycache__
-backend/tests/__pycache__
-worker/__pycache__
-**/__pycache__
-**/*.pyc
-docker-data
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+yarn.lock
+
+# Python virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# Temporary files
+*.tmp
+*.log
+.tmp/
+tmp/
+
+# Docker and compose
+docker-compose*.yml
+Dockerfile
+.dockerignore
+.docker/
+
+# Documentation and CI
+README.md
+docs/
+.github/
+.gitlab-ci.yml
+Makefile
+
+# Monitoring and test artifacts
+coverage/
+.coverage*
+*.lcov
+
+# Local development
+.env.local
+.env*.local
+local/
