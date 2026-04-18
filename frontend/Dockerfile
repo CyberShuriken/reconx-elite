@@ -21,18 +21,18 @@ RUN npm run build && \
 # Runtime stage
 FROM nginx:1.27-alpine
 
-# Security: create non-root user
+# Security: create non-root user with writable directories
 RUN addgroup -S appuser && adduser -S appuser -G appuser && \
-    mkdir -p /var/cache/nginx /var/log/nginx && \
-    chown -R appuser:appuser /var/cache/nginx /var/log/nginx /etc/nginx/conf.d
+    mkdir -p /var/cache/nginx /var/log/nginx /var/run/nginx && \
+    chown -R appuser:appuser /var/cache/nginx /var/log/nginx /var/run/nginx /etc/nginx/conf.d
+
+# Remove the default nginx user directive and set pid to writable location
+RUN sed -i '/^user nginx;/d' /etc/nginx/nginx.conf && \
+    sed -i 's|^pid /var/run/nginx\.pid;|pid /var/run/nginx/nginx.pid;|' /etc/nginx/nginx.conf
 
 # Copy nginx config
 COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 RUN nginx -t  # Validate nginx configuration syntax
-
-# Optimize nginx — only uncomment gzip if not already enabled
-RUN grep -q "# gzip" /etc/nginx/nginx.conf && \
-    sed -i 's/# gzip/gzip/' /etc/nginx/nginx.conf || true
 
 # Copy built app
 COPY --from=build --chown=appuser:appuser /app/frontend/dist /usr/share/nginx/html
