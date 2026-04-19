@@ -22,11 +22,15 @@ FROM nginx:1.27-alpine
 # Security: create non-root user with writable directories
 RUN addgroup -S appuser && adduser -S appuser -G appuser && \
     mkdir -p /var/cache/nginx /var/log/nginx /var/run/nginx && \
-    chown -R appuser:appuser /var/cache/nginx /var/log/nginx /var/run/nginx /etc/nginx/conf.d
+    chown -R appuser:appuser /var/cache/nginx /var/log/nginx /var/run/nginx /etc/nginx/conf.d && \
+    touch /var/run/nginx/nginx.pid && \
+    chown appuser:appuser /var/run/nginx/nginx.pid
 
 # Remove the default nginx user directive and set pid to writable location
 RUN sed -i '/^user nginx;/d' /etc/nginx/nginx.conf && \
-    sed -i 's|^pid /var/run/nginx\.pid;|pid /var/run/nginx/nginx.pid;|' /etc/nginx/nginx.conf
+    sed -i 's|pid        /run/nginx.pid;|pid /var/run/nginx/nginx.pid;|' /etc/nginx/nginx.conf && \
+    mkdir -p /var/run/nginx && \
+    chown -R appuser:appuser /var/run/nginx
 
 # Copy nginx config first, before validation
 COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
