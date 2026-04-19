@@ -1,10 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
 import * as client from "../api/client";
 import { AuthProvider, useAuth } from "./AuthContext";
 
-vi.mock("../utils/jwt", () => ({
+jest.mock("../utils/jwt", () => ({
   decodeJwt: () => ({ role: "user", sub: "42" }),
 }));
 
@@ -27,7 +26,7 @@ function Harness() {
 describe("AuthProvider", () => {
   beforeEach(() => {
     localStorage.clear();
-    vi.spyOn(client.api, "post").mockResolvedValue({
+    jest.spyOn(client.api, "post").mockResolvedValue({
       data: { access_token: "newa", refresh_token: "newr" },
     });
   });

@@ -1,4 +1,3 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import MockAdapter from "axios-mock-adapter";
 
 import { api, formatApiErrorDetail, setAuthHandlers } from "./client";
@@ -31,7 +30,7 @@ describe("api 401 refresh interceptor", () => {
     setAuthHandlers({
       getTokens: () => ({ accessToken: "old", refreshToken: "r" }),
       refreshTokens: async () => ({ accessToken: "new", refreshToken: "r2" }),
-      logout: vi.fn(),
+      logout: jest.fn(),
     });
   });
 

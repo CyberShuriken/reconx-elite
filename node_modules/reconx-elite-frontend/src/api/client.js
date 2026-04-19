@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const backendBaseUrl = (import.meta.env.VITE_API_BASE_URL || "http://localhost:8000").replace(
+const backendBaseUrl = (process.env.VITE_API_BASE_URL || "http://localhost:8000").replace(
   /\/+$/,
   "",
 );
