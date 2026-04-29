@@ -1,8 +1,8 @@
 """Authentication and Session vulnerability analyzer - Enhanced JWT testing."""
 
-import logging
 import base64
 import json
+import logging
 from typing import Any
 
 import httpx

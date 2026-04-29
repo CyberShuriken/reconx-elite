@@ -1,3 +1,4 @@
+from app.core.database import Base
 from sqlalchemy import (
     JSON,
     Boolean,
@@ -10,8 +11,6 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.orm import relationship
-
-from app.core.database import Base
 
 
 class Notification(Base):

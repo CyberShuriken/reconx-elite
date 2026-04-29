@@ -1,16 +1,15 @@
+from app.core.database import Base
 from sqlalchemy import (
     JSON,
+    Boolean,
     Column,
     DateTime,
     ForeignKey,
     Integer,
     String,
-    Boolean,
     func,
 )
 from sqlalchemy.orm import relationship
-
-from app.core.database import Base
 
 
 class ScheduledScan(Base):

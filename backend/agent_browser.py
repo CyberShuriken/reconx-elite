@@ -8,16 +8,16 @@ import json
 import logging
 import os
 import re
-from typing import Any, Dict, List, Optional, Tuple
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 from ai_router import AIRouter
 from tool_runner import ToolRunner
 from websocket_manager import WebSocketManager
 
 try:
-    from playwright.async_api import async_playwright, Browser, BrowserContext, Page
+    from playwright.async_api import Browser, BrowserContext, Page, async_playwright
 
     PLAYWRIGHT_AVAILABLE = True
 except ImportError:

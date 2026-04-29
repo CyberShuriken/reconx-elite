@@ -7,9 +7,9 @@ import asyncio
 import json
 import logging
 import time
-from typing import Any, Dict, List, Optional, Tuple
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 from ai_router import AIRouter
 from logic_simulator import LogicSimulator

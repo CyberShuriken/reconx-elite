@@ -6,13 +6,13 @@ This module processes manual verification data and integrates it into the learni
 to improve AI detection accuracy and consensus thresholds.
 """
 
-import json
 import asyncio
+import json
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, asdict
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 class VerificationStatus(Enum):

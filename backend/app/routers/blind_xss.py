@@ -2,12 +2,11 @@
 
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Request, Response
-from sqlalchemy.orm import Session
-
 from app.core.database import get_db
 from app.models.blind_xss_hit import BlindXssHit
 from app.services.blind_xss_service import BlindXssService
+from fastapi import APIRouter, Depends, Request, Response
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/xss", tags=["blind-xss"])
 

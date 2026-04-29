@@ -1,18 +1,16 @@
 """API endpoints for system validation and health monitoring."""
 
 from datetime import datetime, timezone
-
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from typing import Dict, Optional
 
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import get_current_user, require_admin
 from app.models.user import User
+from app.services.ai_service import get_model_status_snapshot, verify_all_models
 from app.services.system_validator import system_validator
-
-from app.services.ai_service import verify_all_models, get_model_status_snapshot
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/system", tags=["system-validation"])
 
@@ -150,12 +148,12 @@ async def test_ai_service(db: Session = Depends(get_db), current_user: User = De
     """Test AI service functionality (admin only)."""
 
     try:
+        from app.core.config import settings
         from app.services.ai_service import (
             _check_rate_limit,
             _is_ai_enabled,
             analyze_scan_data,
         )
-        from app.core.config import settings
 
         # Test rate limiting
         rate_limit_ok = _check_rate_limit()
@@ -215,7 +213,7 @@ async def get_system_metrics(db: Session = Depends(get_db), current_user: User =
     """Get system metrics (admin only)."""
 
     try:
-        from app.models import User, Target, Scan, Vulnerability
+        from app.models import Scan, Target, User, Vulnerability
 
         # Get basic metrics
         metrics = {

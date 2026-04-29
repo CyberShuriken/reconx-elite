@@ -4,10 +4,10 @@ import logging
 from datetime import datetime, timezone
 
 from app.core.database import get_sessionmaker
-from app.tasks.celery_app import celery_app
-from app.models.vulnerability import Vulnerability
 from app.models.exploit_validation import ExploitValidation
+from app.models.vulnerability import Vulnerability
 from app.services.intelligence_learning import learning_service
+from app.tasks.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
 

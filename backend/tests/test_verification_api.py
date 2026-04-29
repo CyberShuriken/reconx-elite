@@ -6,9 +6,6 @@ from unittest.mock import patch
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from fastapi import HTTPException
-from fastapi.testclient import TestClient
-
 from app.core.config import settings
 from app.core.deps import get_current_user, require_admin
 from app.main import app
@@ -17,6 +14,8 @@ from app.schemas.verification import (
     JavaScriptAnalysisState,
     VerificationFinding,
 )
+from fastapi import HTTPException
+from fastapi.testclient import TestClient
 
 
 class VerificationApiTests(unittest.TestCase):

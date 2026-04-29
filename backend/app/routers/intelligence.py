@@ -1,15 +1,15 @@
 """API endpoints for intelligence learning system."""
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
 from typing import Dict, List, Optional
 
 from app.core.database import get_db
 from app.core.deps import get_current_user
+from app.models.exploit_validation import ExploitValidation
 from app.models.user import User
 from app.models.vulnerability import Vulnerability
-from app.models.exploit_validation import ExploitValidation
 from app.services.intelligence_learning import learning_service
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/intelligence", tags=["intelligence-learning"])
 
@@ -215,9 +215,9 @@ async def get_learning_statistics(db: Session = Depends(get_db), current_user: U
     """Get learning statistics for the current user."""
 
     from app.models.learning_models import (
+        HighValueEndpoint,
         LearningPattern,
         SuccessfulPayload,
-        HighValueEndpoint,
     )
 
     # Pattern statistics

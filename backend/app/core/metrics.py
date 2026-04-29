@@ -1,5 +1,5 @@
 try:
-    from prometheus_client import Counter, Histogram, Gauge
+    from prometheus_client import Counter, Gauge, Histogram
 except ModuleNotFoundError:  # pragma: no cover - local fallback
 
     class _NoopMetric:

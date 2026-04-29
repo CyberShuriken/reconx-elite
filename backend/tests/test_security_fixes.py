@@ -3,21 +3,21 @@ Security regression tests for ReconX Elite platform.
 Tests all security fixes implemented during the audit.
 """
 
-import sys
-import os
-import unittest
-from unittest.mock import Mock, patch, MagicMock
-from datetime import datetime, timezone, timedelta
 import json
+import os
+import sys
+import unittest
+from datetime import datetime, timedelta, timezone
+from unittest.mock import MagicMock, Mock, patch
 
 # Add backend to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from app.core.security import decode_token, create_access_token, create_refresh_token
-from app.core.database import get_engine, get_sessionmaker
-from app.services.intelligence import normalize_endpoint_url, normalize_and_dedupe_urls
-from app.core.middleware import AuthGuardMiddleware
 from app.core.config import settings
+from app.core.database import get_engine, get_sessionmaker
+from app.core.middleware import AuthGuardMiddleware
+from app.core.security import create_access_token, create_refresh_token, decode_token
+from app.services.intelligence import normalize_and_dedupe_urls, normalize_endpoint_url
 
 
 class TestJWTSecurity(unittest.TestCase):
@@ -210,7 +210,7 @@ class TestInputValidation(unittest.TestCase):
 
     def test_email_validation_in_auth(self):
         """Test email validation in authentication."""
-        from app.schemas.auth import RegisterRequest, LoginRequest
+        from app.schemas.auth import LoginRequest, RegisterRequest
 
         # Test invalid emails
         invalid_emails = [

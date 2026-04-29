@@ -7,14 +7,14 @@ import asyncio
 import json
 import logging
 import re
-from typing import Any, Dict, List, Optional, Set
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
 
 from ai_router import AIRouter
-from tech_profiler import TechProfiler
 from phase_2_api_mapper import APIMapper
 from phase_2_cve_database import CVEDatabase
+from tech_profiler import TechProfiler
 from tool_runner import ToolRunner
 from websocket_manager import WebSocketManager
 

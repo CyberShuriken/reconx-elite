@@ -118,8 +118,7 @@ class APIMapper:
 
     async def _attempt_graphql_introspection(self, graphql_endpoint: str) -> dict[str, Any] | None:
         """Try to fetch GraphQL schema via introspection."""
-        introspection_query = {
-            "query": """
+        introspection_query = {"query": """
             query {
               __schema {
                 types {
@@ -130,8 +129,7 @@ class APIMapper:
                 mutationType { name }
               }
             }
-            """
-        }
+            """}
 
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:

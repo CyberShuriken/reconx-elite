@@ -10,10 +10,8 @@ from dataclasses import dataclass
 from urllib.parse import parse_qsl, urljoin, urlparse
 from urllib.request import Request, urlopen
 
-import logging
-
 from app.core.config import settings
-from app.services.ai_service import call_model, ORCHESTRATOR_SYSTEM_PROMPT
+from app.services.ai_service import ORCHESTRATOR_SYSTEM_PROMPT, call_model
 
 logger = logging.getLogger(__name__)
 

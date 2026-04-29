@@ -1,8 +1,9 @@
 """Configuration validation and settings for ReconX Elite."""
 
-from typing import Optional, List
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from typing import List, Optional
+
 from pydantic import Field, validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):

@@ -1,17 +1,16 @@
+from app.core.database import Base
 from sqlalchemy import (
     Boolean,
     Column,
     DateTime,
     ForeignKey,
     Integer,
+    String,
     Text,
     UniqueConstraint,
-    String,
     func,
 )
 from sqlalchemy.orm import relationship
-
-from app.core.database import Base
 
 
 class Target(Base):

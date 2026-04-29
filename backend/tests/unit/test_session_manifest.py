@@ -1,7 +1,8 @@
 """Unit tests for Session Manifest."""
 
-import pytest
 from datetime import datetime
+
+import pytest
 
 
 class TestSessionManifest:

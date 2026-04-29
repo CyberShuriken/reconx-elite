@@ -7,8 +7,8 @@ from typing import Any
 
 import httpx
 
-from backend.tool_runner import ToolRunner
 from backend.recon.context_tree import ContextTree
+from backend.tool_runner import ToolRunner
 
 logger = logging.getLogger(__name__)
 
@@ -469,6 +469,7 @@ Return only subdomain names, one per line, no explanations."""
         """Perform reverse IP lookup to find other domains on same server."""
         try:
             import socket
+
             import dns.resolver
 
             # Get IP address
