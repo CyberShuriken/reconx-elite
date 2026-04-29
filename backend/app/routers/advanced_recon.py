@@ -1,27 +1,26 @@
 """API endpoints for advanced reconnaissance features."""
 
 import json
-
-from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
 from typing import Dict, List, Optional
 
 from app.core.database import get_db
 from app.core.deps import get_current_user
-from app.models.user import User
-from app.models.target import Target
-from app.models.scan import Scan
 from app.models.advanced_recon import (
-    StealthConfig,
     DiscoveredParameter,
     FuzzedEndpoint,
     SmartWordlist,
+    StealthConfig,
 )
+from app.models.scan import Scan
+from app.models.target import Target
+from app.models.user import User
 from app.tasks.advanced_recon_tasks import (
     content_fuzzing_task,
     parameter_discovery_task,
 )
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/advanced-recon", tags=["advanced-recon"])
 

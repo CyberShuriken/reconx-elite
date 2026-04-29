@@ -4,8 +4,8 @@ import json
 import logging
 from typing import Any, Dict, Optional
 
-from app.services.ai_service import _get_model_response, _is_ai_enabled
 from app.core.config import settings
+from app.services.ai_service import _get_model_response, _is_ai_enabled
 
 logger = logging.getLogger(__name__)
 

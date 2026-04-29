@@ -1,7 +1,8 @@
 """Integration tests for full workflow."""
 
+from unittest.mock import AsyncMock, patch
+
 import pytest
-from unittest.mock import patch, AsyncMock
 
 
 class TestFullWorkflow:

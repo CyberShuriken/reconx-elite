@@ -1,21 +1,21 @@
 import io
 from datetime import datetime, timezone
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
-from reportlab.lib.pagesizes import letter, A4
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.colors import HexColor, black, grey, white
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
+from reportlab.lib.pagesizes import A4, letter
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import inch
-from reportlab.lib.colors import HexColor, black, white, grey
 from reportlab.platypus import (
-    SimpleDocTemplate,
+    PageBreak,
     Paragraph,
+    SimpleDocTemplate,
     Spacer,
     Table,
     TableStyle,
-    PageBreak,
 )
 from reportlab.platypus.tableofcontents import TableOfContents
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 
 
 class PDFReportGenerator:

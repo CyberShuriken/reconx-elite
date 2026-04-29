@@ -228,13 +228,11 @@ This report is for authorized security assessment purposes only. Unauthorized ac
                         title = finding.get("title", finding.get("type", "Unknown"))
                         endpoint = finding.get("endpoint", "N/A")
                         impact = finding.get("impact", "N/A")
-                        formatted.append(
-                            f"""#### {title}
+                        formatted.append(f"""#### {title}
 **Location:** `{endpoint}`  
 **Impact:** {impact}
 
-"""
-                        )
+""")
 
         return "\n".join(formatted) if formatted else f"No {severity} severity findings."
 
@@ -247,14 +245,12 @@ This report is for authorized security assessment purposes only. Unauthorized ac
         for poc in pocs[:5]:
             poc_type = poc.get("finding_type", "Unknown")
             curl = poc.get("curl", "")
-            formatted.append(
-                f"""#### {poc_type}
+            formatted.append(f"""#### {poc_type}
 
 \`\`\`bash
 {curl.strip()}
 \`\`\`
 
-"""
-            )
+""")
 
         return "\n".join(formatted)

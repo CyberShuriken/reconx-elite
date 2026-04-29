@@ -4,8 +4,8 @@ import logging
 from datetime import datetime, timezone
 
 from app.core.database import get_sessionmaker
-from app.models.vulnerability import Vulnerability
 from app.models.exploit_validation import ExploitValidation
+from app.models.vulnerability import Vulnerability
 from app.services.exploit_validator import validator
 
 logger = logging.getLogger(__name__)

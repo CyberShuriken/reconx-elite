@@ -1,7 +1,8 @@
 """Integration tests for API endpoints."""
 
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, patch, AsyncMock
 
 
 class TestAPIEndpoints:

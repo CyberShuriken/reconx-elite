@@ -2,15 +2,14 @@ import json
 import logging
 from typing import Dict
 
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
-from sqlalchemy.orm import Session
-
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.core.security import decode_token
 from app.models.user import User
-from app.services.websocket import manager, redis_subscriber
 from app.services.audit import log_audit_event
+from app.services.websocket import manager, redis_subscriber
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
+from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 

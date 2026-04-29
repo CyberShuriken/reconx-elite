@@ -4,8 +4,9 @@ Demonstration script for processing manual verification data
 """
 
 import asyncio
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 from manual_verification_processor import ManualVerificationProcessor
 
 

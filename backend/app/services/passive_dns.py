@@ -9,7 +9,6 @@ import subprocess
 from typing import Iterable
 
 import httpx
-
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)

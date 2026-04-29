@@ -3,9 +3,9 @@
 import asyncio
 import threading
 import time
-from enum import Enum
-from typing import Callable, Any, Optional
 from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Callable, Optional
 
 
 class CircuitState(Enum):

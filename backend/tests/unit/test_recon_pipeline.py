@@ -1,7 +1,8 @@
 """Unit tests for ReconPipeline."""
 
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
 
 
 class TestReconPipeline:

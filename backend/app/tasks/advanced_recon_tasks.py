@@ -5,15 +5,15 @@ import logging
 from datetime import datetime, timezone
 
 from app.core.database import get_sessionmaker
-from app.tasks.celery_app import celery_app
 from app.models.advanced_recon import StealthConfig
 from app.models.scan import Scan
 from app.services.advanced_recon_engine import (
-    stealth_scanner,
-    parameter_discovery,
-    content_fuzzer,
     adaptive_scanner,
+    content_fuzzer,
+    parameter_discovery,
+    stealth_scanner,
 )
+from app.tasks.celery_app import celery_app
 
 logger = logging.getLogger(__name__)
 
