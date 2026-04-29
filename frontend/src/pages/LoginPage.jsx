@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { api } from "../api/client";
+import { api, formatApiErrorDetail } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
-  
+
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -24,13 +24,26 @@ export default function LoginPage() {
     });
   }
 
+  function validatePassword(pwd) {
+    if (pwd.length < 12) return "Password must be at least 12 characters long";
+    if (!/[A-Z]/.test(pwd)) return "Password must contain at least one uppercase letter";
+    if (!/[a-z]/.test(pwd)) return "Password must contain at least one lowercase letter";
+    if (!/\d/.test(pwd)) return "Password must contain at least one number";
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd))
+      return "Password must contain at least one special character";
+    return null;
+  }
+
   async function onSubmit(event) {
     event.preventDefault();
-    if (mode === "register" && password.length < 8) {
-      setError("Password must be at least 8 characters long");
-      return;
+    if (mode === "register") {
+      const pwdError = validatePassword(password);
+      if (pwdError) {
+        setError(pwdError);
+        return;
+      }
     }
-    
+
     setIsSubmitting(true);
     setError("");
     try {
@@ -39,23 +52,45 @@ export default function LoginPage() {
       login(data);
       navigate("/", { replace: true });
     } catch (requestError) {
-      setError(requestError.response?.data?.detail || "Authentication failed");
+      const detail = requestError.response?.data?.detail;
+      setError(formatApiErrorDetail(detail) || "Authentication failed");
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <main 
-      className="auth-shell" 
+    <main
+      className="auth-shell"
       onMouseMove={handleMouseMove}
       style={{ "--mouse-x": `${mousePos.x}%`, "--mouse-y": `${mousePos.y}%` }}
     >
       <div className="auth-background"></div>
       <div className="auth-shapes">
-        <div className="auth-shape" style={{ top: '10%', left: '10%', width: '350px', height: '350px' }}></div>
-        <div className="auth-shape" style={{ top: '65%', left: '85%', width: '450px', height: '450px', animationDelay: '-5s' }}></div>
-        <div className="auth-shape" style={{ top: '35%', left: '45%', width: '300px', height: '300px', animationDelay: '-10s' }}></div>
+        <div
+          className="auth-shape"
+          style={{ top: "10%", left: "10%", width: "350px", height: "350px" }}
+        ></div>
+        <div
+          className="auth-shape"
+          style={{
+            top: "65%",
+            left: "85%",
+            width: "450px",
+            height: "450px",
+            animationDelay: "-5s",
+          }}
+        ></div>
+        <div
+          className="auth-shape"
+          style={{
+            top: "35%",
+            left: "45%",
+            width: "300px",
+            height: "300px",
+            animationDelay: "-10s",
+          }}
+        ></div>
       </div>
 
       <div className="auth-container">
@@ -63,7 +98,8 @@ export default function LoginPage() {
           <p className="eyebrow">ReconX Elite</p>
           <h1>Operate your recon pipeline with a clean attack-surface view.</h1>
           <p className="auth-copy">
-            Use this platform only against infrastructure you own or are explicitly authorized to assess.
+            Use this platform only against infrastructure you own or are explicitly authorized to
+            assess.
           </p>
         </section>
 
@@ -72,7 +108,7 @@ export default function LoginPage() {
             <form onSubmit={onSubmit}>
               <h2>{mode === "register" ? "Create account" : "Sign in"}</h2>
               <label>
-                User Name
+                Email
                 <input
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
@@ -88,7 +124,7 @@ export default function LoginPage() {
                   onChange={(event) => setPassword(event.target.value)}
                   placeholder="••••••••"
                   type="password"
-                  minLength="8"
+                  minLength="12"
                   required
                 />
               </label>
