@@ -94,16 +94,12 @@ class ManualTester:
             start_time = time.time()
 
             # Send request
-            response = await self._send_http_request(
-                method, url, request_headers, body, params
-            )
+            response = await self._send_http_request(method, url, request_headers, body, params)
 
             response_time = (time.time() - start_time) * 1000
 
             # Build full request
-            full_request = self._build_request_string(
-                method, url, request_headers, body, params
-            )
+            full_request = self._build_request_string(method, url, request_headers, body, params)
 
             return {
                 "success": True,
@@ -161,9 +157,7 @@ class ManualTester:
             result["payload_type"] = payload_type
 
             # Analyze response for indicators
-            analysis = self._analyze_response_for_payload(
-                result.get("response_body", ""), payload_type
-            )
+            analysis = self._analyze_response_for_payload(result.get("response_body", ""), payload_type)
             result.update(analysis)
 
             results.append(result)
@@ -211,9 +205,7 @@ class ManualTester:
                 else:
                     # Form body
                     if f"{target_param}=" in body:
-                        body = body.replace(
-                            f"{target_param}=", f"{target_param}={payload}"
-                        )
+                        body = body.replace(f"{target_param}=", f"{target_param}={payload}")
                     else:
                         body += f"&{target_param}={payload}"
             else:
@@ -238,23 +230,17 @@ class ManualTester:
         if method == "GET":
             return await self.client.get(url, headers=headers, params=params)
         elif method == "POST":
-            return await self.client.post(
-                url, headers=headers, data=body, params=params
-            )
+            return await self.client.post(url, headers=headers, data=body, params=params)
         elif method == "PUT":
             return await self.client.put(url, headers=headers, data=body, params=params)
         elif method == "PATCH":
-            return await self.client.patch(
-                url, headers=headers, data=body, params=params
-            )
+            return await self.client.patch(url, headers=headers, data=body, params=params)
         elif method == "DELETE":
             return await self.client.delete(url, headers=headers, params=params)
         elif method == "HEAD":
             return await self.client.head(url, headers=headers, params=params)
         else:
-            return await self.client.request(
-                method, url, headers=headers, data=body, params=params
-            )
+            return await self.client.request(method, url, headers=headers, data=body, params=params)
 
     def _build_request_string(
         self,
@@ -283,9 +269,7 @@ class ManualTester:
 
         return "\n".join(lines)
 
-    def _analyze_response_for_payload(
-        self, response_body: str, payload_type: str
-    ) -> Dict[str, Any]:
+    def _analyze_response_for_payload(self, response_body: str, payload_type: str) -> Dict[str, Any]:
         """Analyze response for payload indicators."""
         indicators = []
         confidence = "low"

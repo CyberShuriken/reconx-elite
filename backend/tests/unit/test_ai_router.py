@@ -77,9 +77,7 @@ class TestAIRouter:
         }
 
         # Find compatible models
-        compatible = [
-            m for m, spec in models.items() if spec["max_context"] >= task_size
-        ]
+        compatible = [m for m, spec in models.items() if spec["max_context"] >= task_size]
 
         # Assert
         assert len(compatible) == 2

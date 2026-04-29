@@ -10,14 +10,10 @@ class LearningPattern(Base):
     __tablename__ = "learning_patterns"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
-    )
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
     # Pattern details
-    pattern_type = Column(
-        Text, nullable=False
-    )  # endpoint_pattern, payload_pattern, subdomain_pattern
+    pattern_type = Column(Text, nullable=False)  # endpoint_pattern, payload_pattern, subdomain_pattern
     vulnerability_type = Column(Text, nullable=False)  # xss, sqli, ssrf, etc.
     pattern_value = Column(Text, nullable=False)  # The actual pattern
     confidence_score = Column(Integer, default=0)  # 0-100 confidence
@@ -44,9 +40,7 @@ class SuccessfulPayload(Base):
     __tablename__ = "successful_payloads"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
-    )
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
     # Payload details
     payload = Column(Text, nullable=False)
@@ -59,9 +53,7 @@ class SuccessfulPayload(Base):
     confirmed_vulnerabilities = Column(Integer, default=0)
 
     # Target information
-    target_patterns = Column(
-        Text, nullable=True
-    )  # JSON array of URL patterns where it worked
+    target_patterns = Column(Text, nullable=True)  # JSON array of URL patterns where it worked
     technology_requirements = Column(Text, nullable=True)  # JSON array of required tech
 
     # Metadata
@@ -80,9 +72,7 @@ class HighValueEndpoint(Base):
     __tablename__ = "high_value_endpoints"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
-    )
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
     # Endpoint details
     endpoint_pattern = Column(Text, nullable=False)  # Regex pattern

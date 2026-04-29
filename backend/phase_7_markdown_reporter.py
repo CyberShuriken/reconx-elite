@@ -167,18 +167,13 @@ This report is for authorized security assessment purposes only. Unauthorized ac
                 count += len(findings_list)
         return count
 
-    def _count_by_severity(
-        self, all_findings: dict[str, list[dict[str, Any]]], severity: str
-    ) -> int:
+    def _count_by_severity(self, all_findings: dict[str, list[dict[str, Any]]], severity: str) -> int:
         """Count findings by severity."""
         count = 0
         for findings_list in all_findings.values():
             if isinstance(findings_list, list):
                 for finding in findings_list:
-                    if (
-                        isinstance(finding, dict)
-                        and finding.get("severity") == severity
-                    ):
+                    if isinstance(finding, dict) and finding.get("severity") == severity:
                         count += 1
         return count
 
@@ -223,18 +218,13 @@ This report is for authorized security assessment purposes only. Unauthorized ac
 
         return "\n".join(formatted)
 
-    def _format_findings_by_type(
-        self, all_findings: dict[str, list[dict[str, Any]]], severity: str
-    ) -> str:
+    def _format_findings_by_type(self, all_findings: dict[str, list[dict[str, Any]]], severity: str) -> str:
         """Format findings by severity."""
         formatted = []
         for vuln_type, findings_list in all_findings.items():
             if isinstance(findings_list, list):
                 for finding in findings_list:
-                    if (
-                        isinstance(finding, dict)
-                        and finding.get("severity") == severity
-                    ):
+                    if isinstance(finding, dict) and finding.get("severity") == severity:
                         title = finding.get("title", finding.get("type", "Unknown"))
                         endpoint = finding.get("endpoint", "N/A")
                         impact = finding.get("impact", "N/A")
@@ -246,9 +236,7 @@ This report is for authorized security assessment purposes only. Unauthorized ac
 """
                         )
 
-        return (
-            "\n".join(formatted) if formatted else f"No {severity} severity findings."
-        )
+        return "\n".join(formatted) if formatted else f"No {severity} severity findings."
 
     def _format_pocs(self, pocs: list[dict[str, Any]]) -> str:
         """Format PoCs for report."""

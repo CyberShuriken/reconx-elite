@@ -28,17 +28,11 @@ class POCGenerator:
         elif finding_type == "xss":
             return self._generate_xss_poc(endpoint, payload, base_url)
         elif finding_type == "injection":
-            return self._generate_injection_poc(
-                endpoint, payload, session_token, base_url
-            )
+            return self._generate_injection_poc(endpoint, payload, session_token, base_url)
         elif finding_type == "business_logic":
-            return self._generate_business_logic_poc(
-                endpoint, payload, session_token, base_url
-            )
+            return self._generate_business_logic_poc(endpoint, payload, session_token, base_url)
         else:
-            return self._generate_generic_poc(
-                endpoint, payload, session_token, base_url
-            )
+            return self._generate_generic_poc(endpoint, payload, session_token, base_url)
 
     def _generate_idor_poc(
         self, endpoint: str, payload: dict[str, Any], session_token: str, base_url: str
@@ -100,9 +94,7 @@ async with httpx.AsyncClient() as client:
             ],
         }
 
-    def _generate_xss_poc(
-        self, endpoint: str, payload: dict[str, Any], base_url: str
-    ) -> dict[str, Any]:
+    def _generate_xss_poc(self, endpoint: str, payload: dict[str, Any], base_url: str) -> dict[str, Any]:
         """Generate XSS PoC."""
         xss_payload = payload.get("payload", '<script>alert("XSS")</script>')
         param = payload.get("param", "q")

@@ -55,21 +55,15 @@ class VerificationApiTests(unittest.TestCase):
             patch("app.routers.verification_api._build_findings", return_value=[]),
             patch(
                 "app.routers.verification_api._build_host_groups",
-                return_value=HostGroupState(
-                    total_discovered=12, live=4, api_targets=["api.example.com"]
-                ),
+                return_value=HostGroupState(total_discovered=12, live=4, api_targets=["api.example.com"]),
             ),
             patch(
                 "app.routers.verification_api._build_js_analysis",
-                return_value=JavaScriptAnalysisState(
-                    files_analyzed=2, endpoints_found=["https://api.example.com/v1"]
-                ),
+                return_value=JavaScriptAnalysisState(files_analyzed=2, endpoints_found=["https://api.example.com/v1"]),
             ),
             patch(
                 "app.routers.verification_api._build_chains",
-                return_value=[
-                    {"title": "Example chain", "combined_severity": "High", "nodes": []}
-                ],
+                return_value=[{"title": "Example chain", "combined_severity": "High", "nodes": []}],
             ),
             patch(
                 "app.routers.verification_api.get_recent_agent_log_events",
@@ -133,9 +127,7 @@ class VerificationApiTests(unittest.TestCase):
                 "app.routers.verification_api._load_target_and_scan",
                 return_value=(fake_target, fake_scan),
             ),
-            patch(
-                "app.routers.verification_api._build_findings", return_value=findings
-            ),
+            patch("app.routers.verification_api._build_findings", return_value=findings),
         ):
             client = TestClient(app)
             response = client.get("/api/findings?target_id=7")
@@ -143,9 +135,7 @@ class VerificationApiTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         payload = response.json()
         self.assertEqual(len(payload["findings"]), 2)
-        self.assertEqual(
-            {item["status"] for item in payload["findings"]}, {"confirmed", "reported"}
-        )
+        self.assertEqual({item["status"] for item in payload["findings"]}, {"confirmed", "reported"})
 
     def test_model_status_requires_admin(self):
         def deny_admin():
@@ -194,9 +184,7 @@ class VerificationApiTests(unittest.TestCase):
             verify_response = client.post("/api/verify-models")
 
         self.assertEqual(status_response.status_code, 200)
-        self.assertEqual(
-            status_response.json()["statuses"]["orchestrator"]["status"], "ONLINE"
-        )
+        self.assertEqual(status_response.json()["statuses"]["orchestrator"]["status"], "ONLINE")
         self.assertEqual(verify_response.status_code, 200)
         self.assertEqual(verify_response.json()["orchestrator"]["status"], "ONLINE")
 

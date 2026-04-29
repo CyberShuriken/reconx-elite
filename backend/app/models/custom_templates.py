@@ -10,9 +10,7 @@ class CustomNucleiTemplate(Base):
     __tablename__ = "custom_nuclei_templates"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
-    )
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
     # Template metadata
     name = Column(Text, nullable=False)
@@ -46,9 +44,7 @@ class CustomNucleiTemplate(Base):
 
     # Relationships
     user = relationship("User", back_populates="custom_templates")
-    scan_results = relationship(
-        "CustomTemplateResult", back_populates="template", cascade="all, delete-orphan"
-    )
+    scan_results = relationship("CustomTemplateResult", back_populates="template", cascade="all, delete-orphan")
 
 
 class CustomTemplateResult(Base):
@@ -63,9 +59,7 @@ class CustomTemplateResult(Base):
         nullable=False,
         index=True,
     )
-    scan_id = Column(
-        Integer, ForeignKey("scans.id", ondelete="CASCADE"), nullable=False, index=True
-    )
+    scan_id = Column(Integer, ForeignKey("scans.id", ondelete="CASCADE"), nullable=False, index=True)
 
     # Match details
     matched_url = Column(Text, nullable=False)

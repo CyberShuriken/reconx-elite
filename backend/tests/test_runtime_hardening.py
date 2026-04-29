@@ -29,9 +29,7 @@ class RuntimeHardeningTests(unittest.IsolatedAsyncioTestCase):
         async def call_next(_request):
             return Mock(status_code=200)
 
-        with patch(
-            "app.core.middleware.decode_token", side_effect=ValueError("bad token")
-        ):
+        with patch("app.core.middleware.decode_token", side_effect=ValueError("bad token")):
             response = await middleware.dispatch(request, call_next)
         self.assertEqual(response.status_code, 401)
 

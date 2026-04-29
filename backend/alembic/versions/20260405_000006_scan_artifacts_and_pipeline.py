@@ -36,12 +36,8 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["scan_id"], ["scans.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        op.f("ix_scan_artifacts_id"), "scan_artifacts", ["id"], unique=False
-    )
-    op.create_index(
-        op.f("ix_scan_artifacts_scan_id"), "scan_artifacts", ["scan_id"], unique=False
-    )
+    op.create_index(op.f("ix_scan_artifacts_id"), "scan_artifacts", ["id"], unique=False)
+    op.create_index(op.f("ix_scan_artifacts_scan_id"), "scan_artifacts", ["scan_id"], unique=False)
 
 
 def downgrade() -> None:

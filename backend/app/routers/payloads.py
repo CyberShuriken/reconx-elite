@@ -47,11 +47,7 @@ def get_payload_opportunities(
         },
     }
     """
-    target = (
-        db.query(Target)
-        .filter(Target.id == target_id, Target.owner_id == user.id)
-        .first()
-    )
+    target = db.query(Target).filter(Target.id == target_id, Target.owner_id == user.id).first()
     if not target:
         raise HTTPException(status_code=404, detail="Target not found")
 
@@ -91,9 +87,7 @@ def get_payload_opportunities(
                 "opportunities": [],
             }
         endpoints_with_opps[endpoint_id]["opportunities"].append(opp)
-        vuln_type_counts[opp.vulnerability_type] = (
-            vuln_type_counts.get(opp.vulnerability_type, 0) + 1
-        )
+        vuln_type_counts[opp.vulnerability_type] = vuln_type_counts.get(opp.vulnerability_type, 0) + 1
 
     # Build response
     result_endpoints = []
@@ -154,11 +148,7 @@ def get_endpoint_payload_opportunities(
     user: User = Depends(get_current_user),
 ):
     """Get payload opportunities for a specific endpoint."""
-    target = (
-        db.query(Target)
-        .filter(Target.id == target_id, Target.owner_id == user.id)
-        .first()
-    )
+    target = db.query(Target).filter(Target.id == target_id, Target.owner_id == user.id).first()
     if not target:
         raise HTTPException(status_code=404, detail="Target not found")
 
@@ -169,9 +159,7 @@ def get_endpoint_payload_opportunities(
     # Verify endpoint belongs to a target owned by user
     scan = db.query(Scan).filter(Scan.id == endpoint.scan_id).first()
     if not scan or scan.target_id != target_id:
-        raise HTTPException(
-            status_code=403, detail="Endpoint does not belong to this target"
-        )
+        raise HTTPException(status_code=403, detail="Endpoint does not belong to this target")
 
     opportunities = (
         db.query(PayloadOpportunity)
@@ -209,16 +197,8 @@ def get_blind_xss_hits(
                 "payload_opportunity": (
                     {
                         "id": hit.payload_opportunity.id,
-                        "endpoint_url": (
-                            hit.payload_opportunity.endpoint.url
-                            if hit.payload_opportunity
-                            else None
-                        ),
-                        "parameter_name": (
-                            hit.payload_opportunity.parameter_name
-                            if hit.payload_opportunity
-                            else None
-                        ),
+                        "endpoint_url": (hit.payload_opportunity.endpoint.url if hit.payload_opportunity else None),
+                        "parameter_name": (hit.payload_opportunity.parameter_name if hit.payload_opportunity else None),
                     }
                     if hit.payload_opportunity
                     else None
@@ -248,11 +228,7 @@ def mark_blind_xss_hit_processed(
 ):
     """Mark a blind XSS hit as processed or ignored."""
     # Verify the hit belongs to the user
-    hit = (
-        db.query(BlindXssHit)
-        .filter(BlindXssHit.id == hit_id, BlindXssHit.user_id == user.id)
-        .first()
-    )
+    hit = db.query(BlindXssHit).filter(BlindXssHit.id == hit_id, BlindXssHit.user_id == user.id).first()
     if not hit:
         raise HTTPException(status_code=404, detail="Blind XSS hit not found")
 
@@ -301,9 +277,7 @@ def create_blind_xss_token(
         if not opp:
             raise HTTPException(status_code=404, detail="Payload opportunity not found")
 
-    token = BlindXssService.create_token_for_opportunity(
-        db, user.id, payload_opportunity_id
-    )
+    token = BlindXssService.create_token_for_opportunity(db, user.id, payload_opportunity_id)
 
     log_audit_event(
         db,

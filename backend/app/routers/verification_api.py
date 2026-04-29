@@ -126,10 +126,7 @@ def _infer_finding_type(vulnerability: Vulnerability) -> str:
 def _finding_status(vulnerability: Vulnerability) -> str:
     if vulnerability.ai_report:
         return "reported"
-    if any(
-        (row.validation_status or "").lower() == "confirmed"
-        for row in vulnerability.validation
-    ):
+    if any((row.validation_status or "").lower() == "confirmed" for row in vulnerability.validation):
         return "confirmed"
     return "unconfirmed"
 
@@ -157,61 +154,32 @@ def _build_findings(scan: Scan | None) -> list[VerificationFinding]:
         endpoint = vulnerability.matched_url or vulnerability.host or ""
         parameter = ""
         matched_params = (
-            (vulnerability.evidence_json or {}).get("matched_params")
-            if vulnerability.evidence_json
-            else None
+            (vulnerability.evidence_json or {}).get("matched_params") if vulnerability.evidence_json else None
         )
         if isinstance(matched_params, list) and matched_params:
             parameter = str(matched_params[0])
         reproduction_steps = []
         if ai_report and ai_report.proof_of_concept:
-            reproduction_steps = [
-                step.strip()
-                for step in ai_report.proof_of_concept.splitlines()
-                if step.strip()
-            ]
+            reproduction_steps = [step.strip() for step in ai_report.proof_of_concept.splitlines() if step.strip()]
         elif validation and validation.url:
             reproduction_steps = [f"Replay request against {validation.url}"]
-        chain_with = [
-            value
-            for value in by_endpoint.get(endpoint, [])
-            if value != str(vulnerability.id)
-        ]
+        chain_with = [value for value in by_endpoint.get(endpoint, []) if value != str(vulnerability.id)]
         findings.append(
             VerificationFinding(
                 id=str(vulnerability.id),
                 type=_infer_finding_type(vulnerability),
                 endpoint=endpoint,
                 parameter=parameter,
-                payload_used=(
-                    validation.payload if validation and validation.payload else ""
-                )
-                or (
-                    ai_report.exploit_draft
-                    if ai_report and ai_report.exploit_draft
-                    else ""
-                ),
+                payload_used=(validation.payload if validation and validation.payload else "")
+                or (ai_report.exploit_draft if ai_report and ai_report.exploit_draft else ""),
                 severity=severity,
                 cvss_score=cvss_score,
                 cvss_vector=cvss_vector,
-                description=vulnerability.description
-                or (ai_report.summary if ai_report else ""),
+                description=vulnerability.description or (ai_report.summary if ai_report else ""),
                 reproduction_steps=reproduction_steps,
-                raw_request=(
-                    validation.full_request
-                    if validation and validation.full_request
-                    else ""
-                ),
-                impact=(
-                    ai_report.business_impact
-                    if ai_report and ai_report.business_impact
-                    else ""
-                ),
-                remediation=(
-                    ai_report.remediation_steps
-                    if ai_report and ai_report.remediation_steps
-                    else ""
-                ),
+                raw_request=(validation.full_request if validation and validation.full_request else ""),
+                impact=(ai_report.business_impact if ai_report and ai_report.business_impact else ""),
+                remediation=(ai_report.remediation_steps if ai_report and ai_report.remediation_steps else ""),
                 chain_with=chain_with,
                 status=_finding_status(vulnerability),
                 details={
@@ -258,9 +226,7 @@ def _build_js_analysis(scan: Scan | None) -> JavaScriptAnalysisState:
     )
 
 
-def _build_chains(
-    scan: Scan | None, findings: list[VerificationFinding]
-) -> list[dict[str, Any]]:
+def _build_chains(scan: Scan | None, findings: list[VerificationFinding]) -> list[dict[str, Any]]:
     if scan and scan.attack_paths:
         return [
             {
@@ -272,9 +238,7 @@ def _build_chains(
             }
             for path in scan.attack_paths
         ]
-    return analyze_finding_chains([finding.model_dump() for finding in findings]).get(
-        "chains", []
-    )
+    return analyze_finding_chains([finding.model_dump() for finding in findings]).get("chains", [])
 
 
 def _next_action(scan: Scan | None) -> str:
@@ -301,9 +265,7 @@ async def get_verification_state(
     if js_state.secrets_found:
         escalations.append("JavaScript secrets found - escalate immediately.")
     if any(finding.severity in {"Critical", "High"} for finding in findings):
-        escalations.append(
-            "High-severity findings require manual confirmation and reporting review."
-        )
+        escalations.append("High-severity findings require manual confirmation and reporting review.")
     blockers = []
     if scan and scan.error:
         blockers.append(scan.error)
@@ -330,14 +292,8 @@ async def get_verification_state(
         js_analysis=js_state,
         findings=findings,
         chains_identified=_build_chains(scan, findings),
-        reports_drafted=sum(
-            len(vulnerability.ai_report)
-            for vulnerability in (scan.vulnerabilities if scan else [])
-        ),
-        model_call_log=[
-            AgentLogEventOut(**_flatten_agent_event(event))
-            for event in get_recent_agent_log_events(100)
-        ],
+        reports_drafted=sum(len(vulnerability.ai_report) for vulnerability in (scan.vulnerabilities if scan else [])),
+        model_call_log=[AgentLogEventOut(**_flatten_agent_event(event)) for event in get_recent_agent_log_events(100)],
         next_action=_next_action(scan),
         blockers=blockers,
         escalations=escalations,
@@ -352,11 +308,7 @@ async def get_verification_findings(
     db: Session = Depends(get_db),
 ):
     _, scan = _load_target_and_scan(db, current_user, target_id, scan_id)
-    findings = [
-        finding
-        for finding in _build_findings(scan)
-        if finding.status in {"confirmed", "reported"}
-    ]
+    findings = [finding for finding in _build_findings(scan) if finding.status in {"confirmed", "reported"}]
     return FindingsResponse(findings=findings)
 
 
@@ -366,10 +318,7 @@ async def get_agent_log_history(
     current_user: User = Depends(require_admin),
 ):
     return AgentLogHistoryResponse(
-        events=[
-            AgentLogEventOut(**_flatten_agent_event(event))
-            for event in get_recent_agent_log_events(limit)
-        ]
+        events=[AgentLogEventOut(**_flatten_agent_event(event)) for event in get_recent_agent_log_events(limit)]
     )
 
 
@@ -444,9 +393,7 @@ async def write_report_api(
     if payload.target_id is not None:
         target = db.query(Target).filter(Target.id == payload.target_id).first()
         _ensure_target_access(target, current_user)
-    return ReportWriteResponse(
-        **(await write_finding_report(payload.finding, payload.severity))
-    )
+    return ReportWriteResponse(**(await write_finding_report(payload.finding, payload.severity)))
 
 
 @router.get("/model-status", response_model=ModelStatusResponse)

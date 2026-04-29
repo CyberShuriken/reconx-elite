@@ -29,9 +29,7 @@ router = APIRouter(prefix="/advanced-recon", tags=["advanced-recon"])
 class StealthConfigCreate(BaseModel):
     """Model for creating stealth configuration."""
 
-    scan_mode: str = Field(
-        "balanced", description="Scan mode: aggressive, balanced, stealth"
-    )
+    scan_mode: str = Field("balanced", description="Scan mode: aggressive, balanced, stealth")
     requests_per_second: int = Field(5, description="Requests per second")
     random_delay_min: int = Field(100, description="Minimum random delay in ms")
     random_delay_max: int = Field(500, description="Maximum random delay in ms")
@@ -39,9 +37,7 @@ class StealthConfigCreate(BaseModel):
     max_retries: int = Field(3, description="Maximum retries")
     retry_backoff_factor: int = Field(2, description="Retry backoff factor")
     rotate_user_agents: bool = Field(True, description="Rotate user agents")
-    custom_user_agents: Optional[List[str]] = Field(
-        None, description="Custom user agents"
-    )
+    custom_user_agents: Optional[List[str]] = Field(None, description="Custom user agents")
     use_jitter: bool = Field(True, description="Use jitter")
     jitter_percentage: int = Field(20, description="Jitter percentage")
     respect_robots_txt: bool = Field(True, description="Respect robots.txt")
@@ -50,25 +46,15 @@ class StealthConfigCreate(BaseModel):
 class StealthConfigUpdate(BaseModel):
     """Model for updating stealth configuration."""
 
-    scan_mode: Optional[str] = Field(
-        None, description="Scan mode: aggressive, balanced, stealth"
-    )
+    scan_mode: Optional[str] = Field(None, description="Scan mode: aggressive, balanced, stealth")
     requests_per_second: Optional[int] = Field(None, description="Requests per second")
-    random_delay_min: Optional[int] = Field(
-        None, description="Minimum random delay in ms"
-    )
-    random_delay_max: Optional[int] = Field(
-        None, description="Maximum random delay in ms"
-    )
+    random_delay_min: Optional[int] = Field(None, description="Minimum random delay in ms")
+    random_delay_max: Optional[int] = Field(None, description="Maximum random delay in ms")
     concurrent_threads: Optional[int] = Field(None, description="Concurrent threads")
     max_retries: Optional[int] = Field(None, description="Maximum retries")
-    retry_backoff_factor: Optional[int] = Field(
-        None, description="Retry backoff factor"
-    )
+    retry_backoff_factor: Optional[int] = Field(None, description="Retry backoff factor")
     rotate_user_agents: Optional[bool] = Field(None, description="Rotate user agents")
-    custom_user_agents: Optional[List[str]] = Field(
-        None, description="Custom user agents"
-    )
+    custom_user_agents: Optional[List[str]] = Field(None, description="Custom user agents")
     use_jitter: Optional[bool] = Field(None, description="Use jitter")
     jitter_percentage: Optional[int] = Field(None, description="Jitter percentage")
     respect_robots_txt: Optional[bool] = Field(None, description="Respect robots.txt")
@@ -79,9 +65,7 @@ class ParameterDiscoveryRequest(BaseModel):
 
     target_id: int = Field(..., description="Target ID")
     endpoint_urls: List[str] = Field(..., description="Endpoint URLs to test")
-    stealth_config: Optional[StealthConfigCreate] = Field(
-        None, description="Stealth configuration"
-    )
+    stealth_config: Optional[StealthConfigCreate] = Field(None, description="Stealth configuration")
 
 
 class ContentFuzzingRequest(BaseModel):
@@ -90,9 +74,7 @@ class ContentFuzzingRequest(BaseModel):
     target_id: int = Field(..., description="Target ID")
     base_urls: List[str] = Field(..., description="Base URLs to fuzz")
     wordlist_category: str = Field("admin", description="Wordlist category")
-    stealth_config: Optional[StealthConfigCreate] = Field(
-        None, description="Stealth configuration"
-    )
+    stealth_config: Optional[StealthConfigCreate] = Field(None, description="Stealth configuration")
 
 
 class SmartWordlistCreate(BaseModel):
@@ -115,19 +97,13 @@ async def create_stealth_config(
     """Create stealth configuration for a target."""
 
     # Check if user owns the target
-    target = (
-        db.query(Target)
-        .filter(Target.id == target_id, Target.owner_id == current_user.id)
-        .first()
-    )
+    target = db.query(Target).filter(Target.id == target_id, Target.owner_id == current_user.id).first()
 
     if not target:
         raise HTTPException(status_code=404, detail="Target not found")
 
     # Remove existing config if any
-    existing = (
-        db.query(StealthConfig).filter(StealthConfig.target_id == target_id).first()
-    )
+    existing = db.query(StealthConfig).filter(StealthConfig.target_id == target_id).first()
 
     if existing:
         db.delete(existing)
@@ -143,9 +119,7 @@ async def create_stealth_config(
         max_retries=config.max_retries,
         retry_backoff_factor=config.retry_backoff_factor,
         rotate_user_agents=config.rotate_user_agents,
-        custom_user_agents=(
-            json.dumps(config.custom_user_agents) if config.custom_user_agents else None
-        ),
+        custom_user_agents=(json.dumps(config.custom_user_agents) if config.custom_user_agents else None),
         use_jitter=config.use_jitter,
         jitter_percentage=config.jitter_percentage,
         respect_robots_txt=config.respect_robots_txt,
@@ -171,18 +145,12 @@ async def get_stealth_config(
     """Get stealth configuration for a target."""
 
     # Check if user owns the target
-    target = (
-        db.query(Target)
-        .filter(Target.id == target_id, Target.owner_id == current_user.id)
-        .first()
-    )
+    target = db.query(Target).filter(Target.id == target_id, Target.owner_id == current_user.id).first()
 
     if not target:
         raise HTTPException(status_code=404, detail="Target not found")
 
-    config = (
-        db.query(StealthConfig).filter(StealthConfig.target_id == target_id).first()
-    )
+    config = db.query(StealthConfig).filter(StealthConfig.target_id == target_id).first()
 
     if not config:
         # Return default config
@@ -211,9 +179,7 @@ async def get_stealth_config(
         "max_retries": config.max_retries,
         "retry_backoff_factor": config.retry_backoff_factor,
         "rotate_user_agents": config.rotate_user_agents,
-        "custom_user_agents": (
-            json.loads(config.custom_user_agents) if config.custom_user_agents else None
-        ),
+        "custom_user_agents": (json.loads(config.custom_user_agents) if config.custom_user_agents else None),
         "use_jitter": config.use_jitter,
         "jitter_percentage": config.jitter_percentage,
         "respect_robots_txt": config.respect_robots_txt,
@@ -231,11 +197,7 @@ async def discover_parameters(
     """Start parameter discovery on endpoints."""
 
     # Check if user owns the target
-    target = (
-        db.query(Target)
-        .filter(Target.id == request.target_id, Target.owner_id == current_user.id)
-        .first()
-    )
+    target = db.query(Target).filter(Target.id == request.target_id, Target.owner_id == current_user.id).first()
 
     if not target:
         raise HTTPException(status_code=404, detail="Target not found")
@@ -265,11 +227,7 @@ async def discover_parameters(
         db.commit()
         config_id = config.id
     else:
-        existing = (
-            db.query(StealthConfig)
-            .filter(StealthConfig.target_id == request.target_id)
-            .first()
-        )
+        existing = db.query(StealthConfig).filter(StealthConfig.target_id == request.target_id).first()
         config_id = existing.id if existing else None
 
     parameter_discovery_task.delay(
@@ -295,11 +253,7 @@ async def fuzz_content(
     """Start content fuzzing on base URLs."""
 
     # Check if user owns the target
-    target = (
-        db.query(Target)
-        .filter(Target.id == request.target_id, Target.owner_id == current_user.id)
-        .first()
-    )
+    target = db.query(Target).filter(Target.id == request.target_id, Target.owner_id == current_user.id).first()
 
     if not target:
         raise HTTPException(status_code=404, detail="Target not found")
@@ -329,11 +283,7 @@ async def fuzz_content(
         db.commit()
         config_id = config.id
     else:
-        existing = (
-            db.query(StealthConfig)
-            .filter(StealthConfig.target_id == request.target_id)
-            .first()
-        )
+        existing = db.query(StealthConfig).filter(StealthConfig.target_id == request.target_id).first()
         config_id = existing.id if existing else None
 
     content_fuzzing_task.delay(
@@ -362,11 +312,7 @@ async def get_discovered_parameters(
     """Get discovered parameters for a target."""
 
     # Check if user owns the target
-    target = (
-        db.query(Target)
-        .filter(Target.id == target_id, Target.owner_id == current_user.id)
-        .first()
-    )
+    target = db.query(Target).filter(Target.id == target_id, Target.owner_id == current_user.id).first()
 
     if not target:
         raise HTTPException(status_code=404, detail="Target not found")
@@ -396,9 +342,7 @@ async def get_discovered_parameters(
                 "parameter_value": p.parameter_value,
                 "discovery_method": p.discovery_method,
                 "confidence_score": p.confidence_score,
-                "response_indicators": (
-                    json.loads(p.response_indicators) if p.response_indicators else []
-                ),
+                "response_indicators": (json.loads(p.response_indicators) if p.response_indicators else []),
                 "status_code_change": p.status_code_change,
                 "response_length_change": p.response_length_change,
                 "reflection_detected": p.reflection_detected,
@@ -421,11 +365,7 @@ async def get_fuzzed_endpoints(
     """Get fuzzed endpoints for a target."""
 
     # Check if user owns the target
-    target = (
-        db.query(Target)
-        .filter(Target.id == target_id, Target.owner_id == current_user.id)
-        .first()
-    )
+    target = db.query(Target).filter(Target.id == target_id, Target.owner_id == current_user.id).first()
 
     if not target:
         raise HTTPException(status_code=404, detail="Target not found")
@@ -441,9 +381,7 @@ async def get_fuzzed_endpoints(
     endpoints = (
         db.query(FuzzedEndpoint)
         .filter(FuzzedEndpoint.scan_id.in_(scan_ids))
-        .order_by(
-            FuzzedEndpoint.is_interesting.desc(), FuzzedEndpoint.created_at.desc()
-        )
+        .order_by(FuzzedEndpoint.is_interesting.desc(), FuzzedEndpoint.created_at.desc())
         .limit(limit)
         .all()
     )
@@ -459,9 +397,7 @@ async def get_fuzzed_endpoints(
                 "response_length": e.response_length,
                 "response_time_ms": e.response_time_ms,
                 "is_interesting": e.is_interesting,
-                "interest_reasons": (
-                    json.loads(e.interest_reasons) if e.interest_reasons else []
-                ),
+                "interest_reasons": (json.loads(e.interest_reasons) if e.interest_reasons else []),
                 "content_type": e.content_type,
                 "server_header": e.server_header,
                 "wordlist_used": e.wordlist_used,
@@ -514,9 +450,7 @@ async def get_wordlists(
 ):
     """Get smart wordlists."""
 
-    query = db.query(SmartWordlist).filter(
-        SmartWordlist.user_id == current_user.id, SmartWordlist.is_active == True
-    )
+    query = db.query(SmartWordlist).filter(SmartWordlist.user_id == current_user.id, SmartWordlist.is_active == True)
 
     if category:
         query = query.filter(SmartWordlist.category == category)

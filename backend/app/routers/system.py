@@ -78,9 +78,7 @@ async def get_admin_system_validation(
 
 
 @router.get("/status")
-async def get_system_status(
-    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
-):
+async def get_system_status(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Get current system status overview."""
 
     try:
@@ -134,9 +132,7 @@ async def get_system_logs(
 
         # Filter by level if specified
         if level.lower() != "all":
-            recent_lines = [
-                line for line in recent_lines if level.lower() in line.lower()
-            ]
+            recent_lines = [line for line in recent_lines if level.lower() in line.lower()]
 
         return {
             "logs": recent_lines,
@@ -150,9 +146,7 @@ async def get_system_logs(
 
 
 @router.post("/test-ai")
-async def test_ai_service(
-    db: Session = Depends(get_db), current_user: User = Depends(require_admin)
-):
+async def test_ai_service(db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     """Test AI service functionality (admin only)."""
 
     try:
@@ -196,9 +190,7 @@ async def test_ai_service(
         if config["tiers"]["scan"]["enabled"]:
             try:
                 # Use analyze_scan_data for a real test call
-                test_result = await analyze_scan_data(
-                    "system_test", "test.example.com", task="scan"
-                )
+                test_result = await analyze_scan_data("system_test", "test.example.com", task="scan")
                 live_test = {
                     "success": "error" not in test_result,
                     "result_keys": list(test_result.keys()),
@@ -219,9 +211,7 @@ async def test_ai_service(
 
 
 @router.get("/metrics")
-async def get_system_metrics(
-    db: Session = Depends(get_db), current_user: User = Depends(require_admin)
-):
+async def get_system_metrics(db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
     """Get system metrics (admin only)."""
 
     try:
@@ -240,22 +230,14 @@ async def get_system_metrics(
         # Scan status breakdown
         from sqlalchemy import func
 
-        scan_statuses = (
-            db.query(Scan.status, func.count(Scan.id)).group_by(Scan.status).all()
-        )
-        metrics["scan_status_breakdown"] = {
-            status: count for status, count in scan_statuses
-        }
+        scan_statuses = db.query(Scan.status, func.count(Scan.id)).group_by(Scan.status).all()
+        metrics["scan_status_breakdown"] = {status: count for status, count in scan_statuses}
 
         # Vulnerability severity breakdown
         vuln_severities = (
-            db.query(Vulnerability.severity, func.count(Vulnerability.id))
-            .group_by(Vulnerability.severity)
-            .all()
+            db.query(Vulnerability.severity, func.count(Vulnerability.id)).group_by(Vulnerability.severity).all()
         )
-        metrics["vulnerability_severity_breakdown"] = {
-            severity: count for severity, count in vuln_severities
-        }
+        metrics["vulnerability_severity_breakdown"] = {severity: count for severity, count in vuln_severities}
 
         return metrics
 

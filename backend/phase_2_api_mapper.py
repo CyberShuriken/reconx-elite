@@ -16,9 +16,7 @@ class APIMapper:
         self.ai_router = ai_router
         self.endpoints = {"rest": [], "graphql": [], "soap": []}
 
-    async def analyze_api_surface(
-        self, urls: list[str], html_content: str = ""
-    ) -> dict[str, Any]:
+    async def analyze_api_surface(self, urls: list[str], html_content: str = "") -> dict[str, Any]:
         """Categorize discovered URLs into API types."""
         endpoints = await self._extract_endpoints(urls, html_content)
 
@@ -33,9 +31,7 @@ class APIMapper:
             "total": len(rest_endpoints) + len(graphql_endpoints) + len(soap_endpoints),
         }
 
-    async def _extract_endpoints(
-        self, urls: list[str], html_content: str = ""
-    ) -> list[str]:
+    async def _extract_endpoints(self, urls: list[str], html_content: str = "") -> list[str]:
         """Extract API endpoints from URLs and HTML."""
         endpoints = list(urls)
 
@@ -56,18 +52,12 @@ class APIMapper:
 
         return list(set(endpoints))
 
-    async def _identify_rest_endpoints(
-        self, endpoints: list[str]
-    ) -> list[dict[str, Any]]:
+    async def _identify_rest_endpoints(self, endpoints: list[str]) -> list[dict[str, Any]]:
         """Identify REST endpoints and extract available methods."""
         rest_endpoints = []
 
         for endpoint in endpoints:
-            if (
-                "/api/" in endpoint
-                or "/rest/" in endpoint
-                or endpoint.endswith((".json", ".xml"))
-            ):
+            if "/api/" in endpoint or "/rest/" in endpoint or endpoint.endswith((".json", ".xml")):
                 # Basic REST indicators
                 rest_endpoints.append(
                     {
@@ -80,9 +70,7 @@ class APIMapper:
 
         return rest_endpoints
 
-    async def _identify_graphql_endpoints(
-        self, endpoints: list[str]
-    ) -> list[dict[str, Any]]:
+    async def _identify_graphql_endpoints(self, endpoints: list[str]) -> list[dict[str, Any]]:
         """Identify GraphQL endpoints and attempt introspection."""
         graphql_endpoints = []
 
@@ -101,18 +89,12 @@ class APIMapper:
 
         return graphql_endpoints
 
-    async def _identify_soap_endpoints(
-        self, endpoints: list[str]
-    ) -> list[dict[str, Any]]:
+    async def _identify_soap_endpoints(self, endpoints: list[str]) -> list[dict[str, Any]]:
         """Identify SOAP endpoints and extract WSDL."""
         soap_endpoints = []
 
         for endpoint in endpoints:
-            if (
-                "/soap" in endpoint.lower()
-                or ".asmx" in endpoint.lower()
-                or ".svc" in endpoint.lower()
-            ):
+            if "/soap" in endpoint.lower() or ".asmx" in endpoint.lower() or ".svc" in endpoint.lower():
                 wsdl = await self._fetch_wsdl(endpoint)
                 soap_endpoints.append(
                     {
@@ -134,9 +116,7 @@ class APIMapper:
             params.extend(re.findall(pattern, endpoint))
         return list(set(params))
 
-    async def _attempt_graphql_introspection(
-        self, graphql_endpoint: str
-    ) -> dict[str, Any] | None:
+    async def _attempt_graphql_introspection(self, graphql_endpoint: str) -> dict[str, Any] | None:
         """Try to fetch GraphQL schema via introspection."""
         introspection_query = {
             "query": """
@@ -159,12 +139,7 @@ class APIMapper:
                 if response.status_code == 200:
                     data = response.json()
                     return {
-                        "operations": [
-                            t["name"]
-                            for t in data.get("data", {})
-                            .get("__schema", {})
-                            .get("types", [])
-                        ],
+                        "operations": [t["name"] for t in data.get("data", {}).get("__schema", {}).get("types", [])],
                         "raw": data,
                     }
         except Exception:

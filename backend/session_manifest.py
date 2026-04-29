@@ -61,40 +61,31 @@ class SessionManifest:
         """Persist manifest to disk, converting sets to lists."""
         data_to_save = self.data.copy()
         data_to_save["deduplication"] = {
-            k: list(v) if isinstance(v, set) else v
-            for k, v in self.data["deduplication"].items()
+            k: list(v) if isinstance(v, set) else v for k, v in self.data["deduplication"].items()
         }
         with open(self.manifest_path, "w") as f:
             json.dump(data_to_save, f, indent=2, default=str)
 
-    def update_phase(
-        self, phase: str, status: str, findings: list[dict] | None = None
-    ) -> None:
+    def update_phase(self, phase: str, status: str, findings: list[dict] | None = None) -> None:
         """Update phase status and findings."""
         if phase in self.data["phases"]:
             self.data["phases"][phase]["status"] = status
             if findings:
                 self.data["phases"][phase]["findings"].extend(findings)
             if status == "completed":
-                self.data["phases"][phase][
-                    "completed_at"
-                ] = datetime.utcnow().isoformat()
+                self.data["phases"][phase]["completed_at"] = datetime.utcnow().isoformat()
         self.save()
 
     def add_context(self, context_type: str, data: Any) -> None:
         """Add data to context tree."""
         if context_type == "subdomains" and isinstance(data, list):
             self.data["context_tree"]["subdomains"].extend(data)
-            self.data["context_tree"]["subdomains"] = list(
-                set(self.data["context_tree"]["subdomains"])
-            )
+            self.data["context_tree"]["subdomains"] = list(set(self.data["context_tree"]["subdomains"]))
         elif context_type == "live_hosts" and isinstance(data, list):
             self.data["context_tree"]["live_hosts"].extend(data)
         elif context_type == "open_ports" and isinstance(data, dict):
             for host, ports in data.items():
-                self.data["context_tree"]["open_ports"].append(
-                    {"host": host, "ports": ports}
-                )
+                self.data["context_tree"]["open_ports"].append({"host": host, "ports": ports})
         elif context_type == "tech_stack" and isinstance(data, dict):
             self.data["context_tree"]["tech_stack"].update(data)
         elif context_type == "cve_findings" and isinstance(data, list):
@@ -121,9 +112,7 @@ class SessionManifest:
             if isinstance(self.data["deduplication"][check_type], set):
                 self.data["deduplication"][check_type].add(value)
             else:
-                self.data["deduplication"][check_type] = set(
-                    self.data["deduplication"][check_type]
-                )
+                self.data["deduplication"][check_type] = set(self.data["deduplication"][check_type])
                 self.data["deduplication"][check_type].add(value)
         self.save()
 

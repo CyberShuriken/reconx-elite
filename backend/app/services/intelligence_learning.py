@@ -50,9 +50,7 @@ class IntelligenceLearningService:
             # Extract and store patterns
             patterns = self._extract_patterns_from_vulnerability(vulnerability)
             for pattern_type, pattern_data in patterns.items():
-                self._store_learning_pattern(
-                    db, user_id, pattern_type, pattern_data, vulnerability
-                )
+                self._store_learning_pattern(db, user_id, pattern_type, pattern_data, vulnerability)
                 learning_results["patterns_learned"] += 1
 
             # Update successful payloads if validation exists
@@ -71,29 +69,21 @@ class IntelligenceLearningService:
 
         return learning_results
 
-    def _extract_patterns_from_vulnerability(
-        self, vulnerability: Vulnerability
-    ) -> Dict[str, Dict]:
+    def _extract_patterns_from_vulnerability(self, vulnerability: Vulnerability) -> Dict[str, Dict]:
         """Extract various patterns from vulnerability data."""
         patterns = {}
 
         # Extract endpoint patterns
         if vulnerability.matched_url:
-            patterns["endpoint"] = self._extract_endpoint_patterns(
-                vulnerability.matched_url
-            )
+            patterns["endpoint"] = self._extract_endpoint_patterns(vulnerability.matched_url)
 
         # Extract payload patterns from evidence
         if vulnerability.evidence_json:
-            patterns["payload"] = self._extract_payload_patterns(
-                vulnerability.evidence_json
-            )
+            patterns["payload"] = self._extract_payload_patterns(vulnerability.evidence_json)
 
         # Extract parameter patterns
         if vulnerability.matched_url:
-            patterns["parameter"] = self._extract_parameter_patterns(
-                vulnerability.matched_url
-            )
+            patterns["parameter"] = self._extract_parameter_patterns(vulnerability.matched_url)
 
         return patterns
 
@@ -163,9 +153,7 @@ class IntelligenceLearningService:
         for part in parts:
             if part and len(part) > 2:  # Skip empty and very short segments
                 # Skip obvious IDs and hashes
-                if not re.match(r"^[a-f0-9]{8,}$", part) and not re.match(
-                    r"^\d+$", part
-                ):
+                if not re.match(r"^[a-f0-9]{8,}$", part) and not re.match(r"^\d+$", part):
                     segments.append(part)
 
         return segments
@@ -230,9 +218,7 @@ class IntelligenceLearningService:
             "subdomain_depth": len(subdomain_labels),
             "subdomain_labels": subdomain_labels,
             "has_common_env_prefix": bool(
-                subdomain_labels
-                and subdomain_labels[0]
-                in {"dev", "staging", "test", "qa", "api", "admin"}
+                subdomain_labels and subdomain_labels[0] in {"dev", "staging", "test", "qa", "api", "admin"}
             ),
         }
 
@@ -245,22 +231,15 @@ class IntelligenceLearningService:
             return "identifier"
 
         # Search parameters
-        if any(
-            search_word in key_lower for search_word in ["search", "query", "q", "find"]
-        ):
+        if any(search_word in key_lower for search_word in ["search", "query", "q", "find"]):
             return "search"
 
         # File parameters
-        if any(
-            file_word in key_lower for file_word in ["file", "upload", "doc", "image"]
-        ):
+        if any(file_word in key_lower for file_word in ["file", "upload", "doc", "image"]):
             return "file"
 
         # Redirect parameters
-        if any(
-            redirect_word in key_lower
-            for redirect_word in ["redirect", "url", "return", "next"]
-        ):
+        if any(redirect_word in key_lower for redirect_word in ["redirect", "url", "return", "next"]):
             return "redirect"
 
         # API parameters
@@ -284,17 +263,11 @@ class IntelligenceLearningService:
 
         # Store different pattern types
         if pattern_type == "endpoint":
-            self._store_endpoint_pattern(
-                db, user_id, pattern_data, vulnerability, vuln_type
-            )
+            self._store_endpoint_pattern(db, user_id, pattern_data, vulnerability, vuln_type)
         elif pattern_type == "payload":
-            self._store_payload_pattern(
-                db, user_id, pattern_data, vulnerability, vuln_type
-            )
+            self._store_payload_pattern(db, user_id, pattern_data, vulnerability, vuln_type)
         elif pattern_type == "parameter":
-            self._store_parameter_pattern(
-                db, user_id, pattern_data, vulnerability, vuln_type
-            )
+            self._store_parameter_pattern(db, user_id, pattern_data, vulnerability, vuln_type)
 
     def _store_endpoint_pattern(
         self,
@@ -467,9 +440,7 @@ class IntelligenceLearningService:
                 success_rate=75,  # Initial success rate
                 usage_count=1,
                 confirmed_vulnerabilities=1,
-                target_patterns=json.dumps(
-                    [urlparse(vulnerability.matched_url or "").netloc]
-                ),
+                target_patterns=json.dumps([urlparse(vulnerability.matched_url or "").netloc]),
             )
             db.add(successful_payload)
 
@@ -522,14 +493,8 @@ class IntelligenceLearningService:
                 endpoint_type=endpoint_type,
                 priority_score=60,  # Initial priority
                 vulnerabilities_found=1,
-                critical_vulnerabilities=(
-                    1 if vulnerability.severity.lower() in ["critical", "high"] else 0
-                ),
-                confirmation_rate=(
-                    100
-                    if validation and validation.validation_status == "confirmed"
-                    else 50
-                ),
+                critical_vulnerabilities=(1 if vulnerability.severity.lower() in ["critical", "high"] else 0),
+                confirmation_rate=(100 if validation and validation.validation_status == "confirmed" else 50),
             )
             db.add(high_value_endpoint)
 
@@ -559,44 +524,27 @@ class IntelligenceLearningService:
         path_lower = path.lower()
 
         # Admin endpoints
-        if any(
-            admin_word in path_lower
-            for admin_word in ["admin", "dashboard", "panel", "manage"]
-        ):
+        if any(admin_word in path_lower for admin_word in ["admin", "dashboard", "panel", "manage"]):
             return "admin"
 
         # API endpoints
-        if any(
-            api_word in path_lower
-            for api_word in ["api", "v1", "v2", "rest", "graphql"]
-        ):
+        if any(api_word in path_lower for api_word in ["api", "v1", "v2", "rest", "graphql"]):
             return "api"
 
         # Debug endpoints
-        if any(
-            debug_word in path_lower
-            for debug_word in ["debug", "test", "dev", "staging"]
-        ):
+        if any(debug_word in path_lower for debug_word in ["debug", "test", "dev", "staging"]):
             return "debug"
 
         # Backup endpoints
-        if any(
-            backup_word in path_lower
-            for backup_word in ["backup", "bak", "old", "archive"]
-        ):
+        if any(backup_word in path_lower for backup_word in ["backup", "bak", "old", "archive"]):
             return "backup"
 
         # Config endpoints
-        if any(
-            config_word in path_lower
-            for config_word in ["config", "settings", "setup", "install"]
-        ):
+        if any(config_word in path_lower for config_word in ["config", "settings", "setup", "install"]):
             return "config"
 
         # Upload endpoints
-        if any(
-            upload_word in path_lower for upload_word in ["upload", "file", "import"]
-        ):
+        if any(upload_word in path_lower for upload_word in ["upload", "file", "import"]):
             return "upload"
 
         return "general"
@@ -615,9 +563,7 @@ class IntelligenceLearningService:
 
         # Get similar endpoint patterns
         if current_vulnerability.matched_url:
-            path_pattern = self._generalize_path(
-                urlparse(current_vulnerability.matched_url).path
-            )
+            path_pattern = self._generalize_path(urlparse(current_vulnerability.matched_url).path)
 
             endpoint_patterns = (
                 db.query(LearningPattern)
@@ -686,12 +632,8 @@ class IntelligenceLearningService:
                     similar_findings["parameter_risks"].append(
                         {
                             "parameter": param,
-                            "risk_score": max(
-                                p.confidence_score for p in param_patterns
-                            ),
-                            "vulnerability_types": list(
-                                set(p.vulnerability_type for p in param_patterns)
-                            ),
+                            "risk_score": max(p.confidence_score for p in param_patterns),
+                            "vulnerability_types": list(set(p.vulnerability_type for p in param_patterns)),
                         }
                     )
 
@@ -708,9 +650,7 @@ class IntelligenceLearningService:
         }
 
         # Count total patterns
-        total_patterns = (
-            db.query(LearningPattern).filter(LearningPattern.user_id == user_id).count()
-        )
+        total_patterns = db.query(LearningPattern).filter(LearningPattern.user_id == user_id).count()
         insights["total_patterns"] = total_patterns
 
         # Get top vulnerability types
@@ -726,9 +666,7 @@ class IntelligenceLearningService:
             .all()
         )
 
-        insights["top_vulnerability_types"] = [
-            {"type": vt[0], "count": vt[1]} for vt in vuln_types
-        ]
+        insights["top_vulnerability_types"] = [{"type": vt[0], "count": vt[1]} for vt in vuln_types]
 
         # Get high-value endpoints
         high_value = (
@@ -760,9 +698,7 @@ class IntelligenceLearningService:
 
         insights["successful_payloads"] = [
             {
-                "payload": (
-                    p.payload[:100] + "..." if len(p.payload) > 100 else p.payload
-                ),
+                "payload": (p.payload[:100] + "..." if len(p.payload) > 100 else p.payload),
                 "type": p.vulnerability_type,
                 "success_rate": p.success_rate,
                 "usage_count": p.usage_count,

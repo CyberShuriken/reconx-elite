@@ -102,10 +102,7 @@ class LogicSimulator:
             "endpoint": endpoint,
             "price_parameter": price_param,
             "tests": results,
-            "vulnerable": any(
-                r["confidence"] >= 0.8 and "200" in r["predicted_status"]
-                for r in results
-            ),
+            "vulnerable": any(r["confidence"] >= 0.8 and "200" in r["predicted_status"] for r in results),
         }
 
     async def refine_payload_for_bypass(
@@ -130,9 +127,7 @@ class LogicSimulator:
             "model": refined.get("model"),
         }
 
-    def _extract_prediction(
-        self, simulation_result: dict[str, Any]
-    ) -> tuple[str, float]:
+    def _extract_prediction(self, simulation_result: dict[str, Any]) -> tuple[str, float]:
         """Parse AI output to extract predicted HTTP status and confidence."""
         output = simulation_result.get("output", "").lower()
 
@@ -181,16 +176,11 @@ class LogicSimulator:
     def get_simulation_stats(self) -> dict[str, Any]:
         """Return statistics about simulations performed."""
         total_sims = len(self.simulation_history)
-        successful = sum(
-            1
-            for s in self.simulation_history
-            if "200" in s.get("predicted_outcome", "")
-        )
+        successful = sum(1 for s in self.simulation_history if "200" in s.get("predicted_outcome", ""))
         failed = sum(
             1
             for s in self.simulation_history
-            if "400" in s.get("predicted_outcome", "")
-            or "403" in s.get("predicted_outcome", "")
+            if "400" in s.get("predicted_outcome", "") or "403" in s.get("predicted_outcome", "")
         )
 
         return {

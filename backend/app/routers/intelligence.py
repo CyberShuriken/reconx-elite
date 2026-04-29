@@ -15,9 +15,7 @@ router = APIRouter(prefix="/intelligence", tags=["intelligence-learning"])
 
 
 @router.get("/insights")
-async def get_learning_insights(
-    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
-):
+async def get_learning_insights(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Get comprehensive learning insights for the current user."""
 
     insights = learning_service.get_learning_insights(db, current_user.id)
@@ -37,9 +35,7 @@ async def get_similar_findings(
     """Get similar past findings for a specific vulnerability."""
 
     # Get vulnerability
-    vulnerability = (
-        db.query(Vulnerability).filter(Vulnerability.id == vulnerability_id).first()
-    )
+    vulnerability = db.query(Vulnerability).filter(Vulnerability.id == vulnerability_id).first()
 
     if not vulnerability:
         raise HTTPException(status_code=404, detail="Vulnerability not found")
@@ -49,9 +45,7 @@ async def get_similar_findings(
         raise HTTPException(status_code=403, detail="Access denied")
 
     # Get similar findings
-    similar_findings = learning_service.get_similar_findings(
-        db, current_user.id, vulnerability
-    )
+    similar_findings = learning_service.get_similar_findings(db, current_user.id, vulnerability)
 
     return {
         "vulnerability_id": vulnerability_id,
@@ -79,9 +73,7 @@ async def get_learning_patterns(
     if vulnerability_type:
         query = query.filter(LearningPattern.vulnerability_type == vulnerability_type)
 
-    patterns = (
-        query.order_by(LearningPattern.confidence_score.desc()).limit(limit).all()
-    )
+    patterns = query.order_by(LearningPattern.confidence_score.desc()).limit(limit).all()
 
     return {
         "patterns": [
@@ -165,9 +157,7 @@ async def get_high_value_endpoints(
     if endpoint_type:
         query = query.filter(HighValueEndpoint.endpoint_type == endpoint_type)
 
-    endpoints = (
-        query.order_by(HighValueEndpoint.priority_score.desc()).limit(limit).all()
-    )
+    endpoints = query.order_by(HighValueEndpoint.priority_score.desc()).limit(limit).all()
 
     return {
         "endpoints": [
@@ -198,9 +188,7 @@ async def learn_from_vulnerability(
     """Trigger learning from a specific vulnerability."""
 
     # Get vulnerability
-    vulnerability = (
-        db.query(Vulnerability).filter(Vulnerability.id == vulnerability_id).first()
-    )
+    vulnerability = db.query(Vulnerability).filter(Vulnerability.id == vulnerability_id).first()
 
     if not vulnerability:
         raise HTTPException(status_code=404, detail="Vulnerability not found")
@@ -210,16 +198,10 @@ async def learn_from_vulnerability(
         raise HTTPException(status_code=403, detail="Access denied")
 
     # Get validation if exists
-    validation = (
-        db.query(ExploitValidation)
-        .filter(ExploitValidation.vulnerability_id == vulnerability_id)
-        .first()
-    )
+    validation = db.query(ExploitValidation).filter(ExploitValidation.vulnerability_id == vulnerability_id).first()
 
     # Perform learning
-    learning_results = learning_service.learn_from_vulnerability(
-        db, current_user.id, vulnerability, validation
-    )
+    learning_results = learning_service.learn_from_vulnerability(db, current_user.id, vulnerability, validation)
 
     return {
         "vulnerability_id": vulnerability_id,
@@ -229,9 +211,7 @@ async def learn_from_vulnerability(
 
 
 @router.get("/statistics")
-async def get_learning_statistics(
-    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
-):
+async def get_learning_statistics(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Get learning statistics for the current user."""
 
     from app.models.learning_models import (
@@ -241,11 +221,7 @@ async def get_learning_statistics(
     )
 
     # Pattern statistics
-    total_patterns = (
-        db.query(LearningPattern)
-        .filter(LearningPattern.user_id == current_user.id)
-        .count()
-    )
+    total_patterns = db.query(LearningPattern).filter(LearningPattern.user_id == current_user.id).count()
 
     high_confidence_patterns = (
         db.query(LearningPattern)
@@ -257,11 +233,7 @@ async def get_learning_statistics(
     )
 
     # Payload statistics
-    total_payloads = (
-        db.query(SuccessfulPayload)
-        .filter(SuccessfulPayload.user_id == current_user.id)
-        .count()
-    )
+    total_payloads = db.query(SuccessfulPayload).filter(SuccessfulPayload.user_id == current_user.id).count()
 
     high_success_payloads = (
         db.query(SuccessfulPayload)
@@ -273,11 +245,7 @@ async def get_learning_statistics(
     )
 
     # Endpoint statistics
-    total_endpoints = (
-        db.query(HighValueEndpoint)
-        .filter(HighValueEndpoint.user_id == current_user.id)
-        .count()
-    )
+    total_endpoints = db.query(HighValueEndpoint).filter(HighValueEndpoint.user_id == current_user.id).count()
 
     high_priority_endpoints = (
         db.query(HighValueEndpoint)
@@ -293,29 +261,17 @@ async def get_learning_statistics(
         "patterns": {
             "total": total_patterns,
             "high_confidence": high_confidence_patterns,
-            "confidence_rate": (
-                (high_confidence_patterns / total_patterns * 100)
-                if total_patterns > 0
-                else 0
-            ),
+            "confidence_rate": ((high_confidence_patterns / total_patterns * 100) if total_patterns > 0 else 0),
         },
         "payloads": {
             "total": total_payloads,
             "high_success": high_success_payloads,
-            "success_rate": (
-                (high_success_payloads / total_payloads * 100)
-                if total_payloads > 0
-                else 0
-            ),
+            "success_rate": ((high_success_payloads / total_payloads * 100) if total_payloads > 0 else 0),
         },
         "endpoints": {
             "total": total_endpoints,
             "high_priority": high_priority_endpoints,
-            "priority_rate": (
-                (high_priority_endpoints / total_endpoints * 100)
-                if total_endpoints > 0
-                else 0
-            ),
+            "priority_rate": ((high_priority_endpoints / total_endpoints * 100) if total_endpoints > 0 else 0),
         },
     }
 
@@ -332,9 +288,7 @@ async def delete_learning_pattern(
 
     pattern = (
         db.query(LearningPattern)
-        .filter(
-            LearningPattern.id == pattern_id, LearningPattern.user_id == current_user.id
-        )
+        .filter(LearningPattern.id == pattern_id, LearningPattern.user_id == current_user.id)
         .first()
     )
 

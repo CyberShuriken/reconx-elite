@@ -14,16 +14,10 @@ from app.core.database import Base
 
 class Endpoint(Base):
     __tablename__ = "endpoints"
-    __table_args__ = (
-        UniqueConstraint(
-            "scan_id", "normalized_url", name="uq_scan_endpoint_normalized"
-        ),
-    )
+    __table_args__ = (UniqueConstraint("scan_id", "normalized_url", name="uq_scan_endpoint_normalized"),)
 
     id = Column(Integer, primary_key=True)
-    scan_id = Column(
-        Integer, ForeignKey("scans.id", ondelete="CASCADE"), nullable=False, index=True
-    )
+    scan_id = Column(Integer, ForeignKey("scans.id", ondelete="CASCADE"), nullable=False, index=True)
     url = Column(String(2048), nullable=False, index=True)
     hostname = Column(String(255), nullable=True, index=True)
     normalized_url = Column(String(2048), nullable=False, index=True)
@@ -38,12 +32,6 @@ class Endpoint(Base):
     is_interesting = Column(Boolean, default=False, nullable=False)
 
     scan = relationship("Scan", back_populates="endpoints")
-    bookmarks = relationship(
-        "Bookmark", back_populates="endpoint", cascade="all, delete-orphan"
-    )
-    discovered_parameters = relationship(
-        "DiscoveredParameter", back_populates="endpoint", cascade="all, delete-orphan"
-    )
-    payload_opportunities = relationship(
-        "PayloadOpportunity", back_populates="endpoint", cascade="all, delete-orphan"
-    )
+    bookmarks = relationship("Bookmark", back_populates="endpoint", cascade="all, delete-orphan")
+    discovered_parameters = relationship("DiscoveredParameter", back_populates="endpoint", cascade="all, delete-orphan")
+    payload_opportunities = relationship("PayloadOpportunity", back_populates="endpoint", cascade="all, delete-orphan")

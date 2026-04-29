@@ -21,9 +21,7 @@ def learn_from_vulnerability_task(user_id: int, vulnerability_id: int) -> dict:
 
     try:
         # Get vulnerability
-        vulnerability = (
-            db.query(Vulnerability).filter(Vulnerability.id == vulnerability_id).first()
-        )
+        vulnerability = db.query(Vulnerability).filter(Vulnerability.id == vulnerability_id).first()
 
         if not vulnerability:
             return {
@@ -32,16 +30,10 @@ def learn_from_vulnerability_task(user_id: int, vulnerability_id: int) -> dict:
             }
 
         # Get validation if exists
-        validation = (
-            db.query(ExploitValidation)
-            .filter(ExploitValidation.vulnerability_id == vulnerability_id)
-            .first()
-        )
+        validation = db.query(ExploitValidation).filter(ExploitValidation.vulnerability_id == vulnerability_id).first()
 
         # Perform learning
-        learning_results = learning_service.learn_from_vulnerability(
-            db, user_id, vulnerability, validation
-        )
+        learning_results = learning_service.learn_from_vulnerability(db, user_id, vulnerability, validation)
 
         logger.info(f"Learning completed for vulnerability {vulnerability_id}")
 

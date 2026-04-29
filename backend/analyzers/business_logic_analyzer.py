@@ -27,10 +27,7 @@ async def analyze_business_logic(
         path = endpoint.get("path", "").lower()
         params = endpoint.get("parameters", [])
 
-        if any(
-            path_marker in path
-            for path_marker in ["checkout", "cart", "payment", "order", "purchase"]
-        ):
+        if any(path_marker in path for path_marker in ["checkout", "cart", "payment", "order", "purchase"]):
             for param in params:
                 param_lower = param.lower()
                 if any(re.search(pattern, param_lower) for pattern in price_patterns):
@@ -41,9 +38,7 @@ async def analyze_business_logic(
                             "test": "Try negative price, zero, or decimal manipulation",
                         }
                     )
-                if any(
-                    re.search(pattern, param_lower) for pattern in discount_patterns
-                ):
+                if any(re.search(pattern, param_lower) for pattern in discount_patterns):
                     findings["discount_parameters"].append(
                         {
                             "endpoint": endpoint.get("path"),
@@ -51,9 +46,7 @@ async def analyze_business_logic(
                             "test": "Try applying discount twice, 100% discount, or invalid codes",
                         }
                     )
-                if any(
-                    re.search(pattern, param_lower) for pattern in quantity_patterns
-                ):
+                if any(re.search(pattern, param_lower) for pattern in quantity_patterns):
                     findings["quantity_parameters"].append(
                         {
                             "endpoint": endpoint.get("path"),

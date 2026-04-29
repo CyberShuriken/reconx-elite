@@ -13,9 +13,7 @@ from app.services.manual_tester import manual_tester
 logger = logging.getLogger(__name__)
 
 
-async def manual_request_task(
-    user_id: int, request_data: dict, vulnerability_id: int = None
-) -> dict:
+async def manual_request_task(user_id: int, request_data: dict, vulnerability_id: int = None) -> dict:
     """Execute manual HTTP request task."""
     db = get_sessionmaker()()
 
@@ -35,9 +33,7 @@ async def manual_request_task(
             )
         )
         db.commit()
-        logger.info(
-            f"Manual request completed for user {user_id}: {request_data.get('url')}"
-        )
+        logger.info(f"Manual request completed for user {user_id}: {request_data.get('url')}")
 
         return {
             "user_id": user_id,
@@ -88,9 +84,7 @@ async def payload_testing_task(user_id: int, test_request: dict) -> dict:
         target_param = test_request.get("target_param")
 
         # Run payload testing
-        results = await manual_tester.test_payload_variations(
-            base_request, payload_type, target_param
-        )
+        results = await manual_tester.test_payload_variations(base_request, payload_type, target_param)
 
         # Count successful detections
         detections = sum(1 for r in results if r.get("payload_detected", False))

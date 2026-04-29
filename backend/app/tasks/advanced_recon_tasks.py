@@ -22,18 +22,14 @@ logger = logging.getLogger(__name__)
 
 
 @celery_app.task(name="app.tasks.advanced_recon_tasks.parameter_discovery_task")
-def parameter_discovery_task(
-    user_id: int, target_id: int, endpoint_urls: list, config_id: int = None
-) -> dict:
+def parameter_discovery_task(user_id: int, target_id: int, endpoint_urls: list, config_id: int = None) -> dict:
     """Execute parameter discovery task."""
     db = get_sessionmaker()()
 
     try:
         # Get or create stealth config
         if config_id:
-            config = (
-                db.query(StealthConfig).filter(StealthConfig.id == config_id).first()
-            )
+            config = db.query(StealthConfig).filter(StealthConfig.id == config_id).first()
         else:
             # Create default config
             config = StealthConfig(
@@ -72,9 +68,7 @@ def parameter_discovery_task(
         asyncio.set_event_loop(loop)
 
         try:
-            results = loop.run_until_complete(
-                _run_parameter_discovery(endpoint_urls, config, scan.id)
-            )
+            results = loop.run_until_complete(_run_parameter_discovery(endpoint_urls, config, scan.id))
         finally:
             loop.close()
 
@@ -88,9 +82,7 @@ def parameter_discovery_task(
         )
         db.commit()
 
-        logger.info(
-            f"Parameter discovery completed for target {target_id}: {len(results)} parameters found"
-        )
+        logger.info(f"Parameter discovery completed for target {target_id}: {len(results)} parameters found")
 
         return {
             "user_id": user_id,
@@ -120,9 +112,7 @@ def parameter_discovery_task(
         db.close()
 
 
-async def _run_parameter_discovery(
-    endpoint_urls: list, config: StealthConfig, scan_id: int
-) -> list:
+async def _run_parameter_discovery(endpoint_urls: list, config: StealthConfig, scan_id: int) -> list:
     """Run parameter discovery with stealth scanner."""
 
     discovered_params = []
@@ -132,9 +122,7 @@ async def _run_parameter_discovery(
 
         for url in endpoint_urls:
             try:
-                params = await param_discovery.discover_parameters(
-                    url, scanner, scan_id
-                )
+                params = await param_discovery.discover_parameters(url, scanner, scan_id)
                 discovered_params.extend(params)
 
                 # Store in database
@@ -167,9 +155,7 @@ def content_fuzzing_task(
     try:
         # Get or create stealth config
         if config_id:
-            config = (
-                db.query(StealthConfig).filter(StealthConfig.id == config_id).first()
-            )
+            config = db.query(StealthConfig).filter(StealthConfig.id == config_id).first()
         else:
             # Create default config
             config = StealthConfig(
@@ -209,9 +195,7 @@ def content_fuzzing_task(
         asyncio.set_event_loop(loop)
 
         try:
-            results = loop.run_until_complete(
-                _run_content_fuzzing(base_urls, wordlist_category, config, scan.id)
-            )
+            results = loop.run_until_complete(_run_content_fuzzing(base_urls, wordlist_category, config, scan.id))
         finally:
             loop.close()
 
@@ -225,9 +209,7 @@ def content_fuzzing_task(
         )
         db.commit()
 
-        logger.info(
-            f"Content fuzzing completed for target {target_id}: {len(results)} endpoints found"
-        )
+        logger.info(f"Content fuzzing completed for target {target_id}: {len(results)} endpoints found")
 
         return {
             "user_id": user_id,
@@ -258,9 +240,7 @@ def content_fuzzing_task(
         db.close()
 
 
-async def _run_content_fuzzing(
-    base_urls: list, wordlist_category: str, config: StealthConfig, scan_id: int
-) -> list:
+async def _run_content_fuzzing(base_urls: list, wordlist_category: str, config: StealthConfig, scan_id: int) -> list:
     """Run content fuzzing with stealth scanner."""
 
     discovered_endpoints = []
@@ -270,9 +250,7 @@ async def _run_content_fuzzing(
 
         for url in base_urls:
             try:
-                endpoints = await fuzzing_engine.fuzz_content(
-                    url, wordlist_category, scanner, scan_id
-                )
+                endpoints = await fuzzing_engine.fuzz_content(url, wordlist_category, scanner, scan_id)
                 discovered_endpoints.extend(endpoints)
 
                 # Store in database
@@ -328,9 +306,7 @@ def adaptive_scan_task(user_id: int, target_id: int, scan_id: int) -> dict:
                             return {
                                 "endpoint_url": endpoint.url,
                                 "analysis": analysis,
-                                "recommendations": analysis.get(
-                                    "recommended_techniques", []
-                                ),
+                                "recommendations": analysis.get("recommended_techniques", []),
                                 "priority": analysis.get("priority_level", "medium"),
                             }
 

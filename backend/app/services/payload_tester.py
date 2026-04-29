@@ -79,18 +79,14 @@ class PayloadTester:
 
             # Check status code anomalies
             if test_status != baseline_status:
-                findings.append(
-                    f"Status code changed: {baseline_status} → {test_status}"
-                )
+                findings.append(f"Status code changed: {baseline_status} → {test_status}")
                 if test_status in (500, 502, 503):
                     confidence += 20
                     findings.append("Server error status detected")
 
             # Check response size anomaly
             if abs(test_length - baseline_length) > baseline_length * 0.5:
-                findings.append(
-                    f"Response size changed: {baseline_length} → {test_length}"
-                )
+                findings.append(f"Response size changed: {baseline_length} → {test_length}")
                 confidence += 15
 
             # Check for common error patterns indicating injection
@@ -126,9 +122,7 @@ class PayloadTester:
         """Get HTTP response with reasonable timeout."""
         try:
             timeout = httpx.Timeout(self.timeout, connect=self.timeout)
-            async with httpx.AsyncClient(
-                timeout=timeout, follow_redirects=True
-            ) as client:
+            async with httpx.AsyncClient(timeout=timeout, follow_redirects=True) as client:
                 resp = await client.get(url, params=params)
                 body = resp.text[: self.max_response_size]
                 return {"status": resp.status_code, "body": body}
@@ -147,10 +141,7 @@ class PayloadTester:
         lines = response.split("\n")
         error_context = []
         for line in lines:
-            if any(
-                keyword in line.lower()
-                for keyword in ["error", "exception", "warning", "syntax"]
-            ):
+            if any(keyword in line.lower() for keyword in ["error", "exception", "warning", "syntax"]):
                 error_context.append(line.strip())
         return " | ".join(error_context[:3]) if error_context else ""
 

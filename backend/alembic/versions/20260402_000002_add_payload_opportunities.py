@@ -61,12 +61,8 @@ def upgrade() -> None:
             nullable=True,
         ),
     )
-    op.create_index(
-        "ix_payload_opportunities_endpoint_id", "payload_opportunities", ["endpoint_id"]
-    )
-    op.create_index(
-        "ix_payload_opportunities_scan_id", "payload_opportunities", ["scan_id"]
-    )
+    op.create_index("ix_payload_opportunities_endpoint_id", "payload_opportunities", ["endpoint_id"])
+    op.create_index("ix_payload_opportunities_scan_id", "payload_opportunities", ["scan_id"])
     op.create_index(
         "ix_payload_opportunities_vulnerability_type",
         "payload_opportunities",
@@ -79,10 +75,6 @@ def downgrade() -> None:
         "ix_payload_opportunities_vulnerability_type",
         table_name="payload_opportunities",
     )
-    op.drop_index(
-        "ix_payload_opportunities_scan_id", table_name="payload_opportunities"
-    )
-    op.drop_index(
-        "ix_payload_opportunities_endpoint_id", table_name="payload_opportunities"
-    )
+    op.drop_index("ix_payload_opportunities_scan_id", table_name="payload_opportunities")
+    op.drop_index("ix_payload_opportunities_endpoint_id", table_name="payload_opportunities")
     op.drop_table("payload_opportunities")

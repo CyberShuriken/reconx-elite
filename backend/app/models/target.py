@@ -19,9 +19,7 @@ class Target(Base):
     __table_args__ = (UniqueConstraint("owner_id", "domain", name="uq_owner_domain"),)
 
     id = Column(Integer, primary_key=True, index=True)
-    owner_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
-    )
+    owner_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     domain = Column(String(255), nullable=False, index=True)
     notes = Column(Text, nullable=True)
     enable_ai_processing = Column(Boolean, default=True, nullable=False)
@@ -32,6 +30,4 @@ class Target(Base):
 
     owner = relationship("User", back_populates="targets")
     scans = relationship("Scan", back_populates="target", cascade="all, delete-orphan")
-    scheduled_scans = relationship(
-        "ScheduledScan", back_populates="target", cascade="all, delete-orphan"
-    )
+    scheduled_scans = relationship("ScheduledScan", back_populates="target", cascade="all, delete-orphan")

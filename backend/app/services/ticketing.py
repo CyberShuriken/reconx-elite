@@ -26,18 +26,14 @@ class JiraConfig(BaseModel):
 class GitHubConfig(BaseModel):
     token: str = Field(..., description="GitHub personal access token")
     repository: str = Field(..., description="Repository in format 'owner/repo'")
-    assignee: Optional[str] = Field(
-        None, description="GitHub username to assign issues to"
-    )
+    assignee: Optional[str] = Field(None, description="GitHub username to assign issues to")
 
 
 class GitLabConfig(BaseModel):
     url: str = Field(default="https://gitlab.com", description="GitLab instance URL")
     token: str = Field(..., description="GitLab personal access token")
     project_id: str = Field(..., description="GitLab project ID or path")
-    assignee_id: Optional[int] = Field(
-        None, description="GitLab user ID to assign issues to"
-    )
+    assignee_id: Optional[int] = Field(None, description="GitLab user ID to assign issues to")
 
 
 class TicketingService:
@@ -63,17 +59,11 @@ class TicketingService:
         """Create a ticket for a vulnerability in the configured platform."""
 
         if self.platform == TicketingPlatform.JIRA:
-            return await self._create_jira_ticket(
-                vulnerability, target_domain, additional_context
-            )
+            return await self._create_jira_ticket(vulnerability, target_domain, additional_context)
         elif self.platform == TicketingPlatform.GITHUB:
-            return await self._create_github_issue(
-                vulnerability, target_domain, additional_context
-            )
+            return await self._create_github_issue(vulnerability, target_domain, additional_context)
         elif self.platform == TicketingPlatform.GITLAB:
-            return await self._create_gitlab_issue(
-                vulnerability, target_domain, additional_context
-            )
+            return await self._create_gitlab_issue(vulnerability, target_domain, additional_context)
         else:
             raise ValueError(f"Unsupported platform: {self.platform}")
 
@@ -88,9 +78,7 @@ class TicketingService:
         config = JiraConfig(**self.config)
 
         # Build Jira issue description
-        description = self._build_jira_description(
-            vulnerability, target_domain, additional_context
-        )
+        description = self._build_jira_description(vulnerability, target_domain, additional_context)
 
         # Determine priority based on severity
         severity = vulnerability.get("severity", "low").lower()
@@ -121,9 +109,7 @@ class TicketingService:
         }
 
         try:
-            response = await self.client.post(
-                f"{config.url}/rest/api/2/issue", json=payload, headers=headers
-            )
+            response = await self.client.post(f"{config.url}/rest/api/2/issue", json=payload, headers=headers)
             response.raise_for_status()
 
             issue_data = response.json()
@@ -136,9 +122,7 @@ class TicketingService:
 
         except httpx.HTTPStatusError as e:
             logger.error(f"Failed to create Jira issue: {e.response.text}")
-            raise Exception(
-                f"Jira API error: {e.response.status_code} - {e.response.text}"
-            )
+            raise Exception(f"Jira API error: {e.response.status_code} - {e.response.text}")
 
     async def _create_github_issue(
         self,
@@ -190,9 +174,7 @@ class TicketingService:
 
         except httpx.HTTPStatusError as e:
             logger.error(f"Failed to create GitHub issue: {e.response.text}")
-            raise Exception(
-                f"GitHub API error: {e.response.status_code} - {e.response.text}"
-            )
+            raise Exception(f"GitHub API error: {e.response.status_code} - {e.response.text}")
 
     async def _create_gitlab_issue(
         self,
@@ -205,9 +187,7 @@ class TicketingService:
         config = GitLabConfig(**self.config)
 
         # Build GitLab issue description
-        description = self._build_gitlab_description(
-            vulnerability, target_domain, additional_context
-        )
+        description = self._build_gitlab_description(vulnerability, target_domain, additional_context)
 
         # Create issue payload
         payload = {
@@ -246,9 +226,7 @@ class TicketingService:
 
         except httpx.HTTPStatusError as e:
             logger.error(f"Failed to create GitLab issue: {e.response.text}")
-            raise Exception(
-                f"GitLab API error: {e.response.status_code} - {e.response.text}"
-            )
+            raise Exception(f"GitLab API error: {e.response.status_code} - {e.response.text}")
 
     def _build_jira_description(
         self,
@@ -382,6 +360,4 @@ async def create_vulnerability_ticket(
     """Create a vulnerability ticket in the specified platform."""
 
     async with TicketingService(platform, config) as service:
-        return await service.create_vulnerability_ticket(
-            vulnerability, target_domain, additional_context
-        )
+        return await service.create_vulnerability_ticket(vulnerability, target_domain, additional_context)

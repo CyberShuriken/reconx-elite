@@ -196,17 +196,9 @@ def system_health(admin: User = Depends(require_admin), db: Session = Depends(ge
         health["celery_worker"] = "unhealthy"
 
     # Overall status
-    if all(
-        v != "unhealthy"
-        for k, v in health.items()
-        if k != "status" and k != "timestamp"
-    ):
+    if all(v != "unhealthy" for k, v in health.items() if k != "status" and k != "timestamp"):
         health["status"] = "healthy"
-    elif any(
-        v == "unhealthy"
-        for k, v in health.items()
-        if k != "status" and k != "timestamp"
-    ):
+    elif any(v == "unhealthy" for k, v in health.items() if k != "status" and k != "timestamp"):
         health["status"] = "degraded"
 
     return health

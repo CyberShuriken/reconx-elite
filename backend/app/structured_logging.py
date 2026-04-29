@@ -157,9 +157,7 @@ class StructuredLogger:
             event_type="ai_api_call",
         )
 
-    def log_error(
-        self, session_id: str, error_type: str, error_message: str, phase: str = None
-    ) -> None:
+    def log_error(self, session_id: str, error_type: str, error_message: str, phase: str = None) -> None:
         """Log error event."""
         self.log_event(
             "error",
@@ -171,9 +169,7 @@ class StructuredLogger:
             event_type="error",
         )
 
-    def log_phase_completed(
-        self, session_id: str, phase: str, duration_ms: float, findings_count: int
-    ) -> None:
+    def log_phase_completed(self, session_id: str, phase: str, duration_ms: float, findings_count: int) -> None:
         """Log phase completion."""
         self.log_event(
             "info",

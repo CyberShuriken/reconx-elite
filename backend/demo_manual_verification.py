@@ -138,12 +138,8 @@ async def show_learning_summary():
     learning_data = await processor._load_learning_data()
     few_shot_data = await processor._load_few_shot_data()
 
-    print(
-        f"Total Verification Results: {learning_data['metadata']['total_verifications']}"
-    )
-    print(
-        f"Total Learning Entries: {learning_data['metadata']['total_learning_entries']}"
-    )
+    print(f"Total Verification Results: {learning_data['metadata']['total_verifications']}")
+    print(f"Total Learning Entries: {learning_data['metadata']['total_learning_entries']}")
     print(f"Total Few-Shot Examples: {few_shot_data['metadata']['total_examples']}")
     print(f"Last Updated: {learning_data['metadata']['last_updated']}")
 

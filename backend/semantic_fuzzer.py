@@ -357,9 +357,7 @@ class SemanticFuzzer:
         # Create contextual wordlist for detected type
         await self._create_application_wordlist(app_type, indicators)
 
-    def _collect_semantic_indicators(
-        self, context_tree: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def _collect_semantic_indicators(self, context_tree: Dict[str, Any]) -> Dict[str, Any]:
         """Collect semantic indicators from context tree"""
         indicators = {
             "domain": self.target,
@@ -381,23 +379,15 @@ class SemanticFuzzer:
 
         # Extract technology stack
         tech_stack = context_tree.get("technology_stack", {}).get("components", [])
-        indicators["technology_stack"] = [
-            tech.get("name", "") for tech in tech_stack[:15]
-        ]
+        indicators["technology_stack"] = [tech.get("name", "") for tech in tech_stack[:15]]
 
         # Extract interesting endpoints
-        interesting_endpoints = context_tree.get("interesting_endpoints", {}).get(
-            "endpoints", []
-        )
-        indicators["interesting_endpoints"] = [
-            ep.get("url", "") for ep in interesting_endpoints[:20]
-        ]
+        interesting_endpoints = context_tree.get("interesting_endpoints", {}).get("endpoints", [])
+        indicators["interesting_endpoints"] = [ep.get("url", "") for ep in interesting_endpoints[:20]]
 
         return indicators
 
-    async def _ai_detect_application_type(
-        self, indicators: Dict[str, Any]
-    ) -> ApplicationType:
+    async def _ai_detect_application_type(self, indicators: Dict[str, Any]) -> ApplicationType:
         """Use AI to detect application type"""
         prompt = f"""
         Analyze the following semantic indicators to determine the application type for {self.target}:
@@ -444,18 +434,14 @@ class SemanticFuzzer:
                     return ApplicationType.UNKNOWN
 
                 except json.JSONDecodeError:
-                    logger.warning(
-                        "AI application type detection response not valid JSON"
-                    )
+                    logger.warning("AI application type detection response not valid JSON")
 
         except Exception as e:
             logger.error(f"AI application type detection failed: {e}")
 
         return ApplicationType.UNKNOWN
 
-    async def _create_application_wordlist(
-        self, app_type: ApplicationType, indicators: Dict[str, Any]
-    ) -> None:
+    async def _create_application_wordlist(self, app_type: ApplicationType, indicators: Dict[str, Any]) -> None:
         """Create contextual wordlist for detected application type"""
         if app_type == ApplicationType.UNKNOWN:
             return
@@ -480,9 +466,7 @@ class SemanticFuzzer:
 
         self.contextual_wordlists.append(wordlist)
 
-    def _extract_domain_terms(
-        self, indicators: Dict[str, Any], app_type: ApplicationType
-    ) -> List[str]:
+    def _extract_domain_terms(self, indicators: Dict[str, Any], app_type: ApplicationType) -> List[str]:
         """Extract domain-specific terms from indicators"""
         terms = []
 
@@ -515,10 +499,7 @@ class SemanticFuzzer:
             # Check if term is related to application type
             if any(keyword in term_lower for keyword in app_keywords):
                 relevant_terms.append(term)
-            elif any(
-                keyword in term_lower
-                for keyword in ["api", "user", "admin", "data", "config", "service"]
-            ):
+            elif any(keyword in term_lower for keyword in ["api", "user", "admin", "data", "config", "service"]):
                 relevant_terms.append(term)
 
         return relevant_terms[:50]  # Limit to prevent token overflow
@@ -643,9 +624,7 @@ class SemanticFuzzer:
         """Analyze HTML forms on a host"""
         try:
             # Fetch page content
-            result = await self.tool_runner.run_tool(
-                "http_request", {"url": host, "method": "GET"}
-            )
+            result = await self.tool_runner.run_tool("http_request", {"url": host, "method": "GET"})
 
             if result and result.get("data"):
                 html_content = result.get("data", "")
@@ -662,9 +641,7 @@ class SemanticFuzzer:
     async def _ai_analyze_forms(self, host: str, html_content: str) -> Dict[str, Any]:
         """Use AI to analyze HTML forms"""
         # Limit content to prevent token overflow
-        content_sample = (
-            html_content[:10000] if len(html_content) > 10000 else html_content
-        )
+        content_sample = html_content[:10000] if len(html_content) > 10000 else html_content
 
         prompt = f"""
         Analyze the HTML forms from {host} and extract semantic information:
@@ -734,29 +711,19 @@ class SemanticFuzzer:
                 enhanced_wordlist = await self._ai_enhance_wordlist(wordlist)
 
                 # Update wordlist with AI enhancements
-                wordlist.domain_specific_terms.extend(
-                    enhanced_wordlist.get("additional_terms", [])
-                )
-                wordlist.parameter_names.extend(
-                    enhanced_wordlist.get("additional_parameters", [])
-                )
-                wordlist.value_patterns.extend(
-                    enhanced_wordlist.get("additional_patterns", [])
-                )
+                wordlist.domain_specific_terms.extend(enhanced_wordlist.get("additional_terms", []))
+                wordlist.parameter_names.extend(enhanced_wordlist.get("additional_parameters", []))
+                wordlist.value_patterns.extend(enhanced_wordlist.get("additional_patterns", []))
 
                 # Remove duplicates
-                wordlist.domain_specific_terms = list(
-                    set(wordlist.domain_specific_terms)
-                )
+                wordlist.domain_specific_terms = list(set(wordlist.domain_specific_terms))
                 wordlist.parameter_names = list(set(wordlist.parameter_names))
                 wordlist.value_patterns = list(set(wordlist.value_patterns))
 
             except Exception as e:
                 logger.debug(f"Wordlist enhancement failed: {e}")
 
-    async def _ai_enhance_wordlist(
-        self, wordlist: ContextualWordlist
-    ) -> Dict[str, Any]:
+    async def _ai_enhance_wordlist(self, wordlist: ContextualWordlist) -> Dict[str, Any]:
         """Use AI to enhance wordlist"""
         app_type = wordlist.application_type.value
 
@@ -820,9 +787,7 @@ class SemanticFuzzer:
             except Exception as e:
                 logger.debug(f"Payload generation failed: {e}")
 
-    async def _generate_wordlist_payloads(
-        self, wordlist: ContextualWordlist
-    ) -> List[SemanticPayload]:
+    async def _generate_wordlist_payloads(self, wordlist: ContextualWordlist) -> List[SemanticPayload]:
         """Generate payloads for a specific wordlist"""
         payloads = []
 
@@ -861,45 +826,23 @@ class SemanticFuzzer:
             "module": "semantic_fuzzer",
             "contextual_wordlists": {
                 "total_count": len(self.contextual_wordlists),
-                "application_types": [
-                    wl.application_type.value for wl in self.contextual_wordlists
-                ],
+                "application_types": [wl.application_type.value for wl in self.contextual_wordlists],
                 "results": [asdict(wordlist) for wordlist in self.contextual_wordlists],
-                "total_terms": sum(
-                    len(wl.domain_specific_terms) for wl in self.contextual_wordlists
-                ),
-                "total_parameters": sum(
-                    len(wl.parameter_names) for wl in self.contextual_wordlists
-                ),
+                "total_terms": sum(len(wl.domain_specific_terms) for wl in self.contextual_wordlists),
+                "total_parameters": sum(len(wl.parameter_names) for wl in self.contextual_wordlists),
             },
             "semantic_payloads": {
                 "total_count": len(self.semantic_payloads),
-                "payload_types": list(
-                    set(p.payload_type for p in self.semantic_payloads)
-                ),
-                "attack_vectors": list(
-                    set(p.attack_vector for p in self.semantic_payloads)
-                ),
-                "results": [
-                    asdict(payload) for payload in self.semantic_payloads[:50]
-                ],  # Limit for response size
-                "high_relevance_count": len(
-                    [
-                        p
-                        for p in self.semantic_payloads
-                        if p.application_relevance >= 0.8
-                    ]
-                ),
+                "payload_types": list(set(p.payload_type for p in self.semantic_payloads)),
+                "attack_vectors": list(set(p.attack_vector for p in self.semantic_payloads)),
+                "results": [asdict(payload) for payload in self.semantic_payloads[:50]],  # Limit for response size
+                "high_relevance_count": len([p for p in self.semantic_payloads if p.application_relevance >= 0.8]),
             },
             "summary": {
                 "wordlists_generated": len(self.contextual_wordlists),
                 "payloads_generated": len(self.semantic_payloads),
-                "application_types_detected": list(
-                    set(wl.application_type.value for wl in self.contextual_wordlists)
-                ),
-                "average_confidence": sum(
-                    wl.confidence for wl in self.contextual_wordlists
-                )
+                "application_types_detected": list(set(wl.application_type.value for wl in self.contextual_wordlists)),
+                "average_confidence": sum(wl.confidence for wl in self.contextual_wordlists)
                 / max(len(self.contextual_wordlists), 1),
                 "recommendation": "Use semantic payloads for targeted vulnerability testing based on application context",
             },

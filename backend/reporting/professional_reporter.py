@@ -143,12 +143,8 @@ class ProfessionalReporter:
             )
 
             return {
-                "vulnerability_reports": [
-                    asdict(report) for report in self.vulnerability_reports
-                ],
-                "executive_summary": (
-                    asdict(self.executive_summary) if self.executive_summary else None
-                ),
+                "vulnerability_reports": [asdict(report) for report in self.vulnerability_reports],
+                "executive_summary": (asdict(self.executive_summary) if self.executive_summary else None),
                 "markdown_report": markdown_report,
             }
 
@@ -162,9 +158,7 @@ class ProfessionalReporter:
             )
             raise
 
-    async def _process_vulnerability_findings(
-        self, scan_results: Dict[str, Any]
-    ) -> None:
+    async def _process_vulnerability_findings(self, scan_results: Dict[str, Any]) -> None:
         """Process vulnerability findings from scan results"""
         await self.ws_manager.send_log(
             self.session_id,
@@ -188,9 +182,7 @@ class ProfessionalReporter:
 
         for module in modules:
             module_results = scan_results.get(module, {})
-            findings = module_results.get("findings", []) or module_results.get(
-                "results", []
-            )
+            findings = module_results.get("findings", []) or module_results.get("results", [])
 
             for finding in findings:
                 if isinstance(finding, dict):
@@ -201,9 +193,7 @@ class ProfessionalReporter:
         sandbox_tests = sandbox_results.get("sandbox_tests", {}).get("results", [])
 
         for test in sandbox_tests:
-            if isinstance(test, dict) and test.get("test_result", "").startswith(
-                "success"
-            ):
+            if isinstance(test, dict) and test.get("test_result", "").startswith("success"):
                 all_findings.append(
                     {
                         **test,
@@ -221,9 +211,7 @@ class ProfessionalReporter:
             except Exception as e:
                 logger.debug(f"Failed to process finding {i}: {e}")
 
-    async def _create_vulnerability_report(
-        self, finding: Dict[str, Any], index: int
-    ) -> VulnerabilityReport:
+    async def _create_vulnerability_report(self, finding: Dict[str, Any], index: int) -> VulnerabilityReport:
         """Create a vulnerability report from a finding"""
         vulnerability_id = f"VULN-{datetime.now().strftime('%Y%m%d')}-{index + 1:03d}"
 
@@ -324,9 +312,7 @@ class ProfessionalReporter:
         # Fallback description
         return f"A {vuln_type} vulnerability was identified in the endpoint {endpoint}. This security issue could potentially allow attackers to exploit the affected system and should be remediated promptly."
 
-    async def _generate_impact_statement(
-        self, vuln_type: str, finding: Dict[str, Any]
-    ) -> str:
+    async def _generate_impact_statement(self, vuln_type: str, finding: Dict[str, Any]) -> str:
         """Generate impact statement"""
         impact_templates = {
             "sql injection": "Full database compromise possible with unauthorized data access, modification, and potential complete system takeover.",
@@ -358,9 +344,7 @@ class ProfessionalReporter:
 
         return steps
 
-    async def _generate_remediation_steps(
-        self, vuln_type: str, finding: Dict[str, Any]
-    ) -> List[str]:
+    async def _generate_remediation_steps(self, vuln_type: str, finding: Dict[str, Any]) -> List[str]:
         """Generate remediation steps"""
         remediation_templates = {
             "sql injection": [
@@ -459,9 +443,7 @@ class ProfessionalReporter:
                 curl_command = self._build_curl_command(report)
                 report.curl_command = curl_command
             except Exception as e:
-                logger.debug(
-                    f"Failed to generate curl command for {report.vulnerability_id}: {e}"
-                )
+                logger.debug(f"Failed to generate curl command for {report.vulnerability_id}: {e}")
                 report.curl_command = "# Failed to generate curl command"
 
     def _build_curl_command(self, report: VulnerabilityReport) -> str:
@@ -531,15 +513,11 @@ class ProfessionalReporter:
                 report.severity = self.severity_mapping.get(report.severity, "P5")
 
             except Exception as e:
-                logger.debug(
-                    f"Failed to calculate CVSS for {report.vulnerability_id}: {e}"
-                )
+                logger.debug(f"Failed to calculate CVSS for {report.vulnerability_id}: {e}")
                 report.cvss_score = 5.0
                 report.cvss_vector = "CVSS:4.0/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:N"
 
-    async def _calculate_cvss_40(
-        self, report: VulnerabilityReport
-    ) -> Tuple[float, str]:
+    async def _calculate_cvss_40(self, report: VulnerabilityReport) -> Tuple[float, str]:
         """Calculate CVSS 4.0 score and vector"""
         vuln_type = report.vulnerability_type.lower()
 
@@ -571,9 +549,7 @@ class ProfessionalReporter:
 
         return base_score, cvss_vector
 
-    def _calculate_base_score(
-        self, av: str, ac: str, pr: str, ui: str, s: str, c: str, i: str, a: str
-    ) -> float:
+    def _calculate_base_score(self, av: str, ac: str, pr: str, ui: str, s: str, c: str, i: str, a: str) -> float:
         """Simplified CVSS 4.0 base score calculation"""
         # Extract metric values
         av_val = self.cvss_metrics["attack_vector"].get(av.split(":")[1], 0.85)
@@ -630,9 +606,7 @@ class ProfessionalReporter:
             except Exception as e:
                 logger.debug(f"Failed to enhance report {report.vulnerability_id}: {e}")
 
-    async def _enhance_description_with_ai(
-        self, report: VulnerabilityReport
-    ) -> Optional[str]:
+    async def _enhance_description_with_ai(self, report: VulnerabilityReport) -> Optional[str]:
         """Enhance description with AI analysis"""
         prompt = f"""
         Enhance this vulnerability description with technical details:
@@ -667,9 +641,7 @@ class ProfessionalReporter:
 
         return None
 
-    async def _generate_impact_analysis(
-        self, report: VulnerabilityReport
-    ) -> Optional[str]:
+    async def _generate_impact_analysis(self, report: VulnerabilityReport) -> Optional[str]:
         """Generate detailed impact analysis"""
         prompt = f"""
         Generate a detailed impact analysis for:
@@ -713,18 +685,12 @@ class ProfessionalReporter:
         )
 
         total_vulns = len(self.vulnerability_reports)
-        critical_count = len(
-            [r for r in self.vulnerability_reports if "P1" in r.severity]
-        )
+        critical_count = len([r for r in self.vulnerability_reports if "P1" in r.severity])
         high_count = len([r for r in self.vulnerability_reports if "P2" in r.severity])
-        medium_count = len(
-            [r for r in self.vulnerability_reports if "P3" in r.severity]
-        )
+        medium_count = len([r for r in self.vulnerability_reports if "P3" in r.severity])
         low_count = len([r for r in self.vulnerability_reports if "P4" in r.severity])
 
-        avg_cvss = sum(r.cvss_score for r in self.vulnerability_reports) / max(
-            total_vulns, 1
-        )
+        avg_cvss = sum(r.cvss_score for r in self.vulnerability_reports) / max(total_vulns, 1)
 
         # Generate business impact
         business_impact = await self._generate_business_impact()
@@ -760,9 +726,7 @@ class ProfessionalReporter:
 
     async def _generate_business_impact(self) -> str:
         """Generate business impact statement"""
-        critical_count = len(
-            [r for r in self.vulnerability_reports if "P1" in r.severity]
-        )
+        critical_count = len([r for r in self.vulnerability_reports if "P1" in r.severity])
         high_count = len([r for r in self.vulnerability_reports if "P2" in r.severity])
 
         if critical_count > 0:
@@ -795,18 +759,12 @@ class ProfessionalReporter:
         if self.executive_summary:
             sections.append("## Executive Summary")
             sections.append("")
-            sections.append(
-                f"**Total Vulnerabilities:** {self.executive_summary.total_vulnerabilities}"
-            )
-            sections.append(
-                f"**Critical (P1):** {self.executive_summary.critical_count}"
-            )
+            sections.append(f"**Total Vulnerabilities:** {self.executive_summary.total_vulnerabilities}")
+            sections.append(f"**Critical (P1):** {self.executive_summary.critical_count}")
             sections.append(f"**High (P2):** {self.executive_summary.high_count}")
             sections.append(f"**Medium (P3):** {self.executive_summary.medium_count}")
             sections.append(f"**Low (P4):** {self.executive_summary.low_count}")
-            sections.append(
-                f"**Average CVSS Score:** {self.executive_summary.cvss_average:.1f}"
-            )
+            sections.append(f"**Average CVSS Score:** {self.executive_summary.cvss_average:.1f}")
             sections.append("")
             sections.append("### Business Impact")
             sections.append(self.executive_summary.business_impact)
@@ -841,9 +799,7 @@ class ProfessionalReporter:
                     sections.append(f"#### {report.title}")
                     sections.append("")
                     sections.append(f"**Vulnerability ID:** {report.vulnerability_id}")
-                    sections.append(
-                        f"**CVSS Score:** {report.cvss_score:.1f} ({report.cvss_vector})"
-                    )
+                    sections.append(f"**CVSS Score:** {report.cvss_score:.1f} ({report.cvss_vector})")
                     sections.append(f"**Endpoint:** {report.endpoint}")
                     sections.append(f"**Method:** {report.method}")
                     sections.append(f"**Confidence:** {report.confidence:.2f}")
@@ -889,19 +845,11 @@ class ProfessionalReporter:
         )
         sections.append("")
         sections.append("### Severity Classification")
-        sections.append(
-            "- **P1 (Critical):** Immediate threat requiring emergency remediation"
-        )
-        sections.append(
-            "- **P2 (High):** Significant risk requiring prompt remediation"
-        )
-        sections.append(
-            "- **P3 (Medium):** Moderate risk requiring scheduled remediation"
-        )
+        sections.append("- **P1 (Critical):** Immediate threat requiring emergency remediation")
+        sections.append("- **P2 (High):** Significant risk requiring prompt remediation")
+        sections.append("- **P3 (Medium):** Moderate risk requiring scheduled remediation")
         sections.append("- **P4 (Low):** Minor risk requiring routine remediation")
-        sections.append(
-            "- **P5 (Informational):** Security best practice recommendations"
-        )
+        sections.append("- **P5 (Informational):** Security best practice recommendations")
         sections.append("")
 
         return "\n".join(sections)
@@ -948,9 +896,7 @@ class ProfessionalReporter:
         )
 
         # Filter high-confidence vulnerabilities
-        high_confidence_reports = [
-            report for report in self.vulnerability_reports if report.confidence > 0.9
-        ]
+        high_confidence_reports = [report for report in self.vulnerability_reports if report.confidence > 0.9]
 
         if not high_confidence_reports:
             await self.ws_manager.send_log(
@@ -972,9 +918,7 @@ class ProfessionalReporter:
                 if template:
                     await self._save_nuclei_template(template, templates_dir)
             except Exception as e:
-                logger.debug(
-                    f"Failed to generate Nuclei template for {report.vulnerability_id}: {e}"
-                )
+                logger.debug(f"Failed to generate Nuclei template for {report.vulnerability_id}: {e}")
 
         await self.ws_manager.send_log(
             self.session_id,
@@ -983,9 +927,7 @@ class ProfessionalReporter:
             phase="nuclei_generation",
         )
 
-    async def _generate_single_nuclei_template(
-        self, report: VulnerabilityReport
-    ) -> Optional[str]:
+    async def _generate_single_nuclei_template(self, report: VulnerabilityReport) -> Optional[str]:
         """Generate a single Nuclei template for a vulnerability"""
         prompt = f"""
         Generate a Nuclei YAML template for the following vulnerability:

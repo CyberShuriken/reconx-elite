@@ -196,9 +196,7 @@ class AgenticBrowser:
 
     async def _initialize_browser(self) -> None:
         """Initialize Playwright browser"""
-        await self.ws_manager.send_log(
-            self.session_id, "info", "Initializing browser...", phase="agent_browser"
-        )
+        await self.ws_manager.send_log(self.session_id, "info", "Initializing browser...", phase="agent_browser")
 
         self.playwright = await async_playwright().start()
 
@@ -237,18 +235,13 @@ class AgenticBrowser:
                 route_path=request.url,
                 route_method=request.method,
                 requires_auth=True,  # Assume API routes require auth
-                parameters=(
-                    list(request.post_data_json.keys())
-                    if request.post_data_json
-                    else []
-                ),
+                parameters=(list(request.post_data_json.keys()) if request.post_data_json else []),
                 discovered_from="request_interception",
             )
 
             # Avoid duplicates
             if not any(
-                r.route_path == route_info.route_path
-                and r.route_method == route_info.route_method
+                r.route_path == route_info.route_path and r.route_method == route_info.route_method
                 for r in self.discovered_routes
             ):
                 self.discovered_routes.append(route_info)
@@ -289,9 +282,7 @@ class AgenticBrowser:
             confidence=0.5,
         )
 
-    async def _ai_analyze_authentication(
-        self, content: str, title: str
-    ) -> AuthenticationType:
+    async def _ai_analyze_authentication(self, content: str, title: str) -> AuthenticationType:
         """Use AI to analyze authentication type"""
         # Limit content to prevent token overflow
         content_sample = content[:5000] if len(content) > 5000 else content
@@ -432,10 +423,7 @@ class AgenticBrowser:
                 form_action = await form.get_attribute("action") or ""
                 form_method = await form.get_attribute("method") or "POST"
 
-                if any(
-                    indicator in form_action.lower()
-                    for indicator in ["login", "auth", "signin"]
-                ):
+                if any(indicator in form_action.lower() for indicator in ["login", "auth", "signin"]):
                     # Find username and password fields
                     username_field = await form.query_selector(
                         'input[type="email"], input[type="text"], input[name*="user"], input[name*="email"], input[id*="user"]'
@@ -453,10 +441,7 @@ class AgenticBrowser:
 
                         # Check if login was successful
                         current_url = self.page.url
-                        if (
-                            "login" not in current_url.lower()
-                            and "auth" not in current_url.lower()
-                        ):
+                        if "login" not in current_url.lower() and "auth" not in current_url.lower():
                             self.browser_session.is_authenticated = True
                             self.browser_session.confidence = 0.9
                             return True
@@ -470,9 +455,7 @@ class AgenticBrowser:
     async def _handle_oauth(self, credentials: Dict[str, str] = None) -> None:
         """Handle OAuth authentication"""
         # Look for OAuth buttons/links
-        oauth_links = await self.page.query_selector_all(
-            'a[href*="oauth"], button[data-oauth]'
-        )
+        oauth_links = await self.page.query_selector_all('a[href*="oauth"], button[data-oauth]')
 
         for link in oauth_links:
             try:
@@ -532,9 +515,7 @@ class AgenticBrowser:
 
     async def _discover_spa_routes(self) -> None:
         """Discover SPA routes by analyzing JavaScript and navigation"""
-        await self.ws_manager.send_log(
-            self.session_id, "info", "Discovering SPA routes...", phase="agent_browser"
-        )
+        await self.ws_manager.send_log(self.session_id, "info", "Discovering SPA routes...", phase="agent_browser")
 
         try:
             # Get all JavaScript files
@@ -577,9 +558,7 @@ class AgenticBrowser:
                     matches = re.findall(pattern, js_content)
                     for match in matches:
                         route = RouteDiscovery(
-                            route_path=(
-                                f"/{match}" if not match.startswith("/") else match
-                            ),
+                            route_path=(f"/{match}" if not match.startswith("/") else match),
                             route_method="GET",
                             requires_auth=True,
                             parameters=[],
@@ -587,10 +566,7 @@ class AgenticBrowser:
                         )
 
                         # Avoid duplicates
-                        if not any(
-                            r.route_path == route.route_path
-                            for r in self.discovered_routes
-                        ):
+                        if not any(r.route_path == route.route_path for r in self.discovered_routes):
                             self.discovered_routes.append(route)
 
         except Exception as e:
@@ -603,9 +579,7 @@ class AgenticBrowser:
         matches = re.findall(link_pattern, content)
 
         for match in matches:
-            if len(match) > 1 and not match.endswith(
-                (".css", ".js", ".png", ".jpg", ".ico")
-            ):
+            if len(match) > 1 and not match.endswith((".css", ".js", ".png", ".jpg", ".ico")):
                 route = RouteDiscovery(
                     route_path=match,
                     route_method="GET",
@@ -615,9 +589,7 @@ class AgenticBrowser:
                 )
 
                 # Avoid duplicates
-                if not any(
-                    r.route_path == route.route_path for r in self.discovered_routes
-                ):
+                if not any(r.route_path == route.route_path for r in self.discovered_routes):
                     self.discovered_routes.append(route)
 
     async def _probe_common_routes(self) -> None:
@@ -658,9 +630,7 @@ class AgenticBrowser:
 
     async def _analyze_forms(self) -> None:
         """Analyze forms on the page"""
-        await self.ws_manager.send_log(
-            self.session_id, "info", "Analyzing forms...", phase="agent_browser"
-        )
+        await self.ws_manager.send_log(self.session_id, "info", "Analyzing forms...", phase="agent_browser")
 
         try:
             forms = await self.page.query_selector_all("form")
@@ -690,10 +660,7 @@ class AgenticBrowser:
                 "action": action,
                 "method": method,
                 "fields": fields,
-                "requires_auth": any(
-                    field.get("name", "") in ["password", "login", "auth"]
-                    for field in fields
-                ),
+                "requires_auth": any(field.get("name", "") in ["password", "login", "auth"] for field in fields),
             }
 
         except Exception as e:
@@ -724,9 +691,7 @@ class AgenticBrowser:
         if not self.browser_session:
             return
 
-        await self.ws_manager.send_log(
-            self.session_id, "info", "Extracting session data...", phase="agent_browser"
-        )
+        await self.ws_manager.send_log(self.session_id, "info", "Extracting session data...", phase="agent_browser")
 
         try:
             # Extract cookies
@@ -746,20 +711,14 @@ class AgenticBrowser:
             self.browser_session.session_storage = session_storage
 
             # Extract authorization headers from storage
-            auth_token = (
-                local_storage.get("token")
-                or local_storage.get("authToken")
-                or session_storage.get("token")
-            )
+            auth_token = local_storage.get("token") or local_storage.get("authToken") or session_storage.get("token")
             if auth_token:
                 self.browser_session.headers["Authorization"] = f"Bearer {auth_token}"
                 self.browser_session.access_tokens["bearer"] = auth_token
 
             # Update confidence based on session data
             if self.browser_session.cookies or self.browser_session.access_tokens:
-                self.browser_session.confidence = min(
-                    self.browser_session.confidence + 0.2, 1.0
-                )
+                self.browser_session.confidence = min(self.browser_session.confidence + 0.2, 1.0)
 
         except Exception as e:
             logger.debug(f"Session data extraction failed: {e}")
@@ -786,60 +745,30 @@ class AgenticBrowser:
             "module": "agent_browser",
             "browser_session": {
                 "authentication_type": (
-                    self.browser_session.authentication_type.value
-                    if self.browser_session
-                    else "unknown"
+                    self.browser_session.authentication_type.value if self.browser_session else "unknown"
                 ),
-                "is_authenticated": (
-                    self.browser_session.is_authenticated
-                    if self.browser_session
-                    else False
-                ),
-                "confidence": (
-                    self.browser_session.confidence if self.browser_session else 0.0
-                ),
-                "cookies_count": (
-                    len(self.browser_session.cookies) if self.browser_session else 0
-                ),
-                "access_tokens": (
-                    list(self.browser_session.access_tokens.keys())
-                    if self.browser_session
-                    else []
-                ),
+                "is_authenticated": (self.browser_session.is_authenticated if self.browser_session else False),
+                "confidence": (self.browser_session.confidence if self.browser_session else 0.0),
+                "cookies_count": (len(self.browser_session.cookies) if self.browser_session else 0),
+                "access_tokens": (list(self.browser_session.access_tokens.keys()) if self.browser_session else []),
                 "headers": self.browser_session.headers if self.browser_session else {},
             },
             "discovered_routes": {
                 "total_count": len(self.discovered_routes),
-                "auth_required_count": len(
-                    [r for r in self.discovered_routes if r.requires_auth]
-                ),
+                "auth_required_count": len([r for r in self.discovered_routes if r.requires_auth]),
                 "results": [asdict(route) for route in self.discovered_routes],
-                "discovery_methods": list(
-                    set(r.discovered_from for r in self.discovered_routes)
-                ),
+                "discovery_methods": list(set(r.discovered_from for r in self.discovered_routes)),
             },
             "form_analysis": {
                 "total_forms": len(self.form_analysis),
-                "auth_forms_count": len(
-                    [
-                        f
-                        for f in self.form_analysis.values()
-                        if f.get("requires_auth", False)
-                    ]
-                ),
+                "auth_forms_count": len([f for f in self.form_analysis.values() if f.get("requires_auth", False)]),
                 "results": self.form_analysis,
             },
             "summary": {
-                "authentication_successful": (
-                    self.browser_session.is_authenticated
-                    if self.browser_session
-                    else False
-                ),
+                "authentication_successful": (self.browser_session.is_authenticated if self.browser_session else False),
                 "routes_discovered": len(self.discovered_routes),
                 "forms_analyzed": len(self.form_analysis),
-                "session_data_extracted": bool(
-                    self.browser_session.cookies if self.browser_session else []
-                ),
+                "session_data_extracted": bool(self.browser_session.cookies if self.browser_session else []),
                 "recommendation": "Use extracted session data for authenticated vulnerability scanning",
             },
         }

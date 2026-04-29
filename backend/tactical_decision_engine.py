@@ -27,9 +27,7 @@ class TacticalDecisionEngine:
             "Business_Logic",
         ]
 
-    async def decide_attack_vectors(
-        self, tech_profile: dict[str, list[str]]
-    ) -> dict[str, Any]:
+    async def decide_attack_vectors(self, tech_profile: dict[str, list[str]]) -> dict[str, Any]:
         """Given tech stack, decide which vulnerabilities to prioritize."""
         logger.info(f"Deciding attack vectors based on tech profile")
 
@@ -40,34 +38,24 @@ class TacticalDecisionEngine:
             "reasoning": {},
         }
 
-        tech_str = " ".join(
-            str(v) for vals in tech_profile.values() for v in vals
-        ).lower()
+        tech_str = " ".join(str(v) for vals in tech_profile.values() for v in vals).lower()
 
         if "graphql" in tech_str:
             decision["recommended_vectors"].extend(["GraphQL Injection", "IDOR"])
-            decision["reasoning"][
-                "graphql"
-            ] = "GraphQL detected - test for introspection and nested query attacks"
+            decision["reasoning"]["graphql"] = "GraphQL detected - test for introspection and nested query attacks"
 
         if "aws" in tech_str:
-            decision["recommended_vectors"].extend(
-                ["SSRF Metadata", "S3 Misconfiguration"]
-            )
+            decision["recommended_vectors"].extend(["SSRF Metadata", "S3 Misconfiguration"])
             decision["reasoning"][
                 "aws"
             ] = "AWS detected - target 169.254.169.254 metadata endpoint and S3 bucket misconfigs"
 
         if "jwt" in tech_str:
             decision["recommended_vectors"].extend(["JWT Attacks", "Session Bypass"])
-            decision["reasoning"][
-                "jwt"
-            ] = "JWT detected - test algorithm bypass, weak keys, signature validation"
+            decision["reasoning"]["jwt"] = "JWT detected - test algorithm bypass, weak keys, signature validation"
 
         if "checkout" in tech_str or "payment" in tech_str or "cart" in tech_str:
-            decision["recommended_vectors"].extend(
-                ["Business Logic", "Price Manipulation"]
-            )
+            decision["recommended_vectors"].extend(["Business Logic", "Price Manipulation"])
             decision["reasoning"][
                 "checkout"
             ] = "Checkout flow detected - focus on price/quantity manipulation and discount bypass"
@@ -78,9 +66,7 @@ class TacticalDecisionEngine:
                 "rest_api"
             ] = "REST API detected - enumerate endpoints and test for horizontal privilege escalation"
 
-        decision["priority_order"] = list(
-            dict.fromkeys(decision["recommended_vectors"])
-        )
+        decision["priority_order"] = list(dict.fromkeys(decision["recommended_vectors"]))
 
         return decision
 
@@ -100,9 +86,7 @@ class TacticalDecisionEngine:
         }
 
         for vuln_type in self.big_7_vulns:
-            matching_findings = [
-                f for f in findings if vuln_type in f.get("vuln_type", "")
-            ]
+            matching_findings = [f for f in findings if vuln_type in f.get("vuln_type", "")]
             report["big_7_coverage"][vuln_type] = {
                 "count": len(matching_findings),
                 "findings": matching_findings,

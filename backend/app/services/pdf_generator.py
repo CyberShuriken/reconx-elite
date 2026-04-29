@@ -157,37 +157,23 @@ class PDFReportGenerator:
 
         # Subdomains section
         if report_data.get("scan", {}).get("subdomains"):
-            story.extend(
-                self._create_subdomains_section(report_data["scan"]["subdomains"])
-            )
+            story.extend(self._create_subdomains_section(report_data["scan"]["subdomains"]))
 
         # Endpoints section
         if report_data.get("scan", {}).get("endpoints"):
-            story.extend(
-                self._create_endpoints_section(report_data["scan"]["endpoints"])
-            )
+            story.extend(self._create_endpoints_section(report_data["scan"]["endpoints"]))
 
         # Vulnerabilities section
         if report_data.get("scan", {}).get("vulnerabilities"):
-            story.extend(
-                self._create_vulnerabilities_section(
-                    report_data["scan"]["vulnerabilities"]
-                )
-            )
+            story.extend(self._create_vulnerabilities_section(report_data["scan"]["vulnerabilities"]))
 
         # JavaScript assets section
         if report_data.get("scan", {}).get("javascript_assets"):
-            story.extend(
-                self._create_javascript_section(
-                    report_data["scan"]["javascript_assets"]
-                )
-            )
+            story.extend(self._create_javascript_section(report_data["scan"]["javascript_assets"]))
 
         # Attack paths section
         if report_data.get("scan", {}).get("attack_paths"):
-            story.extend(
-                self._create_attack_paths_section(report_data["scan"]["attack_paths"])
-            )
+            story.extend(self._create_attack_paths_section(report_data["scan"]["attack_paths"]))
 
         doc.build(story)
         buffer.seek(0)
@@ -198,9 +184,7 @@ class PDFReportGenerator:
         story = []
 
         # Main title
-        story.append(
-            Paragraph("ReconX Elite Security Report", self.styles["CustomTitle"])
-        )
+        story.append(Paragraph("ReconX Elite Security Report", self.styles["CustomTitle"]))
         story.append(Spacer(1, 0.5 * inch))
 
         # Target information
@@ -220,15 +204,9 @@ class PDFReportGenerator:
             try:
                 dt = datetime.fromisoformat(scan_date.replace("Z", "+00:00"))
                 formatted_date = dt.strftime("%B %d, %Y at %I:%M %p UTC")
-                story.append(
-                    Paragraph(
-                        f"<b>Scan Date:</b> {formatted_date}", self.styles["Normal"]
-                    )
-                )
+                story.append(Paragraph(f"<b>Scan Date:</b> {formatted_date}", self.styles["Normal"]))
             except:
-                story.append(
-                    Paragraph(f"<b>Scan Date:</b> {scan_date}", self.styles["Normal"])
-                )
+                story.append(Paragraph(f"<b>Scan Date:</b> {scan_date}", self.styles["Normal"]))
 
         story.append(Spacer(1, 0.2 * inch))
         story.append(
@@ -280,18 +258,10 @@ class PDFReportGenerator:
         vulnerabilities = report_data.get("scan", {}).get("vulnerabilities", [])
 
         # Severity breakdown
-        critical_count = len(
-            [v for v in vulnerabilities if v.get("severity", "").lower() == "critical"]
-        )
-        high_count = len(
-            [v for v in vulnerabilities if v.get("severity", "").lower() == "high"]
-        )
-        medium_count = len(
-            [v for v in vulnerabilities if v.get("severity", "").lower() == "medium"]
-        )
-        low_count = len(
-            [v for v in vulnerabilities if v.get("severity", "").lower() == "low"]
-        )
+        critical_count = len([v for v in vulnerabilities if v.get("severity", "").lower() == "critical"])
+        high_count = len([v for v in vulnerabilities if v.get("severity", "").lower() == "high"])
+        medium_count = len([v for v in vulnerabilities if v.get("severity", "").lower() == "medium"])
+        low_count = len([v for v in vulnerabilities if v.get("severity", "").lower() == "low"])
 
         summary_text = f"""
         The reconnaissance scan for {report_data.get('target', {}).get('domain', 'N/A')} identified 
@@ -304,15 +274,9 @@ class PDFReportGenerator:
 
         # Top vulnerabilities
         if vulnerabilities:
-            story.append(
-                Paragraph("Critical Findings", self.styles["SubSectionHeader"])
-            )
+            story.append(Paragraph("Critical Findings", self.styles["SubSectionHeader"]))
 
-            critical_vulns = [
-                v
-                for v in vulnerabilities
-                if v.get("severity", "").lower() in ["critical", "high"]
-            ]
+            critical_vulns = [v for v in vulnerabilities if v.get("severity", "").lower() in ["critical", "high"]]
             for vuln in critical_vulns[:5]:  # Top 5 critical/high findings
                 story.append(
                     Paragraph(
@@ -331,18 +295,10 @@ class PDFReportGenerator:
 
         # Filter live subdomains
         live_subdomains = [s for s in subdomains if s.get("is_live", False)]
-        takeover_candidates = [
-            s for s in subdomains if s.get("takeover_candidate", False)
-        ]
+        takeover_candidates = [s for s in subdomains if s.get("takeover_candidate", False)]
 
-        story.append(
-            Paragraph(
-                f"Total subdomains discovered: {len(subdomains)}", self.styles["Normal"]
-            )
-        )
-        story.append(
-            Paragraph(f"Live subdomains: {len(live_subdomains)}", self.styles["Normal"])
-        )
+        story.append(Paragraph(f"Total subdomains discovered: {len(subdomains)}", self.styles["Normal"]))
+        story.append(Paragraph(f"Live subdomains: {len(live_subdomains)}", self.styles["Normal"]))
         if takeover_candidates:
             story.append(
                 Paragraph(
@@ -366,16 +322,12 @@ class PDFReportGenerator:
                 cdn_waf.append(subdomain["waf"])
             cdn_waf_str = ", ".join(cdn_waf) if cdn_waf else "None"
 
-            subdomain_data.append(
-                [subdomain.get("hostname", "N/A"), status, env, cdn_waf_str]
-            )
+            subdomain_data.append([subdomain.get("hostname", "N/A"), status, env, cdn_waf_str])
 
         if len(subdomains) > 20:
             subdomain_data.append([f"... and {len(subdomains) - 20} more", "", "", ""])
 
-        table = Table(
-            subdomain_data, colWidths=[2.5 * inch, 1 * inch, 1 * inch, 1.5 * inch]
-        )
+        table = Table(subdomain_data, colWidths=[2.5 * inch, 1 * inch, 1 * inch, 1.5 * inch])
         table.setStyle(
             TableStyle(
                 [
@@ -407,16 +359,8 @@ class PDFReportGenerator:
         high_priority = [e for e in endpoints if e.get("priority_score", 0) > 7]
         interesting_endpoints = [e for e in endpoints if e.get("is_interesting", False)]
 
-        story.append(
-            Paragraph(
-                f"Total endpoints discovered: {len(endpoints)}", self.styles["Normal"]
-            )
-        )
-        story.append(
-            Paragraph(
-                f"High-priority endpoints: {len(high_priority)}", self.styles["Normal"]
-            )
-        )
+        story.append(Paragraph(f"Total endpoints discovered: {len(endpoints)}", self.styles["Normal"]))
+        story.append(Paragraph(f"High-priority endpoints: {len(high_priority)}", self.styles["Normal"]))
         story.append(
             Paragraph(
                 f"Interesting endpoints: {len(interesting_endpoints)}",
@@ -428,9 +372,7 @@ class PDFReportGenerator:
 
         # High-priority endpoints table
         if high_priority:
-            story.append(
-                Paragraph("High-Priority Endpoints", self.styles["SubSectionHeader"])
-            )
+            story.append(Paragraph("High-Priority Endpoints", self.styles["SubSectionHeader"]))
 
             endpoint_data = [["URL", "Category", "Priority", "Tags"]]
 
@@ -445,9 +387,7 @@ class PDFReportGenerator:
 
                 endpoint_data.append([url, category, priority, tags])
 
-            table = Table(
-                endpoint_data, colWidths=[2.5 * inch, 1 * inch, 0.8 * inch, 1.7 * inch]
-            )
+            table = Table(endpoint_data, colWidths=[2.5 * inch, 1 * inch, 0.8 * inch, 1.7 * inch])
             table.setStyle(
                 TableStyle(
                     [
@@ -473,9 +413,7 @@ class PDFReportGenerator:
         """Create vulnerabilities section."""
         story = []
 
-        story.append(
-            Paragraph("Security Vulnerabilities", self.styles["SectionHeader"])
-        )
+        story.append(Paragraph("Security Vulnerabilities", self.styles["SectionHeader"]))
 
         if not vulnerabilities:
             story.append(
@@ -574,9 +512,7 @@ class PDFReportGenerator:
                 evidence = vuln.get("evidence_json")
                 if evidence and isinstance(evidence, dict):
                     if "request" in evidence:
-                        story.append(
-                            Paragraph("<b>Evidence Request:</b>", self.styles["Normal"])
-                        )
+                        story.append(Paragraph("<b>Evidence Request:</b>", self.styles["Normal"]))
                         story.append(
                             Paragraph(
                                 str(evidence["request"])[:200] + "...",
@@ -602,9 +538,7 @@ class PDFReportGenerator:
         """Create JavaScript assets section."""
         story = []
 
-        story.append(
-            Paragraph("JavaScript Assets Analysis", self.styles["SectionHeader"])
-        )
+        story.append(Paragraph("JavaScript Assets Analysis", self.styles["SectionHeader"]))
 
         # Assets with secrets
         assets_with_secrets = [js for js in javascript_assets if js.get("secrets_json")]
@@ -624,16 +558,10 @@ class PDFReportGenerator:
 
         if assets_with_secrets:
             story.append(Spacer(1, 0.2 * inch))
-            story.append(
-                Paragraph("⚠️ Potential Secrets Found", self.styles["SubSectionHeader"])
-            )
+            story.append(Paragraph("⚠️ Potential Secrets Found", self.styles["SubSectionHeader"]))
 
             for asset in assets_with_secrets[:10]:  # Top 10
-                story.append(
-                    Paragraph(
-                        f"<b>{asset.get('url', 'N/A')}</b>", self.styles["Normal"]
-                    )
-                )
+                story.append(Paragraph(f"<b>{asset.get('url', 'N/A')}</b>", self.styles["Normal"]))
 
                 secrets = asset.get("secrets_json", {})
                 if isinstance(secrets, dict):
@@ -649,9 +577,7 @@ class PDFReportGenerator:
                 story.append(Spacer(1, 0.1 * inch))
 
         # Endpoint extraction results
-        total_extracted_endpoints = sum(
-            len(js.get("extracted_endpoints", [])) for js in javascript_assets
-        )
+        total_extracted_endpoints = sum(len(js.get("extracted_endpoints", [])) for js in javascript_assets)
 
         if total_extracted_endpoints > 0:
             story.append(Spacer(1, 0.2 * inch))
@@ -680,9 +606,7 @@ class PDFReportGenerator:
             return story
 
         # Sort by score
-        sorted_paths = sorted(
-            attack_paths, key=lambda p: p.get("score", 0), reverse=True
-        )
+        sorted_paths = sorted(attack_paths, key=lambda p: p.get("score", 0), reverse=True)
 
         story.append(
             Paragraph(
@@ -709,11 +633,7 @@ class PDFReportGenerator:
                     self.styles["Normal"],
                 )
             )
-            story.append(
-                Paragraph(
-                    f"<b>Score:</b> {path.get('score', 0)}", self.styles["Normal"]
-                )
-            )
+            story.append(Paragraph(f"<b>Score:</b> {path.get('score', 0)}", self.styles["Normal"]))
             story.append(
                 Paragraph(
                     f"<b>Summary:</b> {path.get('summary', 'No summary available')}",
@@ -728,9 +648,7 @@ class PDFReportGenerator:
                 for j, step in enumerate(steps[:5]):  # First 5 steps
                     if isinstance(step, dict):
                         step_desc = step.get("description", f"Step {j+1}")
-                        story.append(
-                            Paragraph(f"  {j+1}. {step_desc}", self.styles["Normal"])
-                        )
+                        story.append(Paragraph(f"  {j+1}. {step_desc}", self.styles["Normal"]))
 
             story.append(Spacer(1, 0.3 * inch))
 

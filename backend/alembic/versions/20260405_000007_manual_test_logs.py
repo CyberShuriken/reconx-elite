@@ -35,14 +35,10 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(
-            ["vulnerability_id"], ["vulnerabilities.id"], ondelete="SET NULL"
-        ),
+        sa.ForeignKeyConstraint(["vulnerability_id"], ["vulnerabilities.id"], ondelete="SET NULL"),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        op.f("ix_manual_test_logs_id"), "manual_test_logs", ["id"], unique=False
-    )
+    op.create_index(op.f("ix_manual_test_logs_id"), "manual_test_logs", ["id"], unique=False)
     op.create_index(
         op.f("ix_manual_test_logs_user_id"),
         "manual_test_logs",

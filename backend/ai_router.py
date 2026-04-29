@@ -104,9 +104,7 @@ class AIRouter:
         self.model_availability = self._check_model_availability()
 
         if not self.openrouter_key and not self.gemini_key:
-            logger.warning(
-                "No AI API keys configured. AI calls will return fallback responses."
-            )
+            logger.warning("No AI API keys configured. AI calls will return fallback responses.")
 
     def _check_model_availability(self) -> dict[str, bool]:
         """Check which models are available based on API keys"""
@@ -116,9 +114,7 @@ class AIRouter:
         }
         return availability
 
-    def _select_model_for_task(
-        self, task_type: str, fallback_role: str = "orchestrator"
-    ) -> dict[str, Any]:
+    def _select_model_for_task(self, task_type: str, fallback_role: str = "orchestrator") -> dict[str, Any]:
         """Select the best model for a specific task type"""
         # Try task-specific routing first
         if task_type in TASK_ROUTING:
@@ -134,11 +130,7 @@ class AIRouter:
                         "provider": provider,
                         "max_tokens": model_config["max_tokens"],
                         "temperature": model_config["temperature"],
-                        "url": (
-                            self.gemini_url
-                            if provider == "gemini"
-                            else self.openrouter_url
-                        ),
+                        "url": (self.gemini_url if provider == "gemini" else self.openrouter_url),
                     }
 
         # Fallback to legacy model mapping
@@ -167,9 +159,7 @@ class AIRouter:
 
         # Final fallback
         return {
-            "model_id": legacy_model_map.get(
-                "orchestrator", "meta-llama/llama-3.3-70b-instruct"
-            ),
+            "model_id": legacy_model_map.get("orchestrator", "meta-llama/llama-3.3-70b-instruct"),
             "provider": "openrouter",
             "max_tokens": 2048,
             "temperature": 0.2,
@@ -208,9 +198,7 @@ class AIRouter:
 
         # Prepare payload based on provider
         if model_config["provider"] == "gemini":
-            payload = self._prepare_gemini_payload(
-                prompt, max_tokens, model_config["temperature"]
-            )
+            payload = self._prepare_gemini_payload(prompt, max_tokens, model_config["temperature"])
             headers = self._prepare_gemini_headers()
         else:
             payload = self._prepare_openrouter_payload(
@@ -240,11 +228,7 @@ class AIRouter:
                 if model_config["provider"] == "gemini":
                     content = self._extract_gemini_content(result)
                 else:
-                    content = (
-                        result.get("choices", [{}])[0]
-                        .get("message", {})
-                        .get("content", "")
-                    )
+                    content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
 
                 return {
                     "role": role,
@@ -256,9 +240,7 @@ class AIRouter:
 
             except Exception as exc:
                 last_error = str(exc)
-                logger.warning(
-                    "AI model call failed (attempt %s/%s): %s", attempt, retries, exc
-                )
+                logger.warning("AI model call failed (attempt %s/%s): %s", attempt, retries, exc)
                 await asyncio.sleep(delay)
                 delay *= 2
 
@@ -272,14 +254,10 @@ class AIRouter:
             "task_type": task_type,
         }
 
-    def _prepare_gemini_payload(
-        self, prompt: str, max_tokens: int, temperature: float
-    ) -> dict[str, Any]:
+    def _prepare_gemini_payload(self, prompt: str, max_tokens: int, temperature: float) -> dict[str, Any]:
         """Prepare payload for Gemini API"""
         return {
-            "contents": [
-                {"parts": [{"text": f"You are a security AI assistant.\n\n{prompt}"}]}
-            ],
+            "contents": [{"parts": [{"text": f"You are a security AI assistant.\n\n{prompt}"}]}],
             "generationConfig": {
                 "maxOutputTokens": max_tokens,
                 "temperature": temperature,
@@ -323,9 +301,7 @@ class AIRouter:
             pass
         return ""
 
-    async def classify_hosts(
-        self, hosts_list: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    async def classify_hosts(self, hosts_list: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if not hosts_list:
             return []
         results = []
@@ -337,11 +313,7 @@ class AIRouter:
                 else (
                     "auth_target"
                     if "login" in name or "admin" in name
-                    else (
-                        "dev_target"
-                        if "dev" in name
-                        else "admin_target" if "admin" in name else "skip"
-                    )
+                    else ("dev_target" if "dev" in name else "admin_target" if "admin" in name else "skip")
                 )
             )
             results.append({**host, "category": category})
@@ -359,9 +331,7 @@ class AIRouter:
                 secrets.append(line.strip())
         return {"endpoints": endpoints, "secrets": secrets, "auth_logic": auth_logic}
 
-    async def generate_idor_tests(
-        self, endpoint: str, method: str, params: list[str]
-    ) -> list[dict[str, Any]]:
+    async def generate_idor_tests(self, endpoint: str, method: str, params: list[str]) -> list[dict[str, Any]]:
         tests = []
         for param in params[:3]:
             tests.append(
@@ -382,21 +352,15 @@ class AIRouter:
             "summary": "Check token signing algorithm and header trust.",
         }
 
-    async def analyze_headers(
-        self, headers_dict: dict[str, str], target: str
-    ) -> list[dict[str, Any]]:
+    async def analyze_headers(self, headers_dict: dict[str, str], target: str) -> list[dict[str, Any]]:
         findings = []
         if headers_dict.get("access-control-allow-origin") in (
             "*",
             "https://evil-reconx.com",
         ):
-            findings.append(
-                {"issue": "CORS policy too permissive", "severity": "Medium"}
-            )
+            findings.append({"issue": "CORS policy too permissive", "severity": "Medium"})
         if "x-frame-options" not in headers_dict:
-            findings.append(
-                {"issue": "Missing X-Frame-Options header", "severity": "Low"}
-            )
+            findings.append({"issue": "Missing X-Frame-Options header", "severity": "Low"})
         if "content-security-policy" not in headers_dict:
             findings.append(
                 {
@@ -428,9 +392,7 @@ class AIRouter:
             "cvss_vector": "CVSS:3.1/AV:N/AC:H/PR:N/UI:R/S:U/C:L/I:N/A:N",
         }
 
-    async def find_chains(
-        self, findings_list: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    async def find_chains(self, findings_list: list[dict[str, Any]]) -> list[dict[str, Any]]:
         if len(findings_list) < 2:
             return []
         return [
@@ -445,17 +407,13 @@ class AIRouter:
     async def write_report(self, finding_dict: dict[str, Any]) -> str:
         return f"Finding report for {finding_dict.get('vuln_type')} at {finding_dict.get('endpoint')}: {finding_dict.get('description')}"
 
-    async def analyze_target_recon(
-        self, target: str, discovered_info: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def analyze_target_recon(self, target: str, discovered_info: dict[str, Any]) -> dict[str, Any]:
         return {
             "priority_targets": [target],
             "attack_plan": "Focus on live hosts, API endpoints, and exposed metadata.",
         }
 
-    async def generate_executive_summary(
-        self, all_findings: list[dict[str, Any]], stats: dict[str, Any]
-    ) -> str:
+    async def generate_executive_summary(self, all_findings: list[dict[str, Any]], stats: dict[str, Any]) -> str:
         critical = sum(1 for f in all_findings if f.get("severity") == "Critical")
         high = sum(1 for f in all_findings if f.get("severity") == "High")
         return f"ReconX-Elite scanned {stats.get('total_subdomains', 0)} subdomains and found {critical} critical and {high} high issues. Review the findings for remediation guidance."
@@ -503,14 +461,10 @@ class AIRouter:
             primary_result = await self._primary_model_analysis(vulnerability_data)
 
             # Phase 2: Secondary model review (Llama 3.3)
-            secondary_result = await self._secondary_model_review(
-                vulnerability_data, primary_result
-            )
+            secondary_result = await self._secondary_model_review(vulnerability_data, primary_result)
 
             # Phase 3: Consensus calculation
-            consensus_result = await self._calculate_consensus(
-                primary_result, secondary_result, config
-            )
+            consensus_result = await self._calculate_consensus(primary_result, secondary_result, config)
 
             return consensus_result
 
@@ -528,9 +482,7 @@ class AIRouter:
                 reasoning="Consensus analysis failed due to error",
             )
 
-    async def _primary_model_analysis(
-        self, vulnerability_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    async def _primary_model_analysis(self, vulnerability_data: Dict[str, Any]) -> Dict[str, Any]:
         """Primary model analysis using Qwen3 Coder 480B"""
         prompt = f"""
         Analyze this vulnerability finding and provide your expert assessment:
@@ -565,12 +517,8 @@ class AIRouter:
                         "confidence": analysis.get("confidence", 0.5),
                         "severity": analysis.get("severity", "medium"),
                         "exploit_logic": analysis.get("exploit_logic", "unknown"),
-                        "false_positive_indicators": analysis.get(
-                            "false_positive_indicators", []
-                        ),
-                        "recommended_action": analysis.get(
-                            "recommended_action", "review"
-                        ),
+                        "false_positive_indicators": analysis.get("false_positive_indicators", []),
+                        "recommended_action": analysis.get("recommended_action", "review"),
                         "raw_output": result["output"],
                     }
                 except json.JSONDecodeError:
@@ -637,9 +585,7 @@ class AIRouter:
                         "confidence": review.get("confidence", 0.5),
                         "flaws_detected": review.get("flaws_detected", []),
                         "agreement": review.get("agreement", True),
-                        "severity_assessment": review.get(
-                            "severity_assessment", "medium"
-                        ),
+                        "severity_assessment": review.get("severity_assessment", "medium"),
                         "reasoning": review.get("reasoning", ""),
                         "raw_output": result["output"],
                     }
@@ -679,10 +625,7 @@ class AIRouter:
 
         # Determine final determination
         flaws_detected = secondary_result.get("flaws_detected", [])
-        has_critical_flaws = any(
-            "critical" in flaw.lower() or "major" in flaw.lower()
-            for flaw in flaws_detected
-        )
+        has_critical_flaws = any("critical" in flaw.lower() or "major" in flaw.lower() for flaw in flaws_detected)
 
         if consensus_score >= config.consensus_threshold and not has_critical_flaws:
             final_determination = "pass"

@@ -144,9 +144,7 @@ class OutOfBandService:
 
         return interaction
 
-    def record_interaction(
-        self, db: Session, callback_id: str, request_data: Dict
-    ) -> Optional[OutOfBandInteraction]:
+    def record_interaction(self, db: Session, callback_id: str, request_data: Dict) -> Optional[OutOfBandInteraction]:
         """Record an incoming callback interaction.
 
         Args:
@@ -158,11 +156,7 @@ class OutOfBandService:
             Updated interaction record or None if not found
         """
         # Find the callback record
-        interaction = (
-            db.query(OutOfBandInteraction)
-            .filter(OutOfBandInteraction.callback_id == callback_id)
-            .first()
-        )
+        interaction = db.query(OutOfBandInteraction).filter(OutOfBandInteraction.callback_id == callback_id).first()
 
         if not interaction:
             logger.warning(f"Callback ID {callback_id} not found")
@@ -187,15 +181,11 @@ class OutOfBandService:
         db.commit()
         db.refresh(interaction)
 
-        logger.info(
-            f"Recorded {interaction.interaction_type} interaction for callback {callback_id}"
-        )
+        logger.info(f"Recorded {interaction.interaction_type} interaction for callback {callback_id}")
 
         return interaction
 
-    def _analyze_interaction(
-        self, interaction: OutOfBandInteraction, request_data: Dict
-    ) -> Tuple[str, str]:
+    def _analyze_interaction(self, interaction: OutOfBandInteraction, request_data: Dict) -> Tuple[str, str]:
         """Analyze interaction to determine confidence and extract insights."""
         confidence = "low"
         notes = ""
@@ -212,10 +202,7 @@ class OutOfBandService:
         # Check user agent for automation
         user_agent = request_data.get("user_agent", "")
         if user_agent:
-            if any(
-                tool in user_agent.lower()
-                for tool in ["curl", "wget", "python", "java"]
-            ):
+            if any(tool in user_agent.lower() for tool in ["curl", "wget", "python", "java"]):
                 notes += f" [Tool detected: {user_agent[:50]}]"
                 if confidence == "low":
                     confidence = "medium"
@@ -251,9 +238,7 @@ class OutOfBandService:
         except:
             return False
 
-    def get_user_interactions(
-        self, db: Session, user_id: int, limit: int = 100
-    ) -> List[OutOfBandInteraction]:
+    def get_user_interactions(self, db: Session, user_id: int, limit: int = 100) -> List[OutOfBandInteraction]:
         """Get all interactions for a user."""
         return (
             db.query(OutOfBandInteraction)
@@ -263,9 +248,7 @@ class OutOfBandService:
             .all()
         )
 
-    def get_scan_interactions(
-        self, db: Session, scan_id: int
-    ) -> List[OutOfBandInteraction]:
+    def get_scan_interactions(self, db: Session, scan_id: int) -> List[OutOfBandInteraction]:
         """Get all interactions for a scan."""
         return (
             db.query(OutOfBandInteraction)
@@ -274,9 +257,7 @@ class OutOfBandService:
             .all()
         )
 
-    def get_confirmed_interactions(
-        self, db: Session, user_id: int
-    ) -> List[OutOfBandInteraction]:
+    def get_confirmed_interactions(self, db: Session, user_id: int) -> List[OutOfBandInteraction]:
         """Get confirmed interactions for a user."""
         return (
             db.query(OutOfBandInteraction)

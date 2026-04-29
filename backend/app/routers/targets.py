@@ -41,11 +41,7 @@ def create_target(  # FIX #7: Remove async - only sync db operations
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
-    existing = (
-        db.query(Target)
-        .filter(Target.owner_id == user.id, Target.domain == domain)
-        .first()
-    )
+    existing = db.query(Target).filter(Target.owner_id == user.id, Target.domain == domain).first()
     if existing:
         raise HTTPException(status_code=400, detail="Target already exists")
 
@@ -60,9 +56,7 @@ def create_target(  # FIX #7: Remove async - only sync db operations
         ip_address=request.client.host if request.client else None,
         metadata_json={"target_id": target.id, "domain": target.domain},
     )
-    background_tasks.add_task(
-        _invalidate_targets_cache, build_cache_key(user.id, "targets")
-    )
+    background_tasks.add_task(_invalidate_targets_cache, build_cache_key(user.id, "targets"))
 
     return target
 
@@ -117,11 +111,7 @@ async def list_targets(  # FIX #7: Keep async - uses await on cache
                         "endpoint_count": len(latest.endpoints),
                         "vulnerability_count": len(latest.vulnerabilities),
                         "high_priority_endpoint_count": len(
-                            [
-                                row
-                                for row in latest.endpoints
-                                if row.priority_score >= 60
-                            ]
+                            [row for row in latest.endpoints if row.priority_score >= 60]
                         ),
                     }
                     if latest
@@ -152,11 +142,7 @@ def update_target(  # FIX #7: Remove async - only sync db operations
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    target = (
-        db.query(Target)
-        .filter(Target.id == target_id, Target.owner_id == user.id)
-        .first()
-    )
+    target = db.query(Target).filter(Target.id == target_id, Target.owner_id == user.id).first()
     if not target:
         raise HTTPException(status_code=404, detail="Target not found")
 
@@ -171,9 +157,7 @@ def update_target(  # FIX #7: Remove async - only sync db operations
         ip_address=request.client.host if request.client else None,
         metadata_json={"target_id": target.id},
     )
-    background_tasks.add_task(
-        _invalidate_targets_cache, build_cache_key(user.id, "targets")
-    )
+    background_tasks.add_task(_invalidate_targets_cache, build_cache_key(user.id, "targets"))
 
     return target
 

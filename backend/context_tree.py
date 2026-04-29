@@ -205,27 +205,19 @@ class ContextTree:
                     category=indicator.get("category", "unknown"),
                     version=indicator.get("version"),
                     confidence=indicator.get("confidence", 0.5),
-                    source=(
-                        f"header:{host}"
-                        if indicator in tech_indicators
-                        else f"content:{host}"
-                    ),
+                    source=(f"header:{host}" if indicator in tech_indicators else f"content:{host}"),
                 )
 
                 # Avoid duplicates
                 if not any(
-                    t.name == tech_component.name
-                    and t.category == tech_component.category
-                    for t in self.tech_stack
+                    t.name == tech_component.name and t.category == tech_component.category for t in self.tech_stack
                 ):
                     self.tech_stack.append(tech_component)
 
         except Exception as e:
             logger.debug(f"Host technology analysis failed for {host}: {e}")
 
-    def _extract_tech_from_headers(
-        self, headers: Dict[str, str]
-    ) -> List[Dict[str, Any]]:
+    def _extract_tech_from_headers(self, headers: Dict[str, str]) -> List[Dict[str, Any]]:
         """Extract technology indicators from HTTP headers"""
         indicators = []
 
@@ -332,9 +324,7 @@ class ContextTree:
         """
 
         try:
-            result = await self.ai_router.call_model(
-                role="deep_analyst", prompt=prompt, max_tokens=800
-            )
+            result = await self.ai_router.call_model(role="deep_analyst", prompt=prompt, max_tokens=800)
 
             if result.get("output"):
                 # Parse AI analysis
@@ -361,9 +351,7 @@ class ContextTree:
 
     async def _map_api_schema(self, recon_results: Dict[str, Any]) -> None:
         """Map API endpoints and schemas"""
-        await self.ws_manager.send_log(
-            self.session_id, "info", "Mapping API schema...", phase="api_mapping"
-        )
+        await self.ws_manager.send_log(self.session_id, "info", "Mapping API schema...", phase="api_mapping")
 
         # Use existing API mapper
         api_results = await self.api_mapper.map_apis(self.target, recon_results)
@@ -404,9 +392,7 @@ class ContextTree:
         """
 
         try:
-            result = await self.ai_router.call_model(
-                role="code_engine", prompt=prompt, max_tokens=500
-            )
+            result = await self.ai_router.call_model(role="code_engine", prompt=prompt, max_tokens=500)
 
             if result.get("output"):
                 try:
@@ -419,17 +405,12 @@ class ContextTree:
                             parameters=[],
                             auth_required=True,  # Assume auth required for AI predictions
                             api_type="REST",
-                            description=endpoint_data.get(
-                                "description", "AI predicted"
-                            ),
+                            description=endpoint_data.get("description", "AI predicted"),
                             source="ai_discovery",
                         )
 
                         # Avoid duplicates
-                        if not any(
-                            e.url == endpoint.url and e.method == endpoint.method
-                            for e in self.api_endpoints
-                        ):
+                        if not any(e.url == endpoint.url and e.method == endpoint.method for e in self.api_endpoints):
                             self.api_endpoints.append(endpoint)
 
                 except json.JSONDecodeError:
@@ -438,9 +419,7 @@ class ContextTree:
         except Exception as e:
             logger.error(f"AI API discovery failed: {e}")
 
-    async def _detect_authentication_mechanisms(
-        self, recon_results: Dict[str, Any]
-    ) -> None:
+    async def _detect_authentication_mechanisms(self, recon_results: Dict[str, Any]) -> None:
         """Detect authentication mechanisms"""
         await self.ws_manager.send_log(
             self.session_id,
@@ -470,9 +449,7 @@ class ContextTree:
         # AI-enhanced auth detection
         await self._ai_auth_detection()
 
-    def _extract_auth_mechanisms(
-        self, headers: Dict[str, str], host: str
-    ) -> List[AuthenticationMechanism]:
+    def _extract_auth_mechanisms(self, headers: Dict[str, str], host: str) -> List[AuthenticationMechanism]:
         """Extract authentication mechanisms from headers"""
         mechanisms = []
 
@@ -521,9 +498,7 @@ class ContextTree:
         if not self.auth_mechanisms:
             return
 
-        auth_summary = "\n".join(
-            [f"{t.type} ({t.location})" for t in self.auth_mechanisms]
-        )
+        auth_summary = "\n".join([f"{t.type} ({t.location})" for t in self.auth_mechanisms])
 
         prompt = f"""
         Analyze the authentication mechanisms for {self.target}:
@@ -541,9 +516,7 @@ class ContextTree:
         """
 
         try:
-            result = await self.ai_router.call_model(
-                role="deep_analyst", prompt=prompt, max_tokens=600
-            )
+            result = await self.ai_router.call_model(role="deep_analyst", prompt=prompt, max_tokens=600)
 
             if result.get("output"):
                 try:
@@ -607,9 +580,7 @@ class ContextTree:
                             self.interesting_endpoints.append(interesting_endpoint)
 
                     except Exception as e:
-                        logger.debug(
-                            f"Interesting endpoint check failed for {url}: {e}"
-                        )
+                        logger.debug(f"Interesting endpoint check failed for {url}: {e}")
 
         # AI-enhanced interesting endpoint discovery
         await self._ai_interesting_discovery()
@@ -643,9 +614,7 @@ class ContextTree:
         """
 
         try:
-            result = await self.ai_router.call_model(
-                role="fast_analyst", prompt=prompt, max_tokens=400
-            )
+            result = await self.ai_router.call_model(role="fast_analyst", prompt=prompt, max_tokens=400)
 
             if result.get("output"):
                 try:
@@ -688,9 +657,7 @@ class ContextTree:
                     tech.cves = cves
 
                 except Exception as e:
-                    logger.debug(
-                        f"CVE lookup failed for {tech.name}:{tech.version}: {e}"
-                    )
+                    logger.debug(f"CVE lookup failed for {tech.name}:{tech.version}: {e}")
 
     def _compile_context_tree(self) -> Dict[str, Any]:
         """Compile the complete context tree"""
@@ -701,9 +668,7 @@ class ContextTree:
             "technology_stack": {
                 "total_count": len(self.tech_stack),
                 "by_category": {
-                    category: len(
-                        [t for t in self.tech_stack if t.category == category]
-                    )
+                    category: len([t for t in self.tech_stack if t.category == category])
                     for category in set(t.category for t in self.tech_stack)
                 },
                 "components": [asdict(tech) for tech in self.tech_stack],
@@ -716,22 +681,16 @@ class ContextTree:
                     for method in set(e.method for e in self.api_endpoints)
                 },
                 "by_type": {
-                    api_type: len(
-                        [e for e in self.api_endpoints if e.api_type == api_type]
-                    )
+                    api_type: len([e for e in self.api_endpoints if e.api_type == api_type])
                     for api_type in set(e.api_type for e in self.api_endpoints)
                 },
                 "endpoints": [asdict(endpoint) for endpoint in self.api_endpoints],
-                "auth_required_count": len(
-                    [e for e in self.api_endpoints if e.auth_required]
-                ),
+                "auth_required_count": len([e for e in self.api_endpoints if e.auth_required]),
             },
             "authentication": {
                 "mechanisms_count": len(self.auth_mechanisms),
                 "by_type": {
-                    auth_type: len(
-                        [a for a in self.auth_mechanisms if a.type == auth_type]
-                    )
+                    auth_type: len([a for a in self.auth_mechanisms if a.type == auth_type])
                     for auth_type in set(a.type for a in self.auth_mechanisms)
                 },
                 "mechanisms": [asdict(auth) for auth in self.auth_mechanisms],
@@ -739,39 +698,21 @@ class ContextTree:
             "interesting_endpoints": {
                 "total_count": len(self.interesting_endpoints),
                 "by_category": {
-                    category: len(
-                        [
-                            e
-                            for e in self.interesting_endpoints
-                            if e.category == category
-                        ]
-                    )
+                    category: len([e for e in self.interesting_endpoints if e.category == category])
                     for category in set(e.category for e in self.interesting_endpoints)
                 },
                 "by_risk_level": {
-                    risk: len(
-                        [e for e in self.interesting_endpoints if e.risk_level == risk]
-                    )
+                    risk: len([e for e in self.interesting_endpoints if e.risk_level == risk])
                     for risk in set(e.risk_level for e in self.interesting_endpoints)
                 },
-                "endpoints": [
-                    asdict(endpoint) for endpoint in self.interesting_endpoints
-                ],
-                "accessible_count": len(
-                    [e for e in self.interesting_endpoints if e.accessible]
-                ),
+                "endpoints": [asdict(endpoint) for endpoint in self.interesting_endpoints],
+                "accessible_count": len([e for e in self.interesting_endpoints if e.accessible]),
             },
             "vulnerabilities": {
                 "total_cves": sum(len(cves) for cves in self.known_cves.values()),
                 "by_technology": self.known_cves,
                 "high_severity_count": sum(
-                    len(
-                        [
-                            cve
-                            for cve in cves
-                            if cve.get("severity", "low") in ["high", "critical"]
-                        ]
-                    )
+                    len([cve for cve in cves if cve.get("severity", "low") in ["high", "critical"]])
                     for cves in self.known_cves.values()
                 ),
             },
@@ -814,9 +755,7 @@ class ContextTree:
 
         # High-risk interesting endpoints
         high_risk_endpoints = [
-            e.url
-            for e in self.interesting_endpoints
-            if e.risk_level in ["high", "critical"] and e.accessible
+            e.url for e in self.interesting_endpoints if e.risk_level in ["high", "critical"] and e.accessible
         ]
         priority_targets.extend(high_risk_endpoints)
 

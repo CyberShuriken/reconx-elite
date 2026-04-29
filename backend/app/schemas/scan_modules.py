@@ -62,9 +62,7 @@ class ScanModulesConfig(BaseModel):
     passive_dns: PassiveDnsModule = Field(default_factory=PassiveDnsModule)
     url_sources: UrlSourcesModule = Field(default_factory=UrlSourcesModule)
     active_dns: ActiveDnsModule = Field(default_factory=ActiveDnsModule)
-    content_discovery: ContentDiscoveryModule = Field(
-        default_factory=ContentDiscoveryModule
-    )
+    content_discovery: ContentDiscoveryModule = Field(default_factory=ContentDiscoveryModule)
     port_scan: PortScanModule = Field(default_factory=PortScanModule)
     screenshots: ScreenshotsModule = Field(default_factory=ScreenshotsModule)
     waf_fingerprint: WafFingerprintModule = Field(default_factory=WafFingerprintModule)

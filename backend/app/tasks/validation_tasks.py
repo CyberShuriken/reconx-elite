@@ -14,17 +14,13 @@ from app.services.exploit_validator import validator
 logger = logging.getLogger(__name__)
 
 
-async def validate_vulnerability_task(
-    vulnerability_id: int, payload: str = None
-) -> dict:
+async def validate_vulnerability_task(vulnerability_id: int, payload: str = None) -> dict:
     """Validate a vulnerability by replaying the request with payload."""
     db = get_sessionmaker()()
 
     try:
         # Get vulnerability
-        vulnerability = (
-            db.query(Vulnerability).filter(Vulnerability.id == vulnerability_id).first()
-        )
+        vulnerability = db.query(Vulnerability).filter(Vulnerability.id == vulnerability_id).first()
 
         if not vulnerability:
             logger.error(f"Vulnerability {vulnerability_id} not found")
@@ -40,58 +36,36 @@ async def validate_vulnerability_task(
         }
 
         # Perform validation
-        validation_result = await validator.validate_vulnerability(
-            vulnerability_data, payload
-        )
+        validation_result = await validator.validate_vulnerability(vulnerability_data, payload)
 
         # Create or update validation record
         existing_validation = (
-            db.query(ExploitValidation)
-            .filter(ExploitValidation.vulnerability_id == vulnerability_id)
-            .first()
+            db.query(ExploitValidation).filter(ExploitValidation.vulnerability_id == vulnerability_id).first()
         )
 
         if existing_validation:
             # Update existing validation
-            existing_validation.validation_status = validation_result.get(
-                "validation_status", "unverified"
-            )
-            existing_validation.confidence_score = validation_result.get(
-                "confidence_score", "low"
-            )
+            existing_validation.validation_status = validation_result.get("validation_status", "unverified")
+            existing_validation.confidence_score = validation_result.get("confidence_score", "low")
             existing_validation.method = validation_result.get("method", "GET")
             existing_validation.url = validation_result.get("url", "")
             existing_validation.headers = validation_result.get("headers", "{}")
             existing_validation.payload = validation_result.get("payload", "")
             existing_validation.full_request = validation_result.get("full_request", "")
             existing_validation.status_code = validation_result.get("status_code")
-            existing_validation.response_headers = validation_result.get(
-                "response_headers", "{}"
-            )
-            existing_validation.response_body = validation_result.get(
-                "response_body", ""
-            )
-            existing_validation.response_time_ms = validation_result.get(
-                "response_time_ms", 0
-            )
-            existing_validation.detection_markers = validation_result.get(
-                "detection_markers", "[]"
-            )
-            existing_validation.vulnerability_type = validation_result.get(
-                "vulnerability_type", "unknown"
-            )
-            existing_validation.confirmation_evidence = validation_result.get(
-                "confirmation_evidence", ""
-            )
+            existing_validation.response_headers = validation_result.get("response_headers", "{}")
+            existing_validation.response_body = validation_result.get("response_body", "")
+            existing_validation.response_time_ms = validation_result.get("response_time_ms", 0)
+            existing_validation.detection_markers = validation_result.get("detection_markers", "[]")
+            existing_validation.vulnerability_type = validation_result.get("vulnerability_type", "unknown")
+            existing_validation.confirmation_evidence = validation_result.get("confirmation_evidence", "")
             existing_validation.validation_attempts += 1
             existing_validation.last_attempt_at = datetime.now(timezone.utc)
         else:
             # Create new validation record
             validation = ExploitValidation(
                 vulnerability_id=vulnerability_id,
-                validation_status=validation_result.get(
-                    "validation_status", "unverified"
-                ),
+                validation_status=validation_result.get("validation_status", "unverified"),
                 confidence_score=validation_result.get("confidence_score", "low"),
                 method=validation_result.get("method", "GET"),
                 url=validation_result.get("url", ""),
@@ -103,12 +77,8 @@ async def validate_vulnerability_task(
                 response_body=validation_result.get("response_body", ""),
                 response_time_ms=validation_result.get("response_time_ms", 0),
                 detection_markers=validation_result.get("detection_markers", "[]"),
-                vulnerability_type=validation_result.get(
-                    "vulnerability_type", "unknown"
-                ),
-                confirmation_evidence=validation_result.get(
-                    "confirmation_evidence", ""
-                ),
+                vulnerability_type=validation_result.get("vulnerability_type", "unknown"),
+                confirmation_evidence=validation_result.get("confirmation_evidence", ""),
                 validation_attempts=1,
             )
             db.add(validation)
@@ -123,15 +93,11 @@ async def validate_vulnerability_task(
             "vulnerability_id": vulnerability_id,
             "validation_status": validation_result.get("validation_status"),
             "confidence_score": validation_result.get("confidence_score"),
-            "validation_id": (
-                existing_validation.id if existing_validation else validation.id
-            ),
+            "validation_id": (existing_validation.id if existing_validation else validation.id),
         }
 
     except Exception as e:
-        logger.error(
-            f"Validation task failed for vulnerability {vulnerability_id}: {e}"
-        )
+        logger.error(f"Validation task failed for vulnerability {vulnerability_id}: {e}")
 
         # Create failed validation record
         validation = ExploitValidation(
@@ -169,9 +135,7 @@ async def send_manual_request_task(user_id: int, request_data: dict) -> dict:
         response = await validator._send_request(method, url, headers, data)
 
         # Analyze response
-        validation_result = await validator._analyze_response(
-            response, payload, {"template_id": "manual_test"}, 0
-        )
+        validation_result = await validator._analyze_response(response, payload, {"template_id": "manual_test"}, 0)
 
         return {
             "user_id": user_id,

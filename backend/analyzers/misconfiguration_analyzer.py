@@ -110,11 +110,7 @@ class ExposedFileChecker:
                             "url": url,
                             "status_code": response.status_code,
                             "content_length": len(response.content),
-                            "severity": (
-                                "HIGH"
-                                if path in ["/.git/config", "/.env"]
-                                else "MEDIUM"
-                            ),
+                            "severity": ("HIGH" if path in ["/.git/config", "/.env"] else "MEDIUM"),
                         }
             except Exception:
                 return None
@@ -185,8 +181,6 @@ async def analyze_misconfiguration(
         "subdomain_takeover_risks": findings["takeover_risks"],
         "exposed_files": findings["exposed_files"],
         "total_risks": (
-            len(findings["exposed_secrets"])
-            + len(findings["takeover_risks"])
-            + len(findings["exposed_files"])
+            len(findings["exposed_secrets"]) + len(findings["takeover_risks"]) + len(findings["exposed_files"])
         ),
     }

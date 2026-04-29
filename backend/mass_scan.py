@@ -92,9 +92,7 @@ class MassScanner:
         # Ensure directories exist
         self.results_dir.mkdir(exist_ok=True)
 
-    async def execute(
-        self, template_paths: List[str], domain_filter: Optional[str] = None
-    ) -> Dict[str, Any]:
+    async def execute(self, template_paths: List[str], domain_filter: Optional[str] = None) -> Dict[str, Any]:
         """Execute mass scan across all domains in baselines"""
         await self.ws_manager.send_log(
             self.session_id,
@@ -235,9 +233,7 @@ class MassScanner:
                 )
 
                 if result.returncode != 0:
-                    validation_errors.append(
-                        f"Nuclei validation failed: {result.stderr}"
-                    )
+                    validation_errors.append(f"Nuclei validation failed: {result.stderr}")
 
             except (subprocess.TimeoutExpired, FileNotFoundError):
                 # nuclei not available, skip validation
@@ -390,9 +386,7 @@ class MassScanner:
         async with semaphore:
             return await self._scan_single_target(target, template)
 
-    async def _scan_single_target(
-        self, target: MassScanTarget, template: TemplateValidation
-    ) -> ScanResult:
+    async def _scan_single_target(self, target: MassScanTarget, template: TemplateValidation) -> ScanResult:
         """Execute Nuclei scan on a single target"""
         start_time = time.time()
 
@@ -417,9 +411,7 @@ class MassScanner:
             ]
 
             # Execute nuclei
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, timeout=self.scan_timeout
-            )
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=self.scan_timeout)
 
             execution_time = time.time() - start_time
 
@@ -508,9 +500,7 @@ class MassScanner:
 
     async def _consolidate_results(self) -> None:
         """Consolidate scan results across all targets"""
-        await self.ws_manager.send_log(
-            self.session_id, "info", "Consolidating scan results...", phase="mass_scan"
-        )
+        await self.ws_manager.send_log(self.session_id, "info", "Consolidating scan results...", phase="mass_scan")
 
         # Group findings by severity and template
         consolidated = {
@@ -627,54 +617,36 @@ class MassScanner:
                 "scan_results_count": len(self.scan_results),
                 "total_findings": self.consolidated_results.get("total_findings", 0),
                 "failed_scans": len(self.consolidated_results.get("failed_scans", [])),
-                "timeout_scans": len(
-                    self.consolidated_results.get("timeout_scans", [])
-                ),
+                "timeout_scans": len(self.consolidated_results.get("timeout_scans", [])),
             },
             "targets": {
                 "total_count": len(self.targets),
-                "completed_count": len(
-                    [t for t in self.targets if t.status == ScanStatus.COMPLETED]
-                ),
-                "failed_count": len(
-                    [t for t in self.targets if t.status == ScanStatus.FAILED]
-                ),
-                "timeout_count": len(
-                    [t for t in self.targets if t.status == ScanStatus.TIMEOUT]
-                ),
-                "results": [
-                    asdict(target) for target in self.targets[:20]
-                ],  # Limit for response size
+                "completed_count": len([t for t in self.targets if t.status == ScanStatus.COMPLETED]),
+                "failed_count": len([t for t in self.targets if t.status == ScanStatus.FAILED]),
+                "timeout_count": len([t for t in self.targets if t.status == ScanStatus.TIMEOUT]),
+                "results": [asdict(target) for target in self.targets[:20]],  # Limit for response size
             },
             "templates": {
                 "total_count": len(self.templates),
                 "valid_count": len([t for t in self.templates if t.is_valid]),
                 "invalid_count": len([t for t in self.templates if not t.is_valid]),
-                "results": [
-                    asdict(template) for template in self.templates[:10]
-                ],  # Limit for response size
+                "results": [asdict(template) for template in self.templates[:10]],  # Limit for response size
             },
             "findings": {
                 "total_count": self.consolidated_results.get("total_findings", 0),
                 "by_severity": self.consolidated_results.get("by_severity", {}),
                 "by_template": self.consolidated_results.get("by_template", {}),
                 "by_domain": self.consolidated_results.get("by_domain", {}),
-                "high_severity_count": len(
-                    self.consolidated_results.get("by_severity", {}).get("critical", [])
-                )
+                "high_severity_count": len(self.consolidated_results.get("by_severity", {}).get("critical", []))
                 + len(self.consolidated_results.get("by_severity", {}).get("high", [])),
             },
             "summary": {
                 "targets_scanned": len(self.targets),
                 "templates_used": len([t for t in self.templates if t.is_valid]),
                 "total_findings": self.consolidated_results.get("total_findings", 0),
-                "high_severity_findings": len(
-                    self.consolidated_results.get("by_severity", {}).get("critical", [])
-                )
+                "high_severity_findings": len(self.consolidated_results.get("by_severity", {}).get("critical", []))
                 + len(self.consolidated_results.get("by_severity", {}).get("high", [])),
-                "success_rate": len(
-                    [t for t in self.targets if t.status == ScanStatus.COMPLETED]
-                )
+                "success_rate": len([t for t in self.targets if t.status == ScanStatus.COMPLETED])
                 / max(len(self.targets), 1),
                 "recommendation": "Review high-severity findings and failed scans for further investigation",
             },

@@ -29,9 +29,7 @@ class ScopeManager:
         """Add discovered URL."""
         self.urls.add(url)
 
-    def add_endpoint(
-        self, method: str, path: str, params: list[str] | None = None
-    ) -> None:
+    def add_endpoint(self, method: str, path: str, params: list[str] | None = None) -> None:
         """Add endpoint with method and parameters."""
         self.endpoints.append(
             {

@@ -200,9 +200,7 @@ class ReconPipeline:
             phase="ai_discovery",
         )
 
-        current_level_subdomains = {
-            r.subdomain for r in self.subdomain_results if r.level == 1
-        }
+        current_level_subdomains = {r.subdomain for r in self.subdomain_results if r.level == 1}
 
         for level in range(2, self.max_depth + 1):
             await self.ws_manager.send_log(
@@ -213,9 +211,7 @@ class ReconPipeline:
             )
 
             # Use AI to predict hidden subdomains
-            ai_predictions = await self._predict_hidden_subdomains(
-                current_level_subdomains, level
-            )
+            ai_predictions = await self._predict_hidden_subdomains(current_level_subdomains, level)
 
             # Validate AI predictions
             validated_subdomains = await self._validate_ai_predictions(ai_predictions)
@@ -244,9 +240,7 @@ class ReconPipeline:
                 phase="ai_discovery",
             )
 
-    async def _predict_hidden_subdomains(
-        self, known_subdomains: Set[str], level: int
-    ) -> List[str]:
+    async def _predict_hidden_subdomains(self, known_subdomains: Set[str], level: int) -> List[str]:
         """Use AI to predict potential hidden subdomains"""
         if not known_subdomains:
             return []
@@ -313,9 +307,7 @@ class ReconPipeline:
             pattern_counts[pattern] = pattern_counts.get(pattern, 0) + 1
 
         # Return most common patterns
-        sorted_patterns = sorted(
-            pattern_counts.items(), key=lambda x: x[1], reverse=True
-        )
+        sorted_patterns = sorted(pattern_counts.items(), key=lambda x: x[1], reverse=True)
         return [pattern for pattern, count in sorted_patterns if count > 1]
 
     async def _validate_ai_predictions(self, predictions: List[str]) -> List[str]:
@@ -382,9 +374,7 @@ class ReconPipeline:
         """
 
         try:
-            result = await self.ai_router.call_model(
-                role="fast_analyst", prompt=prompt, max_tokens=300
-            )
+            result = await self.ai_router.call_model(role="fast_analyst", prompt=prompt, max_tokens=300)
 
             if result.get("output"):
                 # Parse JSON response
@@ -399,9 +389,7 @@ class ReconPipeline:
 
         return {}
 
-    async def _validate_cloud_asset(
-        self, asset_info: Dict[str, Any]
-    ) -> Optional[CloudAsset]:
+    async def _validate_cloud_asset(self, asset_info: Dict[str, Any]) -> Optional[CloudAsset]:
         """Validate cloud asset accessibility"""
         asset_type = asset_info.get("type", "s3")
         asset_name = asset_info.get("name", "")
@@ -531,9 +519,7 @@ class ReconPipeline:
         )
 
         # Use existing acquisition mapper
-        acquisition_results = await self.acquisition_mapper.map_acquisitions(
-            self.target
-        )
+        acquisition_results = await self.acquisition_mapper.map_acquisitions(self.target)
 
         # Convert to AcquisitionTarget objects
         for result in acquisition_results:
@@ -578,9 +564,7 @@ class ReconPipeline:
             "subdomains": {
                 "total_count": len(self.subdomain_results),
                 "results": [asdict(result) for result in self.subdomain_results],
-                "ai_predicted_count": len(
-                    [r for r in self.subdomain_results if r.ai_predicted]
-                ),
+                "ai_predicted_count": len([r for r in self.subdomain_results if r.ai_predicted]),
             },
             "cloud_assets": {
                 "total_count": len(self.cloud_assets),
@@ -590,18 +574,14 @@ class ReconPipeline:
             "ports": {
                 "total_count": len(self.port_results),
                 "results": [asdict(port) for port in self.port_results],
-                "dev_ports_found": len(
-                    [p for p in self.port_results if p.port in self.dev_ports]
-                ),
+                "dev_ports_found": len([p for p in self.port_results if p.port in self.dev_ports]),
             },
             "acquisitions": {
                 "total_count": len(self.acquisition_targets),
                 "results": [asdict(target) for target in self.acquisition_targets],
             },
             "summary": {
-                "total_discoveries": len(self.subdomain_results)
-                + len(self.cloud_assets)
-                + len(self.port_results),
+                "total_discoveries": len(self.subdomain_results) + len(self.cloud_assets) + len(self.port_results),
                 "discovery_depth": self.max_depth,
                 "ai_enhanced": True,
             },

@@ -28,9 +28,7 @@ class TestReconPipeline:
         """Test subdomain enumeration."""
         # Assert
         assert len(mock_reconnaissance_result["subdomains"]) == 2
-        assert "api.example.com" in [
-            s["subdomain"] for s in mock_reconnaissance_result["subdomains"]
-        ]
+        assert "api.example.com" in [s["subdomain"] for s in mock_reconnaissance_result["subdomains"]]
         assert all("ip" in s for s in mock_reconnaissance_result["subdomains"])
 
     @pytest.mark.asyncio
@@ -38,10 +36,7 @@ class TestReconPipeline:
         """Test endpoint discovery."""
         # Assert
         assert len(mock_reconnaissance_result["endpoints"]) == 2
-        assert all(
-            "url" in e and "status" in e
-            for e in mock_reconnaissance_result["endpoints"]
-        )
+        assert all("url" in e and "status" in e for e in mock_reconnaissance_result["endpoints"])
 
     @pytest.mark.asyncio
     async def test_javascript_analysis(self, mock_reconnaissance_result):
@@ -81,18 +76,9 @@ class TestReconPipeline:
         """Test handling large reconnaissance datasets."""
         # Arrange
         large_result = {
-            "subdomains": [
-                {"subdomain": f"sub{i}.example.com", "ip": f"192.168.1.{i}"}
-                for i in range(1000)
-            ],
-            "endpoints": [
-                {"url": f"https://api.example.com/endpoint{i}", "status": 200}
-                for i in range(5000)
-            ],
-            "js_files": [
-                {"url": f"https://api.example.com/js/file{i}.js", "size": 10000}
-                for i in range(100)
-            ],
+            "subdomains": [{"subdomain": f"sub{i}.example.com", "ip": f"192.168.1.{i}"} for i in range(1000)],
+            "endpoints": [{"url": f"https://api.example.com/endpoint{i}", "status": 200} for i in range(5000)],
+            "js_files": [{"url": f"https://api.example.com/js/file{i}.js", "size": 10000} for i in range(100)],
         }
 
         # Assert

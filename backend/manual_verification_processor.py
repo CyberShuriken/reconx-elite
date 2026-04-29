@@ -106,9 +106,7 @@ class ManualVerificationProcessor:
             "prototype_pollution": ["business_logic"],
         }
 
-    async def process_manual_verification(
-        self, verification_data: Dict[str, Any]
-    ) -> bool:
+    async def process_manual_verification(self, verification_data: Dict[str, Any]) -> bool:
         """
         Process manual verification data and integrate into learning system
 
@@ -124,37 +122,23 @@ class ManualVerificationProcessor:
 
             # Create verification result
             verification_result = self._create_verification_result(verification_data)
-            existing_data["verification_results"].append(
-                self._dataclass_to_dict(verification_result)
-            )
+            existing_data["verification_results"].append(self._dataclass_to_dict(verification_result))
 
             # Extract learning patterns
-            learning_entries = await self._extract_learning_patterns(
-                verification_result
-            )
-            existing_data["learning_entries"].extend(
-                [self._dataclass_to_dict(entry) for entry in learning_entries]
-            )
+            learning_entries = await self._extract_learning_patterns(verification_result)
+            existing_data["learning_entries"].extend([self._dataclass_to_dict(entry) for entry in learning_entries])
 
             # Generate few-shot example
-            few_shot_example = await self._generate_few_shot_example(
-                verification_result
-            )
+            few_shot_example = await self._generate_few_shot_example(verification_result)
             if few_shot_example:
                 few_shot_data = await self._load_few_shot_data()
-                few_shot_data["few_shot_examples"].append(
-                    self._dataclass_to_dict(few_shot_example)
-                )
+                few_shot_data["few_shot_examples"].append(self._dataclass_to_dict(few_shot_example))
                 await self._save_few_shot_data(few_shot_data)
 
             # Update metadata
             existing_data["metadata"]["last_updated"] = datetime.now().isoformat()
-            existing_data["metadata"]["total_verifications"] = len(
-                existing_data["verification_results"]
-            )
-            existing_data["metadata"]["total_learning_entries"] = len(
-                existing_data["learning_entries"]
-            )
+            existing_data["metadata"]["total_verifications"] = len(existing_data["verification_results"])
+            existing_data["metadata"]["total_learning_entries"] = len(existing_data["learning_entries"])
 
             # Save learning data
             await self._save_learning_data(existing_data)
@@ -214,13 +198,9 @@ class ManualVerificationProcessor:
     def _create_verification_result(self, data: Dict[str, Any]) -> VerificationResult:
         """Create verification result from manual data"""
         return VerificationResult(
-            vulnerability_id=data.get(
-                "vulnerability_id", f"MANUAL-{datetime.now().strftime('%Y%m%d%H%M%S')}"
-            ),
+            vulnerability_id=data.get("vulnerability_id", f"MANUAL-{datetime.now().strftime('%Y%m%d%H%M%S')}"),
             session_id=data.get("session_id", "manual_verification_session"),
-            verification_status=VerificationStatus(
-                data.get("verification_status", "confirmed")
-            ),
+            verification_status=VerificationStatus(data.get("verification_status", "confirmed")),
             confidence_adjustment=data.get("confidence_adjustment", 0.0),
             manual_notes=data.get("manual_notes", ""),
             verified_by=data.get("verified_by", "manual_analyst"),
@@ -232,9 +212,7 @@ class ManualVerificationProcessor:
             additional_context=data.get("additional_context", {}),
         )
 
-    async def _extract_learning_patterns(
-        self, result: VerificationResult
-    ) -> List[LearningEntry]:
+    async def _extract_learning_patterns(self, result: VerificationResult) -> List[LearningEntry]:
         """Extract learning patterns from verification result"""
         patterns = []
 
@@ -248,9 +226,7 @@ class ManualVerificationProcessor:
                 confidence=0.9,
                 timestamp=result.verified_at,
                 source_session=result.session_id,
-                applicable_modules=self._get_applicable_modules(
-                    result.vulnerability_id
-                ),
+                applicable_modules=self._get_applicable_modules(result.vulnerability_id),
             )
             patterns.append(pattern)
 
@@ -264,9 +240,7 @@ class ManualVerificationProcessor:
                     confidence=0.8,
                     timestamp=result.verified_at,
                     source_session=result.session_id,
-                    applicable_modules=self._get_applicable_modules(
-                        result.vulnerability_id
-                    ),
+                    applicable_modules=self._get_applicable_modules(result.vulnerability_id),
                 )
                 patterns.append(gap_pattern)
 
@@ -280,17 +254,13 @@ class ManualVerificationProcessor:
                 confidence=0.9,
                 timestamp=result.verified_at,
                 source_session=result.session_id,
-                applicable_modules=self._get_applicable_modules(
-                    result.vulnerability_id
-                ),
+                applicable_modules=self._get_applicable_modules(result.vulnerability_id),
             )
             patterns.append(pattern)
 
         return patterns
 
-    async def _generate_few_shot_example(
-        self, result: VerificationResult
-    ) -> Optional[FewShotExample]:
+    async def _generate_few_shot_example(self, result: VerificationResult) -> Optional[FewShotExample]:
         """Generate few-shot example from verification result"""
         if result.verification_status != VerificationStatus.CONFIRMED:
             return None
@@ -423,22 +393,13 @@ This case demonstrates the need for enhanced detection patterns for similar vuln
         root_causes = []
 
         if result.original_confidence < 0.3:
-            root_causes.append(
-                "Low initial confidence suggests insufficient pattern recognition"
-            )
+            root_causes.append("Low initial confidence suggests insufficient pattern recognition")
 
         if "manual" in result.verified_by.lower():
-            root_causes.append(
-                "Manual detection indicates automated systems missed key indicators"
-            )
+            root_causes.append("Manual detection indicates automated systems missed key indicators")
 
-        if (
-            result.impact_severity in ["high", "critical"]
-            and result.original_confidence < 0.7
-        ):
-            root_causes.append(
-                "High-impact vulnerability with low confidence indicates detection gap"
-            )
+        if result.impact_severity in ["high", "critical"] and result.original_confidence < 0.7:
+            root_causes.append("High-impact vulnerability with low confidence indicates detection gap")
 
         return {
             "root_causes": root_causes,
@@ -462,25 +423,14 @@ This case demonstrates the need for enhanced detection patterns for similar vuln
         if analysis.get("detection_failure", False):
             # If confirmed vulnerability was missed due to low confidence
             recommendations["recommended_threshold"] = 0.6
-            recommendations["reasoning"] = (
-                "Reduce threshold to catch more true positives"
-            )
-            recommendations["impact_assessment"] = (
-                "May increase false positives but improve detection rate"
-            )
+            recommendations["reasoning"] = "Reduce threshold to catch more true positives"
+            recommendations["impact_assessment"] = "May increase false positives but improve detection rate"
 
-        elif (
-            result.verification_status == VerificationStatus.FALSE_POSITIVE
-            and result.original_confidence > 0.8
-        ):
+        elif result.verification_status == VerificationStatus.FALSE_POSITIVE and result.original_confidence > 0.8:
             # If high confidence false positive
             recommendations["recommended_threshold"] = 0.8
-            recommendations["reasoning"] = (
-                "Increase threshold to reduce false positives"
-            )
-            recommendations["impact_assessment"] = (
-                "May reduce detection rate but improve precision"
-            )
+            recommendations["reasoning"] = "Increase threshold to reduce false positives"
+            recommendations["impact_assessment"] = "May reduce detection rate but improve precision"
 
         return recommendations
 
@@ -488,9 +438,7 @@ This case demonstrates the need for enhanced detection patterns for similar vuln
         """Update refinement module with new few-shot example"""
         # This would integrate with the existing refinement.py module
         # For now, we'll save the example to the few_shot_examples.json file
-        print(
-            f"Updated refinement module with new few-shot example for {example.module}"
-        )
+        print(f"Updated refinement module with new few-shot example for {example.module}")
 
 
 # Example usage function

@@ -95,9 +95,7 @@ class ContextTree:
         """Categorize endpoint into interesting categories."""
         endpoint_lower = endpoint.lower()
 
-        if any(
-            p in endpoint_lower for p in ["/admin", "/dashboard", "/manage", "/control"]
-        ):
+        if any(p in endpoint_lower for p in ["/admin", "/dashboard", "/manage", "/control"]):
             if endpoint not in self.tree["interesting_endpoints"]["admin"]:
                 self.tree["interesting_endpoints"]["admin"].append(endpoint)
 
@@ -105,9 +103,7 @@ class ContextTree:
             if endpoint not in self.tree["interesting_endpoints"]["api"]:
                 self.tree["interesting_endpoints"]["api"].append(endpoint)
 
-        if any(
-            p in endpoint_lower for p in ["/upload", "/file", "/image", "/document"]
-        ):
+        if any(p in endpoint_lower for p in ["/upload", "/file", "/image", "/document"]):
             if endpoint not in self.tree["interesting_endpoints"]["upload"]:
                 self.tree["interesting_endpoints"]["upload"].append(endpoint)
 
@@ -115,9 +111,7 @@ class ContextTree:
             if endpoint not in self.tree["interesting_endpoints"]["config"]:
                 self.tree["interesting_endpoints"]["config"].append(endpoint)
 
-        if any(
-            p in endpoint_lower for p in ["/login", "/auth", "/oauth", "/jwt", "/token"]
-        ):
+        if any(p in endpoint_lower for p in ["/login", "/auth", "/oauth", "/jwt", "/token"]):
             if endpoint not in self.tree["interesting_endpoints"]["auth"]:
                 self.tree["interesting_endpoints"]["auth"].append(endpoint)
 
@@ -129,9 +123,7 @@ class ContextTree:
             if endpoint not in self.tree["interesting_endpoints"]["dev"]:
                 self.tree["interesting_endpoints"]["dev"].append(endpoint)
 
-    def add_subdomain(
-        self, subdomain: str, is_live: bool = False, is_ai_guessed: bool = False
-    ) -> None:
+    def add_subdomain(self, subdomain: str, is_live: bool = False, is_ai_guessed: bool = False) -> None:
         """Add discovered subdomain."""
         if subdomain not in self.tree["subdomains"]["discovered"]:
             self.tree["subdomains"]["discovered"].append(subdomain)
@@ -144,9 +136,7 @@ class ContextTree:
 
         self._touch()
 
-    def add_cloud_asset(
-        self, provider: str, asset_url: str, permissions: dict = None
-    ) -> None:
+    def add_cloud_asset(self, provider: str, asset_url: str, permissions: dict = None) -> None:
         """Add discovered cloud asset."""
         asset_entry = {
             "url": asset_url,
@@ -154,20 +144,11 @@ class ContextTree:
             "discovered_at": datetime.utcnow().isoformat(),
         }
 
-        if (
-            provider == "s3"
-            and asset_entry not in self.tree["cloud_assets"]["s3_buckets"]
-        ):
+        if provider == "s3" and asset_entry not in self.tree["cloud_assets"]["s3_buckets"]:
             self.tree["cloud_assets"]["s3_buckets"].append(asset_entry)
-        elif (
-            provider == "azure"
-            and asset_entry not in self.tree["cloud_assets"]["azure_blobs"]
-        ):
+        elif provider == "azure" and asset_entry not in self.tree["cloud_assets"]["azure_blobs"]:
             self.tree["cloud_assets"]["azure_blobs"].append(asset_entry)
-        elif (
-            provider == "gcp"
-            and asset_entry not in self.tree["cloud_assets"]["gcp_storage"]
-        ):
+        elif provider == "gcp" and asset_entry not in self.tree["cloud_assets"]["gcp_storage"]:
             self.tree["cloud_assets"]["gcp_storage"].append(asset_entry)
 
         self._touch()
@@ -253,11 +234,7 @@ class ContextTree:
             "live_hosts_count": len(self.tree["subdomains"]["live"]),
             "tech_count": sum(len(v) for v in self.tree["tech_stack"].values()),
             "api_endpoints_count": len(self.tree["api_schema"]["endpoints"]),
-            "cloud_assets_count": sum(
-                len(v) for v in self.tree["cloud_assets"].values()
-            ),
+            "cloud_assets_count": sum(len(v) for v in self.tree["cloud_assets"].values()),
             "cves_count": len(self.tree["known_cves"]),
-            "interesting_endpoints": {
-                k: len(v) for k, v in self.tree["interesting_endpoints"].items()
-            },
+            "interesting_endpoints": {k: len(v) for k, v in self.tree["interesting_endpoints"].items()},
         }

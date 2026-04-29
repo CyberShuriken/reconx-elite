@@ -8,9 +8,7 @@ class TestFullWorkflow:
     """Test complete ReconX Elite workflow."""
 
     @pytest.mark.asyncio
-    async def test_end_to_end_scan_workflow(
-        self, mock_scan_result, mock_reconnaissance_result
-    ):
+    async def test_end_to_end_scan_workflow(self, mock_scan_result, mock_reconnaissance_result):
         """Test complete scan workflow from target to report."""
         # Phase 1: Reconnaissance
         recon_result = mock_reconnaissance_result

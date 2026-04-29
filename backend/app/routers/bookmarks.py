@@ -35,11 +35,7 @@ def create_bookmark(
         raise HTTPException(status_code=404, detail="Endpoint not found")
 
     existing = (
-        db.query(Bookmark)
-        .filter(
-            Bookmark.user_id == user.id, Bookmark.endpoint_id == payload.endpoint_id
-        )
-        .first()
+        db.query(Bookmark).filter(Bookmark.user_id == user.id, Bookmark.endpoint_id == payload.endpoint_id).first()
     )
     if existing:
         raise HTTPException(status_code=400, detail="Already bookmarked")
@@ -80,11 +76,7 @@ def delete_bookmark(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    bookmark = (
-        db.query(Bookmark)
-        .filter(Bookmark.id == bookmark_id, Bookmark.user_id == user.id)
-        .first()
-    )
+    bookmark = db.query(Bookmark).filter(Bookmark.id == bookmark_id, Bookmark.user_id == user.id).first()
     if not bookmark:
         raise HTTPException(status_code=404, detail="Bookmark not found")
 

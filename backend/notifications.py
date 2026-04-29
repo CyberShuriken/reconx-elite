@@ -80,12 +80,8 @@ class NotificationHub:
     def _load_config(self) -> NotificationConfig:
         """Load notification configuration from environment"""
         return NotificationConfig(
-            telegram_enabled=os.getenv(
-                "TELEGRAM_NOTIFICATIONS_ENABLED", "false"
-            ).lower()
-            == "true",
-            discord_enabled=os.getenv("DISCORD_NOTIFICATIONS_ENABLED", "false").lower()
-            == "true",
+            telegram_enabled=os.getenv("TELEGRAM_NOTIFICATIONS_ENABLED", "false").lower() == "true",
+            discord_enabled=os.getenv("DISCORD_NOTIFICATIONS_ENABLED", "false").lower() == "true",
             telegram_webhook_url=os.getenv("TELEGRAM_WEBHOOK_URL", ""),
             discord_webhook_url=os.getenv("DISCORD_WEBHOOK_URL", ""),
             rate_limit_seconds=int(os.getenv("NOTIFICATION_RATE_LIMIT_SECONDS", "30")),
@@ -149,15 +145,11 @@ class NotificationHub:
                 if await self._send_single_notification(notification_msg):
                     success_count += 1
             except Exception as e:
-                logger.error(
-                    f"Failed to send {notification_msg.platform.value} notification: {e}"
-                )
+                logger.error(f"Failed to send {notification_msg.platform.value} notification: {e}")
 
         return success_count > 0
 
-    async def _send_single_notification(
-        self, notification_msg: NotificationMessage
-    ) -> bool:
+    async def _send_single_notification(self, notification_msg: NotificationMessage) -> bool:
         """Send a single notification to a platform"""
         # Format message for platform
         formatted_message = self.formatters[notification_msg.platform](notification_msg)
@@ -178,9 +170,7 @@ class NotificationHub:
                 )
 
                 if response.status_code == 200:
-                    logger.info(
-                        f"Notification sent to {notification_msg.platform.value}"
-                    )
+                    logger.info(f"Notification sent to {notification_msg.platform.value}")
                     return True
                 else:
                     logger.warning(
@@ -188,9 +178,7 @@ class NotificationHub:
                     )
 
             except Exception as e:
-                logger.warning(
-                    f"Attempt {attempt + 1} failed for {notification_msg.platform.value}: {e}"
-                )
+                logger.warning(f"Attempt {attempt + 1} failed for {notification_msg.platform.value}: {e}")
                 if attempt < self.config.max_retries - 1:
                     await asyncio.sleep(2**attempt)  # Exponential backoff
 
@@ -295,13 +283,9 @@ class NotificationHub:
             }
         )
 
-        return await self.send_notification(
-            NotificationType.NEW_SUBDOMAIN, title, message, "info", metadata
-        )
+        return await self.send_notification(NotificationType.NEW_SUBDOMAIN, title, message, "info", metadata)
 
-    async def notify_valid_poc(
-        self, vulnerability_id: str, severity: str, endpoint: str, payload: str
-    ) -> bool:
+    async def notify_valid_poc(self, vulnerability_id: str, severity: str, endpoint: str, payload: str) -> bool:
         """Send notification for valid proof of concept generation"""
         title = "Valid Proof of Concept Generated"
         message = f"Valid PoC generated for vulnerability `{vulnerability_id}`\n\n"
@@ -316,13 +300,9 @@ class NotificationHub:
             "payload": payload,
         }
 
-        return await self.send_notification(
-            NotificationType.VALID_POC, title, message, severity.lower(), metadata
-        )
+        return await self.send_notification(NotificationType.VALID_POC, title, message, severity.lower(), metadata)
 
-    async def notify_monitoring_error(
-        self, error_message: str, target: str, error_type: str = "general"
-    ) -> bool:
+    async def notify_monitoring_error(self, error_message: str, target: str, error_type: str = "general") -> bool:
         """Send notification for monitoring loop errors"""
         title = "Monitoring Loop Error"
         message = f"Monitoring error detected for target `{target}`\n\n"
@@ -336,9 +316,7 @@ class NotificationHub:
             "timestamp": datetime.now().isoformat(),
         }
 
-        return await self.send_notification(
-            NotificationType.MONITORING_ERROR, title, message, "high", metadata
-        )
+        return await self.send_notification(NotificationType.MONITORING_ERROR, title, message, "high", metadata)
 
     async def notify_scan_completed(
         self,
@@ -365,15 +343,9 @@ class NotificationHub:
         }
 
         # Determine severity based on critical findings
-        severity = (
-            "critical"
-            if critical_count > 0
-            else "info" if total_vulnerabilities > 0 else "info"
-        )
+        severity = "critical" if critical_count > 0 else "info" if total_vulnerabilities > 0 else "info"
 
-        return await self.send_notification(
-            NotificationType.SCAN_COMPLETED, title, message, severity, metadata
-        )
+        return await self.send_notification(NotificationType.SCAN_COMPLETED, title, message, severity, metadata)
 
     async def notify_critical_vulnerability(
         self, vulnerability_id: str, severity: str, endpoint: str, description: str
@@ -425,9 +397,7 @@ class NotificationHub:
         # Determine severity based on findings
         severity = "high" if total_findings > 0 else "info"
 
-        return await self.send_notification(
-            NotificationType.MASS_SCAN_COMPLETED, title, message, severity, metadata
-        )
+        return await self.send_notification(NotificationType.MASS_SCAN_COMPLETED, title, message, severity, metadata)
 
     async def notify_consensus_alert(
         self,
@@ -453,9 +423,7 @@ class NotificationHub:
         # Determine severity based on determination
         severity = "high" if determination == "fail" else "info"
 
-        return await self.send_notification(
-            NotificationType.CONSENSUS_ALERT, title, message, severity, metadata
-        )
+        return await self.send_notification(NotificationType.CONSENSUS_ALERT, title, message, severity, metadata)
 
     async def test_notifications(self) -> Dict[str, bool]:
         """Test notification connectivity"""

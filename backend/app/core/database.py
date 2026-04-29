@@ -17,9 +17,7 @@ def init_engine():
     global _engine, _async_session_maker
     if _engine is None:
         # Convert psycopg2 URL to async URL for SQLAlchemy
-        async_db_url = settings.database_url.replace(
-            "postgresql+psycopg2://", "postgresql+asyncpg://"
-        )
+        async_db_url = settings.database_url.replace("postgresql+psycopg2://", "postgresql+asyncpg://")
         _engine = create_async_engine(
             async_db_url,
             pool_pre_ping=True,
@@ -32,9 +30,7 @@ def init_engine():
                 "timeout": 10,
             },
         )
-        _async_session_maker = async_sessionmaker(
-            _engine, class_=AsyncSession, expire_on_commit=False
-        )
+        _async_session_maker = async_sessionmaker(_engine, class_=AsyncSession, expire_on_commit=False)
 
 
 def get_engine():

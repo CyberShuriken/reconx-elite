@@ -36,17 +36,13 @@ class EvolutionaryXSS:
         findings = []
 
         for payload in self.INITIAL_PAYLOADS:
-            result = await self._test_payload(
-                endpoint, param, payload, base_url, method
-            )
+            result = await self._test_payload(endpoint, param, payload, base_url, method)
 
             if result.get("blocked") and self.ai_router:
                 # Generate bypass using AI
                 bypass_payload = await self._generate_bypass(result, payload)
                 if bypass_payload:
-                    bypass_result = await self._test_payload(
-                        endpoint, param, bypass_payload, base_url, method
-                    )
+                    bypass_result = await self._test_payload(endpoint, param, bypass_payload, base_url, method)
                     if bypass_result.get("executed"):
                         findings.append(
                             {
@@ -118,9 +114,7 @@ class EvolutionaryXSS:
         except Exception:
             return {"blocked": False, "executed": False}
 
-    async def _generate_bypass(
-        self, blocked_result: dict, original_payload: str
-    ) -> str:
+    async def _generate_bypass(self, blocked_result: dict, original_payload: str) -> str:
         """Use AI to generate WAF bypass payload."""
         if not self.ai_router:
             return original_payload
@@ -134,9 +128,7 @@ Consider: encoding variations, event handlers, alternative tags, unicode encodin
 Return ONLY the payload, no explanations."""
 
         try:
-            result = await self.ai_router.call_model(
-                "xss_bypass", prompt, max_tokens=256
-            )
+            result = await self.ai_router.call_model("xss_bypass", prompt, max_tokens=256)
             bypass = result.get("output", "").strip()
             return bypass if bypass else original_payload
         except Exception:
@@ -188,9 +180,7 @@ async def analyze_xss(
 
                 # Test with evolutionary bypass if AI router available
                 if ai_router and base_url:
-                    findings = await xss_tester.test_and_bypass(
-                        path, param, base_url, endpoint.get("method", "GET")
-                    )
+                    findings = await xss_tester.test_and_bypass(path, param, base_url, endpoint.get("method", "GET"))
                     confirmed_findings.extend(findings)
 
     return {

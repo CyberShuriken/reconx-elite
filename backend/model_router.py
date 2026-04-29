@@ -24,9 +24,7 @@ class ModelRouter:
             "payload_refine": "code_engine",
         }
 
-    async def route_analysis(
-        self, task_type: str, context: dict[str, Any]
-    ) -> dict[str, Any]:
+    async def route_analysis(self, task_type: str, context: dict[str, Any]) -> dict[str, Any]:
         """Route analysis to appropriate model based on task type."""
         model_role = self.task_model_map.get(task_type, "primary_analyst")
 
@@ -68,9 +66,7 @@ class ModelRouter:
 
         if task_type == "xss_payload_gen":
             context_info = context.get("context", "")
-            return (
-                f"Generate context-aware XSS payloads for this context: {context_info}"
-            )
+            return f"Generate context-aware XSS payloads for this context: {context_info}"
 
         if task_type == "business_logic":
             flow = context.get("flow", "")
@@ -89,18 +85,12 @@ class ModelRouter:
 
         return "Analyze the security context and provide recommendations."
 
-    async def analyze_tech_stack(
-        self, technologies: dict[str, list[str]]
-    ) -> dict[str, Any]:
+    async def analyze_tech_stack(self, technologies: dict[str, list[str]]) -> dict[str, Any]:
         """Analyze tech stack and determine priority attack vectors."""
-        result = await self.route_analysis(
-            "tech_profiling", {"technologies": technologies}
-        )
+        result = await self.route_analysis("tech_profiling", {"technologies": technologies})
         return result
 
-    async def analyze_idor_endpoints(
-        self, endpoints: list[dict[str, Any]]
-    ) -> dict[str, Any]:
+    async def analyze_idor_endpoints(self, endpoints: list[dict[str, Any]]) -> dict[str, Any]:
         """Identify IDOR-vulnerable endpoints."""
         result = await self.route_analysis("idor_analysis", {"endpoints": endpoints})
         return result
@@ -122,9 +112,7 @@ class ModelRouter:
         )
         return result
 
-    async def refine_payload(
-        self, original_payload: dict[str, Any], rejection_reason: str
-    ) -> dict[str, Any]:
+    async def refine_payload(self, original_payload: dict[str, Any], rejection_reason: str) -> dict[str, Any]:
         """Refine payload to bypass server-side validation."""
         result = await self.route_analysis(
             "payload_refine",

@@ -47,23 +47,16 @@ class TacticalReportGenerator:
         ]
 
         for vuln in big_7:
-            report["vulnerability_findings"][vuln] = all_findings.get(
+            report["vulnerability_findings"][vuln] = all_findings.get(vuln.lower().replace("_", "_"), {})
+            candidates = all_findings.get(vuln.lower().replace("_", "_"), {}).get("candidates", []) or all_findings.get(
                 vuln.lower().replace("_", "_"), {}
-            )
-            candidates = all_findings.get(vuln.lower().replace("_", "_"), {}).get(
-                "candidates", []
-            ) or all_findings.get(vuln.lower().replace("_", "_"), {}).get(
-                "total_candidates", 0
-            )
+            ).get("total_candidates", 0)
             count = len(candidates) if isinstance(candidates, list) else candidates
             report["big_7_summary"][vuln] = {"count": count}
 
         report["recommended_next_steps"] = self._generate_recommendations(all_findings)
 
-        report_file = (
-            self.reports_dir
-            / f'tactical_report_{target}_{datetime.utcnow().strftime("%Y%m%d_%H%M%S")}.json'
-        )
+        report_file = self.reports_dir / f'tactical_report_{target}_{datetime.utcnow().strftime("%Y%m%d_%H%M%S")}.json'
         with open(report_file, "w") as f:
             json.dump(report, f, indent=2, default=str)
 
@@ -80,34 +73,22 @@ class TacticalReportGenerator:
             )
 
         if findings.get("injection", {}).get("graphql_findings"):
-            recommendations.append(
-                "2. GraphQL Introspection: Query __schema for full schema enumeration"
-            )
+            recommendations.append("2. GraphQL Introspection: Query __schema for full schema enumeration")
 
         if findings.get("ssrf", {}).get("candidates"):
-            recommendations.append(
-                "3. SSRF Exploitation: Target 169.254.169.254/latest/meta-data on AWS instances"
-            )
+            recommendations.append("3. SSRF Exploitation: Target 169.254.169.254/latest/meta-data on AWS instances")
 
         if findings.get("misconfiguration", {}).get("exposed_secrets"):
-            recommendations.append(
-                "4. Secret Extraction: Leverage exposed API keys and tokens"
-            )
+            recommendations.append("4. Secret Extraction: Leverage exposed API keys and tokens")
 
         if findings.get("xss", {}).get("candidates"):
-            recommendations.append(
-                "5. XSS Payloads: Test DOM-based and stored XSS vectors"
-            )
+            recommendations.append("5. XSS Payloads: Test DOM-based and stored XSS vectors")
 
         if findings.get("auth_session", {}).get("jwt_findings"):
-            recommendations.append(
-                "6. JWT Analysis: Check for weak algorithm and key validation"
-            )
+            recommendations.append("6. JWT Analysis: Check for weak algorithm and key validation")
 
         if findings.get("business_logic", {}).get("total_candidates"):
-            recommendations.append(
-                "7. Business Logic Testing: Use logic simulator to test price/discount bypass"
-            )
+            recommendations.append("7. Business Logic Testing: Use logic simulator to test price/discount bypass")
 
         return recommendations
 

@@ -13,9 +13,7 @@ logger = logging.getLogger(__name__)
 class ExternalNotificationService:
     """Service to send notifications to external platforms."""
 
-    async def send_slack_notification(
-        self, webhook_url: str, message: str, title: str = "ReconX Elite Alert"
-    ):
+    async def send_slack_notification(self, webhook_url: str, message: str, title: str = "ReconX Elite Alert"):
         """Send a notification to Slack."""
         if not webhook_url:
             return
@@ -37,9 +35,7 @@ class ExternalNotificationService:
         except Exception as e:
             logger.error(f"Failed to send Slack notification: {e}")
 
-    async def send_discord_notification(
-        self, webhook_url: str, message: str, title: str = "ReconX Elite Alert"
-    ):
+    async def send_discord_notification(self, webhook_url: str, message: str, title: str = "ReconX Elite Alert"):
         """Send a notification to Discord."""
         if not webhook_url:
             return
@@ -50,9 +46,7 @@ class ExternalNotificationService:
                     "title": title,
                     "description": message,
                     "color": 0x00FF00 if "Success" in title else 0xFF0000,
-                    "footer": {
-                        "text": "ReconX Elite - Automated Security Intelligence"
-                    },
+                    "footer": {"text": "ReconX Elite - Automated Security Intelligence"},
                 }
             ]
         }
@@ -71,9 +65,7 @@ class ExternalNotificationService:
         if severity not in ["HIGH", "CRITICAL"]:
             return
 
-        title = (
-            f"🚨 {severity} Finding: {vulnerability_data.get('template_id', 'Unknown')}"
-        )
+        title = f"🚨 {severity} Finding: {vulnerability_data.get('template_id', 'Unknown')}"
         message = (
             f"*Target*: {vulnerability_data.get('matched_url', 'N/A')}\n"
             f"*Description*: {vulnerability_data.get('description', 'No description provided')}\n"

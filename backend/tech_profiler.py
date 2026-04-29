@@ -16,9 +16,7 @@ class TechProfiler:
             "frontend_frameworks": [],
         }
 
-    async def profile_target(
-        self, content: str, headers: dict[str, str], urls: list[str]
-    ) -> dict[str, Any]:
+    async def profile_target(self, content: str, headers: dict[str, str], urls: list[str]) -> dict[str, Any]:
         """Profile a target for technology stack."""
         self._analyze_headers(headers)
         self._analyze_content(content)
@@ -114,9 +112,7 @@ class TechProfiler:
     def has_high_value_keywords(self) -> dict[str, bool]:
         """Return flags for high-value attack vectors."""
         profile = self.get_profile()
-        content_str = " ".join(
-            str(v) for vals in profile.values() for v in vals
-        ).lower()
+        content_str = " ".join(str(v) for vals in profile.values() for v in vals).lower()
         return {
             "has_graphql": "graphql" in content_str,
             "has_jwt": "jwt" in content_str,

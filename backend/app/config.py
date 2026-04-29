@@ -20,9 +20,7 @@ class Settings(BaseSettings):
     )
 
     # Redis
-    redis_url: str = Field(
-        default="redis://localhost:6379/0", description="Redis connection URL"
-    )
+    redis_url: str = Field(default="redis://localhost:6379/0", description="Redis connection URL")
     redis_cache_ttl: int = Field(default=60, description="Redis cache TTL in seconds")
 
     # AI Models
@@ -30,35 +28,21 @@ class Settings(BaseSettings):
     ai_model: str = Field(default="gemini-1.5-flash", description="Primary AI model")
     gemini_api_key: str = Field(default="", description="Gemini API key")
 
-    ai_analyze_provider: str = Field(
-        default="openrouter", description="Analysis AI provider"
-    )
-    ai_analyze_model: str = Field(
-        default="google/gemma-2-27b-it", description="Analysis model"
-    )
+    ai_analyze_provider: str = Field(default="openrouter", description="Analysis AI provider")
+    ai_analyze_model: str = Field(default="google/gemma-2-27b-it", description="Analysis model")
 
-    ai_scan_provider: str = Field(
-        default="openrouter", description="Scanning AI provider"
-    )
-    ai_scan_model: str = Field(
-        default="meta-llama/llama-3.3-70b-instruct", description="Scanning model"
-    )
+    ai_scan_provider: str = Field(default="openrouter", description="Scanning AI provider")
+    ai_scan_model: str = Field(default="meta-llama/llama-3.3-70b-instruct", description="Scanning model")
 
-    ai_report_provider: str = Field(
-        default="openrouter", description="Report AI provider"
-    )
-    ai_report_model: str = Field(
-        default="qwen/qwen-2.5-coder-32b-instruct", description="Report model"
-    )
+    ai_report_provider: str = Field(default="openrouter", description="Report AI provider")
+    ai_report_model: str = Field(default="qwen/qwen-2.5-coder-32b-instruct", description="Report model")
 
     openrouter_key: str = Field(default="", description="OpenRouter API key")
 
     # API Configuration
     api_title: str = Field(default="ReconX Elite API", description="API title")
     api_version: str = Field(default="1.0.0", description="API version")
-    api_description: str = Field(
-        default="Advanced vulnerability research engine", description="API description"
-    )
+    api_description: str = Field(default="Advanced vulnerability research engine", description="API description")
 
     # Security
     jwt_secret_key: str = Field(
@@ -66,33 +50,17 @@ class Settings(BaseSettings):
         description="JWT secret key",
     )
     jwt_algorithm: str = Field(default="HS256", description="JWT algorithm")
-    access_token_expire_minutes: int = Field(
-        default=120, description="Access token expiration in minutes"
-    )
-    refresh_token_expire_minutes: int = Field(
-        default=10080, description="Refresh token expiration in minutes"
-    )
+    access_token_expire_minutes: int = Field(default=120, description="Access token expiration in minutes")
+    refresh_token_expire_minutes: int = Field(default=10080, description="Refresh token expiration in minutes")
 
     # Rate Limiting
     login_rate_limit: str = Field(default="20/minute", description="Login rate limit")
-    register_rate_limit: str = Field(
-        default="10/minute", description="Registration rate limit"
-    )
-    scan_rate_limit: str = Field(
-        default="12/minute", description="Scan initiation rate limit"
-    )
-    read_rate_limit: str = Field(
-        default="120/minute", description="Read operations rate limit"
-    )
-    write_rate_limit: str = Field(
-        default="60/minute", description="Write operations rate limit"
-    )
-    refresh_rate_limit: str = Field(
-        default="30/minute", description="Token refresh rate limit"
-    )
-    report_rate_limit: str = Field(
-        default="30/minute", description="Report generation rate limit"
-    )
+    register_rate_limit: str = Field(default="10/minute", description="Registration rate limit")
+    scan_rate_limit: str = Field(default="12/minute", description="Scan initiation rate limit")
+    read_rate_limit: str = Field(default="120/minute", description="Read operations rate limit")
+    write_rate_limit: str = Field(default="60/minute", description="Write operations rate limit")
+    refresh_rate_limit: str = Field(default="30/minute", description="Token refresh rate limit")
+    report_rate_limit: str = Field(default="30/minute", description="Report generation rate limit")
 
     # CORS
     cors_allowed_origins: List[str] = Field(
@@ -102,29 +70,15 @@ class Settings(BaseSettings):
 
     # Scan Configuration
     default_scan_mode: str = Field(default="balanced", description="Default scan mode")
-    max_concurrent_scans: int = Field(
-        default=10, description="Maximum concurrent scans"
-    )
-    scan_timeout_seconds: int = Field(
-        default=3600, description="Scan timeout in seconds"
-    )
+    max_concurrent_scans: int = Field(default=10, description="Maximum concurrent scans")
+    scan_timeout_seconds: int = Field(default=3600, description="Scan timeout in seconds")
 
     # Advanced Recon
-    advanced_recon_enabled: bool = Field(
-        default=True, description="Enable advanced reconnaissance"
-    )
-    max_adaptive_analysis_endpoints: int = Field(
-        default=20, description="Max endpoints for adaptive analysis"
-    )
-    parameter_discovery_timeout_seconds: int = Field(
-        default=300, description="Parameter discovery timeout"
-    )
-    content_fuzzing_timeout_seconds: int = Field(
-        default=600, description="Content fuzzing timeout"
-    )
-    max_content_fuzzing_requests: int = Field(
-        default=100, description="Max content fuzzing requests"
-    )
+    advanced_recon_enabled: bool = Field(default=True, description="Enable advanced reconnaissance")
+    max_adaptive_analysis_endpoints: int = Field(default=20, description="Max endpoints for adaptive analysis")
+    parameter_discovery_timeout_seconds: int = Field(default=300, description="Parameter discovery timeout")
+    content_fuzzing_timeout_seconds: int = Field(default=600, description="Content fuzzing timeout")
+    max_content_fuzzing_requests: int = Field(default=100, description="Max content fuzzing requests")
 
     # Logging
     log_level: str = Field(default="INFO", description="Logging level")
@@ -133,13 +87,9 @@ class Settings(BaseSettings):
     metrics_enabled: bool = Field(default=True, description="Enable Prometheus metrics")
 
     # Monitoring
-    enable_aggressive_scanning: bool = Field(
-        default=False, description="Enable aggressive scanning"
-    )
+    enable_aggressive_scanning: bool = Field(default=False, description="Enable aggressive scanning")
 
-    model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", case_sensitive=False
-    )
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", case_sensitive=False)
 
     @validator("postgres_password")
     def validate_password_strength(cls, v: str) -> str:

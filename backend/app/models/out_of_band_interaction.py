@@ -10,12 +10,8 @@ class OutOfBandInteraction(Base):
     __tablename__ = "out_of_band_interactions"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
-    )
-    scan_id = Column(
-        Integer, ForeignKey("scans.id", ondelete="CASCADE"), nullable=True, index=True
-    )
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    scan_id = Column(Integer, ForeignKey("scans.id", ondelete="CASCADE"), nullable=True, index=True)
     vulnerability_id = Column(
         Integer,
         ForeignKey("vulnerabilities.id", ondelete="CASCADE"),
@@ -24,9 +20,7 @@ class OutOfBandInteraction(Base):
     )
 
     # Callback details
-    callback_id = Column(
-        Text, nullable=False, unique=True, index=True
-    )  # Unique identifier
+    callback_id = Column(Text, nullable=False, unique=True, index=True)  # Unique identifier
     callback_url = Column(Text, nullable=False)  # Full callback URL
     interaction_type = Column(Text, nullable=False)  # ssrf, blind_xss, dns, etc.
 

@@ -34,9 +34,7 @@ class DualSessionHandler:
             "total_candidates": len(idor_candidates),
         }
 
-    async def _crawl_endpoints(
-        self, session_token: str, endpoints: list[str], session_label: str
-    ) -> None:
+    async def _crawl_endpoints(self, session_token: str, endpoints: list[str], session_label: str) -> None:
         """Crawl endpoints with a specific session token."""
         async with httpx.AsyncClient(timeout=15.0) as client:
             for endpoint in endpoints:
@@ -50,9 +48,7 @@ class DualSessionHandler:
 
                     if response.status_code == 200:
                         # Extract resource IDs from response
-                        resources = await self._extract_resources(
-                            response.text, endpoint
-                        )
+                        resources = await self._extract_resources(response.text, endpoint)
 
                         if session_label == "session_a":
                             self.session_a_resources[endpoint] = resources
@@ -62,9 +58,7 @@ class DualSessionHandler:
                 except Exception:
                     pass
 
-    async def _extract_resources(
-        self, html_content: str, endpoint: str
-    ) -> list[dict[str, Any]]:
+    async def _extract_resources(self, html_content: str, endpoint: str) -> list[dict[str, Any]]:
         """Extract resource IDs from HTML/JSON response."""
         resources = []
 
@@ -98,9 +92,7 @@ class DualSessionHandler:
         candidates = []
 
         # Find common endpoints
-        common_endpoints = set(self.session_a_resources.keys()) & set(
-            self.session_b_resources.keys()
-        )
+        common_endpoints = set(self.session_a_resources.keys()) & set(self.session_b_resources.keys())
 
         for endpoint in common_endpoints:
             resources_a = self.session_a_resources[endpoint]
@@ -120,17 +112,13 @@ class DualSessionHandler:
 
         return candidates
 
-    async def test_idor_vector(
-        self, endpoint: str, session_a_id: str, session_b_token: str
-    ) -> dict[str, Any]:
+    async def test_idor_vector(self, endpoint: str, session_a_id: str, session_b_token: str) -> dict[str, Any]:
         """Test if Session B can access Session A's resources (IDOR proof)."""
         try:
             async with httpx.AsyncClient(timeout=15.0) as client:
                 test_url = f"{self.base_url}{endpoint}?id={session_a_id}"
                 headers = {"Authorization": f"Bearer {session_b_token}"}
-                response = await client.get(
-                    test_url, headers=headers, follow_redirects=True
-                )
+                response = await client.get(test_url, headers=headers, follow_redirects=True)
 
                 return {
                     "endpoint": endpoint,
@@ -138,11 +126,7 @@ class DualSessionHandler:
                     "status_code": response.status_code,
                     "vulnerable": response.status_code == 200,
                     "response_size": len(response.content),
-                    "data_leaked": (
-                        "potential data disclosure"
-                        if response.status_code == 200
-                        else "protected"
-                    ),
+                    "data_leaked": ("potential data disclosure" if response.status_code == 200 else "protected"),
                 }
         except Exception as e:
             return {

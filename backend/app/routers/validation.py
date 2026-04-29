@@ -29,9 +29,7 @@ async def validate_vulnerability(
     """Validate a vulnerability by replaying the request with payload."""
 
     # Get vulnerability
-    vulnerability = (
-        db.query(Vulnerability).filter(Vulnerability.id == vulnerability_id).first()
-    )
+    vulnerability = db.query(Vulnerability).filter(Vulnerability.id == vulnerability_id).first()
 
     if not vulnerability:
         raise HTTPException(status_code=404, detail="Vulnerability not found")
@@ -55,9 +53,7 @@ async def get_validation_results(
     """Get validation results for a vulnerability."""
 
     # Get vulnerability
-    vulnerability = (
-        db.query(Vulnerability).filter(Vulnerability.id == vulnerability_id).first()
-    )
+    vulnerability = db.query(Vulnerability).filter(Vulnerability.id == vulnerability_id).first()
 
     if not vulnerability:
         raise HTTPException(status_code=404, detail="Vulnerability not found")
@@ -123,11 +119,7 @@ async def get_full_validation_details(
     """Get full validation details including request/response."""
 
     # Get validation
-    validation = (
-        db.query(ExploitValidation)
-        .filter(ExploitValidation.id == validation_id)
-        .first()
-    )
+    validation = db.query(ExploitValidation).filter(ExploitValidation.id == validation_id).first()
 
     if not validation:
         raise HTTPException(status_code=404, detail="Validation not found")

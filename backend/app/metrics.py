@@ -106,13 +106,9 @@ database_connection_pool_usage = Gauge(
 )
 
 # Cache metrics
-cache_hits = Counter(
-    "cache_hits_total", "Total cache hits", ["cache_type"], registry=registry
-)
+cache_hits = Counter("cache_hits_total", "Total cache hits", ["cache_type"], registry=registry)
 
-cache_misses = Counter(
-    "cache_misses_total", "Total cache misses", ["cache_type"], registry=registry
-)
+cache_misses = Counter("cache_misses_total", "Total cache misses", ["cache_type"], registry=registry)
 
 # Phase metrics
 phase_execution_time = Histogram(
@@ -123,9 +119,7 @@ phase_execution_time = Histogram(
     registry=registry,
 )
 
-phase_findings = Counter(
-    "phase_findings_total", "Findings per phase", ["phase"], registry=registry
-)
+phase_findings = Counter("phase_findings_total", "Findings per phase", ["phase"], registry=registry)
 
 # HTTP metrics
 http_requests_total = Counter(
@@ -144,13 +138,9 @@ http_request_duration = Histogram(
 )
 
 # System health
-system_health = Gauge(
-    "system_health", "Overall system health (1=healthy, 0=unhealthy)", registry=registry
-)
+system_health = Gauge("system_health", "Overall system health (1=healthy, 0=unhealthy)", registry=registry)
 
-worker_queue_size = Gauge(
-    "worker_queue_size", "Number of tasks in worker queue", ["queue"], registry=registry
-)
+worker_queue_size = Gauge("worker_queue_size", "Number of tasks in worker queue", ["queue"], registry=registry)
 
 
 class MetricsCollector:
@@ -204,13 +194,9 @@ class MetricsCollector:
         phase_findings.labels(phase=phase).inc(findings)
 
     @staticmethod
-    def record_http_request(
-        method: str, endpoint: str, status: int, duration: float
-    ) -> None:
+    def record_http_request(method: str, endpoint: str, status: int, duration: float) -> None:
         """Record HTTP request metrics."""
-        http_requests_total.labels(
-            method=method, endpoint=endpoint, status=status
-        ).inc()
+        http_requests_total.labels(method=method, endpoint=endpoint, status=status).inc()
         http_request_duration.labels(method=method, endpoint=endpoint).observe(duration)
 
     @staticmethod

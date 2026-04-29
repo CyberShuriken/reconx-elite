@@ -12,9 +12,7 @@ from app.services.blind_xss_service import BlindXssService
 router = APIRouter(prefix="/xss", tags=["blind-xss"])
 
 
-@router.api_route(
-    "/{token}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"]
-)
+@router.api_route("/{token}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS"])
 async def collect_xss_hit(
     token: str,
     request: Request,

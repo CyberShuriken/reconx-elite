@@ -114,14 +114,10 @@ class WAFAnalyzer:
         # WAF signature patterns
         self.waf_signatures = {
             WAFType.CLOUDFLARE: [
-                WAFSignature(
-                    "server_header", r"cloudflare", "Cloudflare server header", 0.9
-                ),
+                WAFSignature("server_header", r"cloudflare", "Cloudflare server header", 0.9),
                 WAFSignature("error_page", r"cloudflare", "Cloudflare error page", 0.8),
                 WAFSignature("ray_id", r"ray_id|cf-ray", "Cloudflare Ray ID", 0.9),
-                WAFSignature(
-                    "response_code", r"403.*cloudflare", "Cloudflare 403 page", 0.7
-                ),
+                WAFSignature("response_code", r"403.*cloudflare", "Cloudflare 403 page", 0.7),
             ],
             WAFType.AKAMAI: [
                 WAFSignature("server_header", r"akamai", "Akamai server header", 0.9),
@@ -142,16 +138,10 @@ class WAFAnalyzer:
                 WAFSignature("cookies", r"aws.*waf", "AWS WAF cookies", 0.5),
             ],
             WAFType.MODSECURITY: [
-                WAFSignature(
-                    "error_page", r"modsecurity", "ModSecurity error page", 0.8
-                ),
+                WAFSignature("error_page", r"modsecurity", "ModSecurity error page", 0.8),
                 WAFSignature("headers", r"x-modsecurity", "ModSecurity headers", 0.9),
-                WAFSignature(
-                    "server_header", r"modsecurity", "ModSecurity server", 0.6
-                ),
-                WAFSignature(
-                    "response_code", r"403.*modsecurity", "ModSecurity block", 0.7
-                ),
+                WAFSignature("server_header", r"modsecurity", "ModSecurity server", 0.6),
+                WAFSignature("response_code", r"403.*modsecurity", "ModSecurity block", 0.7),
             ],
             WAFType.F5_ASM: [
                 WAFSignature("server_header", r"big-ip|f5", "F5 Big-IP header", 0.8),
@@ -232,9 +222,7 @@ class WAFAnalyzer:
 
     async def _fingerprint_waf(self) -> None:
         """Fingerprint WAF type and configuration"""
-        await self.ws_manager.send_log(
-            self.session_id, "info", "Fingerprinting WAF...", phase="waf_analysis"
-        )
+        await self.ws_manager.send_log(self.session_id, "info", "Fingerprinting WAF...", phase="waf_analysis")
 
         # Test base target
         base_url = f"https://{self.target}"
@@ -262,9 +250,7 @@ class WAFAnalyzer:
         # Create WAF profile
         await self._create_waf_profile(waf_type, base_response, payload_responses)
 
-    async def _analyze_response(
-        self, url: str, params: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+    async def _analyze_response(self, url: str, params: Dict[str, Any] = None) -> Dict[str, Any]:
         """Analyze HTTP response for WAF indicators"""
         try:
             if params:
@@ -274,9 +260,7 @@ class WAFAnalyzer:
             else:
                 test_url = url
 
-            result = await self.tool_runner.run_tool(
-                "http_request", {"url": test_url, "method": "GET"}
-            )
+            result = await self.tool_runner.run_tool("http_request", {"url": test_url, "method": "GET"})
 
             if result:
                 return {
@@ -426,9 +410,7 @@ class WAFAnalyzer:
             evasion_techniques=[],
         )
 
-    def _check_signature(
-        self, signature: WAFSignature, response: Dict[str, Any]
-    ) -> bool:
+    def _check_signature(self, signature: WAFSignature, response: Dict[str, Any]) -> bool:
         """Check if WAF signature matches response"""
         pattern = signature.pattern.lower()
 
@@ -452,9 +434,7 @@ class WAFAnalyzer:
 
     async def _detect_rate_limiting(self) -> None:
         """Detect rate limiting thresholds"""
-        await self.ws_manager.send_log(
-            self.session_id, "info", "Detecting rate limiting...", phase="waf_analysis"
-        )
+        await self.ws_manager.send_log(self.session_id, "info", "Detecting rate limiting...", phase="waf_analysis")
 
         if not self.waf_profile:
             return
@@ -483,16 +463,12 @@ class WAFAnalyzer:
                 logger.debug(f"Rate limiting test failed for request {i+1}: {e}")
 
         # Analyze results for rate limiting
-        rate_limit_detected, threshold = self._analyze_rate_limiting_results(
-            test_results
-        )
+        rate_limit_detected, threshold = self._analyze_rate_limiting_results(test_results)
 
         self.waf_profile.rate_limit_detected = rate_limit_detected
         self.waf_profile.rate_limit_threshold = threshold
 
-    def _analyze_rate_limiting_results(
-        self, test_results: List[Dict[str, Any]]
-    ) -> Tuple[bool, Optional[int]]:
+    def _analyze_rate_limiting_results(self, test_results: List[Dict[str, Any]]) -> Tuple[bool, Optional[int]]:
         """Analyze rate limiting test results"""
         if len(test_results) < 5:
             return False, None
@@ -508,9 +484,7 @@ class WAFAnalyzer:
 
         if len(response_times) >= 3:
             # Check if response times are increasing significantly
-            avg_first_half = sum(response_times[: len(response_times) // 2]) / (
-                len(response_times) // 2
-            )
+            avg_first_half = sum(response_times[: len(response_times) // 2]) / (len(response_times) // 2)
             avg_second_half = sum(response_times[len(response_times) // 2 :]) / (
                 len(response_times) // 2 + len(response_times) % 2
             )
@@ -683,9 +657,7 @@ class WAFAnalyzer:
 
     async def _configure_stealth_mode(self) -> None:
         """Configure stealth mode settings"""
-        await self.ws_manager.send_log(
-            self.session_id, "info", "Configuring stealth mode...", phase="waf_analysis"
-        )
+        await self.ws_manager.send_log(self.session_id, "info", "Configuring stealth mode...", phase="waf_analysis")
 
         if not self.waf_profile:
             self.stealth_config["stealth_mode"] = False
@@ -695,8 +667,7 @@ class WAFAnalyzer:
         stealth_conditions = [
             self.waf_profile.confidence > 0.7,
             self.waf_profile.rate_limit_detected,
-            self.waf_profile.waf_type
-            in [WAFType.CLOUDFLARE, WAFType.AKAMAI, WAFType.IMPERVA],
+            self.waf_profile.waf_type in [WAFType.CLOUDFLARE, WAFType.AKAMAI, WAFType.IMPERVA],
         ]
 
         self.waf_profile.stealth_mode = any(stealth_conditions)
@@ -755,15 +726,13 @@ class WAFAnalyzer:
             return False
 
         # Move to next provider
-        self.proxy_config["current_provider_index"] = (
-            self.proxy_config["current_provider_index"] + 1
-        ) % len(self.proxy_config["providers"])
+        self.proxy_config["current_provider_index"] = (self.proxy_config["current_provider_index"] + 1) % len(
+            self.proxy_config["providers"]
+        )
 
         self.proxy_config["rotation_count"] += 1
 
-        current_provider = self.proxy_config["providers"][
-            self.proxy_config["current_provider_index"]
-        ]
+        current_provider = self.proxy_config["providers"][self.proxy_config["current_provider_index"]]
 
         await self.ws_manager.send_log(
             self.session_id,
@@ -779,9 +748,7 @@ class WAFAnalyzer:
         if not self.proxy_config["enabled"] or not self.proxy_config["providers"]:
             return {}
 
-        current_provider = self.proxy_config["providers"][
-            self.proxy_config["current_provider_index"]
-        ]
+        current_provider = self.proxy_config["providers"][self.proxy_config["current_provider_index"]]
 
         # Get proxy endpoint from provider API
         proxy_endpoint = await self._get_proxy_endpoint(current_provider)
@@ -803,9 +770,7 @@ class WAFAnalyzer:
 
             # Make request to get proxy endpoint
             async with httpx.AsyncClient() as client:
-                response = await client.get(
-                    f"{config['api_url']}/proxy", headers=headers, timeout=10
-                )
+                response = await client.get(f"{config['api_url']}/proxy", headers=headers, timeout=10)
 
                 if response.status_code == 200:
                     proxy_data = response.json()
@@ -830,8 +795,7 @@ class WAFAnalyzer:
         # Check if proxy rotation should be triggered
         if (
             bypass_type in ["xss_bypass", "sql_injection_bypass"]
-            and self.proxy_config["bypass_failure_count"]
-            >= self.proxy_config["rotation_threshold"]
+            and self.proxy_config["bypass_failure_count"] >= self.proxy_config["rotation_threshold"]
         ):
 
             await self.ws_manager.send_log(
@@ -851,40 +815,23 @@ class WAFAnalyzer:
             "session_id": self.session_id,
             "module": "waf_analyzer",
             "waf_profile": {
-                "waf_type": (
-                    self.waf_profile.waf_type.value if self.waf_profile else "unknown"
-                ),
+                "waf_type": (self.waf_profile.waf_type.value if self.waf_profile else "unknown"),
                 "confidence": self.waf_profile.confidence if self.waf_profile else 0.0,
-                "signatures_count": (
-                    len(self.waf_profile.signatures) if self.waf_profile else 0
-                ),
-                "rate_limit_detected": (
-                    self.waf_profile.rate_limit_detected if self.waf_profile else False
-                ),
+                "signatures_count": (len(self.waf_profile.signatures) if self.waf_profile else 0),
+                "rate_limit_detected": (self.waf_profile.rate_limit_detected if self.waf_profile else False),
                 "rate_limit_threshold": self.waf_profile.rate_limit_threshold,
-                "recommended_delay": (
-                    self.waf_profile.recommended_delay if self.waf_profile else 0.0
-                ),
-                "stealth_mode": (
-                    self.waf_profile.stealth_mode if self.waf_profile else False
-                ),
-                "evasion_techniques": (
-                    self.waf_profile.evasion_techniques if self.waf_profile else []
-                ),
+                "recommended_delay": (self.waf_profile.recommended_delay if self.waf_profile else 0.0),
+                "stealth_mode": (self.waf_profile.stealth_mode if self.waf_profile else False),
+                "evasion_techniques": (self.waf_profile.evasion_techniques if self.waf_profile else []),
             },
             "stealth_config": self.stealth_config,
             "summary": {
-                "waf_detected": self.waf_profile is not None
-                and self.waf_profile.waf_type != WAFType.UNKNOWN,
-                "waf_type": (
-                    self.waf_profile.waf_type.value if self.waf_profile else "unknown"
-                ),
+                "waf_detected": self.waf_profile is not None and self.waf_profile.waf_type != WAFType.UNKNOWN,
+                "waf_type": (self.waf_profile.waf_type.value if self.waf_profile else "unknown"),
                 "confidence": self.waf_profile.confidence if self.waf_profile else 0.0,
                 "recommended_delay": self.stealth_config.get("recommended_delay", 0.0),
                 "stealth_mode_enabled": self.stealth_config.get("stealth_mode", False),
-                "evasion_techniques_count": len(
-                    self.stealth_config.get("evasion_techniques", [])
-                ),
+                "evasion_techniques_count": len(self.stealth_config.get("evasion_techniques", [])),
                 "recommendation": "Use recommended delays and evasion techniques for stealthy scanning",
             },
         }

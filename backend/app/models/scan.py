@@ -20,29 +20,15 @@ class Scan(Base):
     scan_config_json = Column(MutableDict.as_mutable(JSON), default=dict)
     error = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(
-        DateTime(timezone=True), onupdate=func.now(), server_default=func.now()
-    )
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now(), server_default=func.now())
 
     target = relationship("Target", back_populates="scans")
-    subdomains = relationship(
-        "Subdomain", back_populates="scan", cascade="all, delete-orphan"
-    )
-    endpoints = relationship(
-        "Endpoint", back_populates="scan", cascade="all, delete-orphan"
-    )
-    vulnerabilities = relationship(
-        "Vulnerability", back_populates="scan", cascade="all, delete-orphan"
-    )
-    javascript_assets = relationship(
-        "JavaScriptAsset", back_populates="scan", cascade="all, delete-orphan"
-    )
-    attack_paths = relationship(
-        "AttackPath", back_populates="scan", cascade="all, delete-orphan"
-    )
-    payload_opportunities = relationship(
-        "PayloadOpportunity", back_populates="scan", cascade="all, delete-orphan"
-    )
+    subdomains = relationship("Subdomain", back_populates="scan", cascade="all, delete-orphan")
+    endpoints = relationship("Endpoint", back_populates="scan", cascade="all, delete-orphan")
+    vulnerabilities = relationship("Vulnerability", back_populates="scan", cascade="all, delete-orphan")
+    javascript_assets = relationship("JavaScriptAsset", back_populates="scan", cascade="all, delete-orphan")
+    attack_paths = relationship("AttackPath", back_populates="scan", cascade="all, delete-orphan")
+    payload_opportunities = relationship("PayloadOpportunity", back_populates="scan", cascade="all, delete-orphan")
     logs = relationship("ScanLog", back_populates="scan", cascade="all, delete-orphan")
     diffs = relationship(
         "ScanDiff",
@@ -50,18 +36,8 @@ class Scan(Base):
         cascade="all, delete-orphan",
         foreign_keys="ScanDiff.scan_id",
     )
-    oob_interactions = relationship(
-        "OutOfBandInteraction", back_populates="scan", cascade="all, delete-orphan"
-    )
-    custom_results = relationship(
-        "CustomTemplateResult", back_populates="scan", cascade="all, delete-orphan"
-    )
-    discovered_parameters = relationship(
-        "DiscoveredParameter", back_populates="scan", cascade="all, delete-orphan"
-    )
-    fuzzed_endpoints = relationship(
-        "FuzzedEndpoint", back_populates="scan", cascade="all, delete-orphan"
-    )
-    artifacts = relationship(
-        "ScanArtifact", back_populates="scan", cascade="all, delete-orphan"
-    )
+    oob_interactions = relationship("OutOfBandInteraction", back_populates="scan", cascade="all, delete-orphan")
+    custom_results = relationship("CustomTemplateResult", back_populates="scan", cascade="all, delete-orphan")
+    discovered_parameters = relationship("DiscoveredParameter", back_populates="scan", cascade="all, delete-orphan")
+    fuzzed_endpoints = relationship("FuzzedEndpoint", back_populates="scan", cascade="all, delete-orphan")
+    artifacts = relationship("ScanArtifact", back_populates="scan", cascade="all, delete-orphan")

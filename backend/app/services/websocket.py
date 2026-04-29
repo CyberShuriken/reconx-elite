@@ -139,9 +139,7 @@ class WebSocketManager:
         """Publish message to Redis for cross-process communication."""
         await self.init_redis()
         try:
-            await self.redis_client.publish(
-                f"reconx:notifications:{channel}", json.dumps(message)
-            )
+            await self.redis_client.publish(f"reconx:notifications:{channel}", json.dumps(message))
         except Exception as e:
             logger.error(f"Error publishing to Redis: {e}")
 
@@ -183,9 +181,7 @@ async def notify_scan_started(user_id: int, target_domain: str, scan_id: int):
     await manager.publish_to_redis("scan_events", message)
 
 
-async def notify_scan_completed(
-    user_id: int, target_domain: str, scan_id: int, results: dict
-):
+async def notify_scan_completed(user_id: int, target_domain: str, scan_id: int, results: dict):
     """Send notification when scan completes successfully."""
     message = {
         "type": NotificationType.SCAN_COMPLETED,
@@ -208,9 +204,7 @@ async def notify_scan_completed(
     await manager.publish_to_redis("scan_events", message)
 
 
-async def notify_scan_failed(
-    user_id: int, target_domain: str, scan_id: int, error: str
-):
+async def notify_scan_failed(user_id: int, target_domain: str, scan_id: int, error: str):
     """Send notification when scan fails."""
     message = {
         "type": NotificationType.SCAN_FAILED,
@@ -262,9 +256,7 @@ async def notify_system_alert(message: str, severity: str = "info"):
     await manager.publish_to_redis("system_alerts", notification_message)
 
 
-async def notify_user_notification(
-    user_id: int, title: str, message: str, notification_type: str = "info"
-):
+async def notify_user_notification(user_id: int, title: str, message: str, notification_type: str = "info"):
     """Send custom notification to specific user."""
     notification_message = {
         "type": NotificationType.USER_NOTIFICATION,

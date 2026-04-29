@@ -104,9 +104,7 @@ class ReconXLogger:
             user_id=user_id,
         )
 
-    def log_ai_event(
-        self, event: str, details: Dict[str, Any], user_id: Optional[int] = None
-    ):
+    def log_ai_event(self, event: str, details: Dict[str, Any], user_id: Optional[int] = None):
         """Log AI-related events."""
 
         self.log_structured(
@@ -132,9 +130,7 @@ class ReconXLogger:
             user_id=user_id,
         )
 
-    def log_validation_event(
-        self, event: str, details: Dict[str, Any], user_id: Optional[int] = None
-    ):
+    def log_validation_event(self, event: str, details: Dict[str, Any], user_id: Optional[int] = None):
         """Log exploit validation events."""
 
         self.log_structured(

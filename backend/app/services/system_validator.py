@@ -45,15 +45,11 @@ class SystemValidator:
 
                 if check_result["status"] == "error":
                     results["overall_status"] = "unhealthy"
-                    results["errors"].append(
-                        f"{check_name}: {check_result.get('message', 'Unknown error')}"
-                    )
+                    results["errors"].append(f"{check_name}: {check_result.get('message', 'Unknown error')}")
                 elif check_result["status"] == "warning":
                     if results["overall_status"] == "healthy":
                         results["overall_status"] = "degraded"
-                    results["warnings"].append(
-                        f"{check_name}: {check_result.get('message', 'Warning')}"
-                    )
+                    results["warnings"].append(f"{check_name}: {check_result.get('message', 'Warning')}")
 
             except Exception as e:
                 logger.error(f"Validation check {check_name} failed: {e}")
@@ -278,13 +274,8 @@ class SystemValidator:
                 security_issues.append("Gemini API key not configured")
 
             # Check CORS settings
-            if (
-                "localhost" in settings.cors_allowed_origins
-                and "localhost" in settings.cors_allowed_origins
-            ):
-                security_issues.append(
-                    "Localhost CORS origins detected (OK for development)"
-                )
+            if "localhost" in settings.cors_allowed_origins and "localhost" in settings.cors_allowed_origins:
+                security_issues.append("Localhost CORS origins detected (OK for development)")
 
             # Check rate limits
             try:

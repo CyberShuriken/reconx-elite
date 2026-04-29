@@ -46,9 +46,7 @@ def rate_limit_key(request: Request) -> str:
 limiter = Limiter(key_func=rate_limit_key)
 
 
-@router.post(
-    "/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED
-)
+@router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 @limiter.limit(settings.register_rate_limit)
 async def register(payload: RegisterRequest, request: Request, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(User).filter(User.email == payload.email))
@@ -56,9 +54,7 @@ async def register(payload: RegisterRequest, request: Request, db: AsyncSession 
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
-    user = User(
-        email=payload.email, password_hash=hash_password(payload.password), role="user"
-    )
+    user = User(email=payload.email, password_hash=hash_password(payload.password), role="user")
     db.add(user)
     await db.commit()
     await db.refresh(user)
@@ -98,9 +94,7 @@ async def login(payload: LoginRequest, request: Request, db: AsyncSession = Depe
 
 @router.post("/refresh", response_model=TokenResponse)
 @limiter.limit(settings.refresh_rate_limit)
-async def refresh_token(
-    payload: RefreshRequest, request: Request, db: AsyncSession = Depends(get_db)
-):
+async def refresh_token(payload: RefreshRequest, request: Request, db: AsyncSession = Depends(get_db)):
     try:
         claims = decode_token(payload.refresh_token)
     except (JWTError, ValueError) as exc:
@@ -115,16 +109,10 @@ async def refresh_token(
         raise HTTPException(status_code=401, detail="Malformed refresh token")
 
     result = await db.execute(
-        select(RefreshToken).filter(
-            RefreshToken.token_jti == token_jti, RefreshToken.user_id == int(user_id)
-        )
+        select(RefreshToken).filter(RefreshToken.token_jti == token_jti, RefreshToken.user_id == int(user_id))
     )
     stored = result.scalar_one_or_none()
-    if (
-        not stored
-        or stored.is_revoked
-        or stored.expires_at < datetime.now(timezone.utc)
-    ):
+    if not stored or stored.is_revoked or stored.expires_at < datetime.now(timezone.utc):
         raise HTTPException(status_code=401, detail="Refresh token revoked or expired")
 
     result = await db.execute(select(User).filter(User.id == int(user_id)))

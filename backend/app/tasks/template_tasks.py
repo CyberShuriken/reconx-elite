@@ -12,9 +12,7 @@ from app.services.custom_template_engine import template_engine
 logger = logging.getLogger(__name__)
 
 
-async def run_custom_template_task(
-    user_id: int, template_id: int, target_urls: list
-) -> dict:
+async def run_custom_template_task(user_id: int, template_id: int, target_urls: list) -> dict:
     """Execute a custom Nuclei template task."""
     db = get_sessionmaker()()
 
@@ -24,9 +22,7 @@ async def run_custom_template_task(
             db, template_id, target_urls, 0  # scan_id=0 for manual execution
         )
 
-        logger.info(
-            f"Custom template {template_id} executed for user {user_id}: {len(findings)} findings"
-        )
+        logger.info(f"Custom template {template_id} executed for user {user_id}: {len(findings)} findings")
 
         return {
             "user_id": user_id,

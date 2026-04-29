@@ -1,9 +1,7 @@
 import re
 from urllib.parse import urlparse
 
-DOMAIN_RE = re.compile(
-    r"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))+$"
-)
+DOMAIN_RE = re.compile(r"^(?!-)[A-Za-z0-9-]{1,63}(?<!-)(\.(?!-)[A-Za-z0-9-]{1,63}(?<!-))+$")
 
 
 def _host_from_user_input(value: str) -> str:

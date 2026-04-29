@@ -34,7 +34,9 @@ class TestJWTSecurity(unittest.TestCase):
         """Test that JWT tokens have required claims."""
         # Test missing exp claim - create a token without proper signature
         # This will fail with signature verification error, which is expected
-        invalid_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwidG9rZW5fdHlwZSI6ImFjY2VzcyJ9.invalid"
+        invalid_token = (
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwidG9rZW5fdHlwZSI6ImFjY2VzcyJ9.invalid"
+        )
 
         with self.assertRaises(ValueError) as context:
             decode_token(invalid_token)
@@ -127,12 +129,8 @@ class TestURLNormalizationSecurity(unittest.TestCase):
         url = f"https://example.com/path?{params}"
 
         result = normalize_endpoint_url(url, source="test")
-        self.assertIsNotNone(
-            result, "URL with many params should be accepted but limited"
-        )
-        self.assertLessEqual(
-            len(result["query_params"]), 50, "Query params should be limited to 50"
-        )
+        self.assertIsNotNone(result, "URL with many params should be accepted but limited")
+        self.assertLessEqual(len(result["query_params"]), 50, "Query params should be limited to 50")
 
     def test_valid_urls_accepted(self):
         """Test that valid URLs are accepted."""
@@ -146,9 +144,7 @@ class TestURLNormalizationSecurity(unittest.TestCase):
         for url in valid_urls:
             result = normalize_endpoint_url(url, source="test")
             self.assertIsNotNone(result, f"Valid URL should be accepted: {url}")
-            self.assertLess(
-                len(result["url"]), 2049, "Stored URL should be length-limited"
-            )
+            self.assertLess(len(result["url"]), 2049, "Stored URL should be length-limited")
 
 
 class TestDatabaseSecurity(unittest.TestCase):
@@ -192,9 +188,7 @@ class TestCeleryTaskSecurity(unittest.TestCase):
         for payload in invalid_payloads:
             with self.subTest(payload=type(payload).__name__):
                 # Verify these would be caught by validation
-                self.assertTrue(
-                    not isinstance(payload, dict) or "scan_id" not in payload
-                )
+                self.assertTrue(not isinstance(payload, dict) or "scan_id" not in payload)
 
 
 class TestMiddlewareSecurity(unittest.TestCase):
@@ -292,9 +286,7 @@ class TestErrorHandling(unittest.TestCase):
         # This would require mocking database operations
         # For now, we'll ensure the database URL doesn't appear in error messages
         db_url = settings.database_url
-        self.assertNotIn(
-            "password", db_url.lower()
-        )  # Should use connection string without password
+        self.assertNotIn("password", db_url.lower())  # Should use connection string without password
 
 
 if __name__ == "__main__":

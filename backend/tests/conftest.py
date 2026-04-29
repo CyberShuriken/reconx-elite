@@ -18,9 +18,7 @@ TEST_DATABASE_URL = "sqlite:///:memory:"
 @pytest.fixture(scope="session")
 def test_db():
     """Create test database engine."""
-    engine = create_engine(
-        TEST_DATABASE_URL, connect_args={"check_same_thread": False}, echo=False
-    )
+    engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False}, echo=False)
     return engine
 
 

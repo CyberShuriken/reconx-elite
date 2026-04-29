@@ -14,9 +14,7 @@ router = APIRouter(prefix="/oob", tags=["out-of-band"])
 
 
 @router.post("/callback/{callback_id}")
-async def receive_callback(
-    callback_id: str, request: Request, db: Session = Depends(get_db)
-):
+async def receive_callback(callback_id: str, request: Request, db: Session = Depends(get_db)):
     """Receive and record out-of-band callback."""
 
     # Extract request details
@@ -77,9 +75,7 @@ async def generate_callback(
         )
 
     # Generate callback details
-    callback_details = oob_service.generate_callback(
-        current_user.id, interaction_type, scan_id, vulnerability_id
-    )
+    callback_details = oob_service.generate_callback(current_user.id, interaction_type, scan_id, vulnerability_id)
 
     # Create database record
     interaction = oob_service.create_callback_record(
@@ -133,9 +129,7 @@ async def get_user_interactions(
 
 
 @router.get("/interactions/confirmed")
-async def get_confirmed_interactions(
-    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
-):
+async def get_confirmed_interactions(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Get confirmed out-of-band interactions."""
 
     interactions = oob_service.get_confirmed_interactions(db, current_user.id)
@@ -205,11 +199,7 @@ async def get_interaction_details(
 ):
     """Get detailed information about a specific interaction."""
 
-    interaction = (
-        db.query(OutOfBandInteraction)
-        .filter(OutOfBandInteraction.id == interaction_id)
-        .first()
-    )
+    interaction = db.query(OutOfBandInteraction).filter(OutOfBandInteraction.id == interaction_id).first()
 
     if not interaction:
         raise HTTPException(status_code=404, detail="Interaction not found")

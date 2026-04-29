@@ -29,14 +29,10 @@ class TicketingConfigRequest(BaseModel):
 
 
 class CreateTicketRequest(BaseModel):
-    vulnerability_id: int = Field(
-        ..., description="Vulnerability ID to create ticket for"
-    )
+    vulnerability_id: int = Field(..., description="Vulnerability ID to create ticket for")
     platform: TicketingPlatform = Field(..., description="Ticketing platform")
     config: Dict = Field(..., description="Platform-specific configuration")
-    additional_context: Optional[Dict] = Field(
-        None, description="Additional context for the ticket"
-    )
+    additional_context: Optional[Dict] = Field(None, description="Additional context for the ticket")
 
 
 class TicketingConfigResponse(BaseModel):
@@ -53,10 +49,7 @@ def list_ticketing_platforms(current_user: User = Depends(get_current_user)):
 
     # Jira
     jira_configured = bool(
-        settings.jira_url
-        and settings.jira_username
-        and settings.jira_api_token
-        and settings.jira_project_key
+        settings.jira_url and settings.jira_username and settings.jira_api_token and settings.jira_project_key
     )
     platforms.append(
         TicketingConfigResponse(
@@ -90,9 +83,7 @@ def list_ticketing_platforms(current_user: User = Depends(get_current_user)):
 
 
 @router.post("/test-connection")
-async def test_ticketing_connection(
-    request: TicketingConfigRequest, current_user: User = Depends(get_current_user)
-):
+async def test_ticketing_connection(request: TicketingConfigRequest, current_user: User = Depends(get_current_user)):
     """Test connection to a ticketing platform."""
 
     try:
@@ -114,9 +105,7 @@ async def test_ticketing_connection(
         }
 
     except Exception as e:
-        raise HTTPException(
-            status_code=400, detail=f"Failed to connect to {request.platform}: {str(e)}"
-        )
+        raise HTTPException(status_code=400, detail=f"Failed to connect to {request.platform}: {str(e)}")
 
 
 @router.post("/create-ticket")
@@ -130,11 +119,7 @@ async def create_ticket(
     """Create a ticket for a vulnerability in the specified platform."""
 
     # Get vulnerability and verify ownership
-    vulnerability = (
-        db.query(Vulnerability)
-        .filter(Vulnerability.id == request.vulnerability_id)
-        .first()
-    )
+    vulnerability = db.query(Vulnerability).filter(Vulnerability.id == request.vulnerability_id).first()
 
     if not vulnerability:
         raise HTTPException(status_code=404, detail="Vulnerability not found")
@@ -229,9 +214,7 @@ async def create_ticket(
             },
         )
 
-        raise HTTPException(
-            status_code=500, detail=f"Failed to create ticket: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to create ticket: {str(e)}")
 
 
 @router.post("/bulk-create-tickets")
@@ -246,30 +229,20 @@ async def bulk_create_tickets(
     """Create tickets for multiple vulnerabilities."""
 
     if len(vulnerability_ids) > 50:
-        raise HTTPException(
-            status_code=400, detail="Cannot create more than 50 tickets at once"
-        )
+        raise HTTPException(status_code=400, detail="Cannot create more than 50 tickets at once")
 
     # Get vulnerabilities and verify ownership
-    vulnerabilities = (
-        db.query(Vulnerability).filter(Vulnerability.id.in_(vulnerability_ids)).all()
-    )
+    vulnerabilities = db.query(Vulnerability).filter(Vulnerability.id.in_(vulnerability_ids)).all()
 
     if not vulnerabilities:
         raise HTTPException(status_code=404, detail="No vulnerabilities found")
 
     # Verify user owns all vulnerabilities
     target_ids = {vuln.scan.target_id for vuln in vulnerabilities}
-    targets = (
-        db.query(Target)
-        .filter(Target.id.in_(target_ids), Target.owner_id == current_user.id)
-        .all()
-    )
+    targets = db.query(Target).filter(Target.id.in_(target_ids), Target.owner_id == current_user.id).all()
 
     if len(targets) != len(target_ids):
-        raise HTTPException(
-            status_code=403, detail="Access denied to some vulnerabilities"
-        )
+        raise HTTPException(status_code=403, detail="Access denied to some vulnerabilities")
 
     try:
         # Validate configuration
@@ -300,9 +273,7 @@ async def bulk_create_tickets(
                 }
 
                 # Get target domain
-                target = next(
-                    t for t in targets if t.id == vulnerability.scan.target_id
-                )
+                target = next(t for t in targets if t.id == vulnerability.scan.target_id)
 
                 # Prepare additional context
                 context = {
@@ -365,6 +336,4 @@ async def bulk_create_tickets(
         }
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Failed to create bulk tickets: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Failed to create bulk tickets: {str(e)}")

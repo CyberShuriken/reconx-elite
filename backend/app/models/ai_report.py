@@ -21,9 +21,7 @@ class AIReport(Base):
     title = Column(Text, nullable=False)
     summary = Column(Text, nullable=False)
     severity = Column(Text, nullable=False)  # low, medium, high, critical
-    confidence_score = Column(
-        Text, nullable=False, default="medium"
-    )  # low, medium, high
+    confidence_score = Column(Text, nullable=False, default="medium")  # low, medium, high
 
     # Technical details
     cwe_mapping = Column(Text, nullable=True)  # JSON array of CWE IDs

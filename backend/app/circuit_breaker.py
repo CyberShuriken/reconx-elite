@@ -72,20 +72,13 @@ class CircuitBreaker:
             )
 
         try:
-            result = (
-                await func(*args, **kwargs)
-                if asyncio.iscoroutinefunction(func)
-                else func(*args, **kwargs)
-            )
+            result = await func(*args, **kwargs) if asyncio.iscoroutinefunction(func) else func(*args, **kwargs)
 
             # Record success (thread-safe)
             with self._lock:
                 if self.state == CircuitState.HALF_OPEN:
                     self.success_count_in_half_open += 1
-                    if (
-                        self.success_count_in_half_open
-                        >= self.success_threshold_in_half_open
-                    ):
+                    if self.success_count_in_half_open >= self.success_threshold_in_half_open:
                         # Transition back to closed
                         self.state = CircuitState.CLOSED
                         self.failure_count = 0
@@ -130,8 +123,7 @@ class CircuitBreaker:
                     max(
                         0,
                         (
-                            self.config.recovery_timeout_seconds
-                            - (time.time() - self.last_failure_time)
+                            self.config.recovery_timeout_seconds - (time.time() - self.last_failure_time)
                             if self.last_failure_time
                             else 0
                         ),
@@ -198,8 +190,7 @@ class RetryableCircuitBreaker:
                 if attempt < self.retry_config.max_retries:
                     # Calculate delay with exponential backoff
                     delay = min(
-                        self.retry_config.base_delay_seconds
-                        * (self.retry_config.exponential_base**attempt),
+                        self.retry_config.base_delay_seconds * (self.retry_config.exponential_base**attempt),
                         self.retry_config.max_delay_seconds,
                     )
 
@@ -226,21 +217,15 @@ class RetryableCircuitBreaker:
 # Global circuit breakers for different AI models
 AI_CIRCUIT_BREAKERS = {
     "gemini": RetryableCircuitBreaker(
-        circuit_config=CircuitBreakerConfig(
-            failure_threshold=5, recovery_timeout_seconds=60
-        ),
+        circuit_config=CircuitBreakerConfig(failure_threshold=5, recovery_timeout_seconds=60),
         retry_config=RetryConfig(max_retries=3),
     ),
     "openrouter": RetryableCircuitBreaker(
-        circuit_config=CircuitBreakerConfig(
-            failure_threshold=5, recovery_timeout_seconds=60
-        ),
+        circuit_config=CircuitBreakerConfig(failure_threshold=5, recovery_timeout_seconds=60),
         retry_config=RetryConfig(max_retries=3),
     ),
     "default": RetryableCircuitBreaker(
-        circuit_config=CircuitBreakerConfig(
-            failure_threshold=5, recovery_timeout_seconds=60
-        ),
+        circuit_config=CircuitBreakerConfig(failure_threshold=5, recovery_timeout_seconds=60),
         retry_config=RetryConfig(max_retries=3),
     ),
 }

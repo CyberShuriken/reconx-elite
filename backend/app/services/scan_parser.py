@@ -3,9 +3,7 @@ from typing import Any
 
 
 def parse_subfinder_output(stdout: str) -> list[str]:
-    return sorted(
-        {line.strip().lower() for line in stdout.splitlines() if line.strip()}
-    )
+    return sorted({line.strip().lower() for line in stdout.splitlines() if line.strip()})
 
 
 def parse_httpx_live_output(stdout: str) -> list[str]:

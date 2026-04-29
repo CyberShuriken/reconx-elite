@@ -109,25 +109,19 @@ def _nuclei_targets_from_scan_endpoints(db: Session, scan_id: int) -> list[str]:
     rows = db.query(Endpoint).filter(Endpoint.scan_id == scan_id).all()
     records: list[dict] = []
     for row in rows:
-        rec = normalize_endpoint_url(
-            row.url, source=row.source or "gau", js_source=row.js_source
-        )
+        rec = normalize_endpoint_url(row.url, source=row.source or "gau", js_source=row.js_source)
         if rec:
             records.append(rec)
     return filter_nuclei_targets(records)
 
 
-def _default_metadata(
-    stage: str = "queued", stage_index: int = 0, stage_total: int | None = None
-) -> dict:
+def _default_metadata(stage: str = "queued", stage_index: int = 0, stage_total: int | None = None) -> dict:
     total = stage_total if stage_total is not None else 4
     return {
         "stage": stage,
         "stage_index": stage_index,
         "stage_total": total,
-        "progress_percent": (
-            int((stage_index / total) * 100) if total and stage_index else 0
-        ),
+        "progress_percent": (int((stage_index / total) * 100) if total and stage_index else 0),
         "warnings": [],
         "errors": [],
     }
@@ -178,9 +172,7 @@ def _set_stage(scan: Scan, db: Session, stage_name: str) -> None:
         stage=stage_name,
         stage_index=stage_index,
         stage_total=stage_total,
-        progress_percent=(
-            int(((stage_index - 1) / stage_total) * 100) if stage_total else 0
-        ),
+        progress_percent=(int(((stage_index - 1) / stage_total) * 100) if stage_total else 0),
     )
     logger.info(
         "scan_stage scan_id=%s stage=%s stage_index=%s stage_total=%s progress_percent=%s",
@@ -285,9 +277,7 @@ def _fail_scan(scan: Scan, db: Session, *, stage: str, message: str) -> None:
     metadata = _merge_metadata(
         scan,
         stage=stage,
-        progress_percent=min(
-            int((scan.metadata_json or {}).get("progress_percent", 0)), 99
-        ),
+        progress_percent=min(int((scan.metadata_json or {}).get("progress_percent", 0)), 99),
     )
     _emit_agent_log_event(
         {
@@ -304,40 +294,25 @@ def _fail_scan(scan: Scan, db: Session, *, stage: str, message: str) -> None:
     _update_scan(scan, db, status="failed", error=message, metadata_json=metadata)
 
 
-def _soft_log(
-    scan: Scan, db: Session, step: str, payload: dict, warning: str | None = None
-) -> None:
+def _soft_log(scan: Scan, db: Session, step: str, payload: dict, warning: str | None = None) -> None:
     if warning:
         _append_warning(scan, db, f"{step}: {warning}")
     _log_step(db, scan.id, step, "warning" if warning else "success", payload)
 
 
 def _upsert_endpoints(db: Session, scan_id: int, records: list[dict]) -> None:
-    existing = {
-        row.normalized_url: row
-        for row in db.query(Endpoint).filter(Endpoint.scan_id == scan_id).all()
-    }
+    existing = {row.normalized_url: row for row in db.query(Endpoint).filter(Endpoint.scan_id == scan_id).all()}
     for record in records:
         normalized_url = record.get("normalized_url")
         if not normalized_url:
             continue
         row = existing.get(normalized_url)
         if row:
-            row.priority_score = max(
-                row.priority_score, record.get("priority_score", 0)
-            )
-            row.focus_reasons = sorted(
-                set(row.focus_reasons or []) | set(record.get("focus_reasons") or [])
-            )
+            row.priority_score = max(row.priority_score, record.get("priority_score", 0))
+            row.focus_reasons = sorted(set(row.focus_reasons or []) | set(record.get("focus_reasons") or []))
             row.tags = sorted(set(row.tags or []) | set(record.get("tags") or []))
-            row.is_interesting = row.is_interesting or bool(
-                record.get("is_interesting")
-            )
-            row.category = (
-                row.category
-                if row.category != "general"
-                else (record.get("category") or row.category)
-            )
+            row.is_interesting = row.is_interesting or bool(record.get("is_interesting"))
+            row.category = row.category if row.category != "general" else (record.get("category") or row.category)
             if row.source == "gau" and record.get("source") == "js":
                 row.js_source = record.get("js_source") or row.js_source
             elif row.source == "js" and record.get("source") == "gau":
@@ -358,14 +333,10 @@ def _create_js_assets(db: Session, scan_id: int, asset_rows: list[dict]) -> None
     db.commit()
 
 
-def _create_vulnerabilities(
-    db: Session, scan_id: int, vulnerabilities: list[dict]
-) -> None:
+def _create_vulnerabilities(db: Session, scan_id: int, vulnerabilities: list[dict]) -> None:
     existing = {
         (row.template_id, row.matched_url or "", row.matcher_name or "")
-        for row in db.query(Vulnerability)
-        .filter(Vulnerability.scan_id == scan_id)
-        .all()
+        for row in db.query(Vulnerability).filter(Vulnerability.scan_id == scan_id).all()
     }
 
     # Get scan for user ID
@@ -400,9 +371,7 @@ def _create_vulnerabilities(
 
                 learn_from_vulnerability_task.delay(user_id, vuln.id)
             except Exception as e:
-                logger.warning(
-                    f"Failed to queue learning for vulnerability {vuln.id}: {e}"
-                )
+                logger.warning(f"Failed to queue learning for vulnerability {vuln.id}: {e}")
 
 
 def _create_attack_paths(db: Session, scan_id: int, attack_paths: list[dict]) -> None:
@@ -413,12 +382,7 @@ def _create_attack_paths(db: Session, scan_id: int, attack_paths: list[dict]) ->
 
 def _detect_payload_opportunities(db: Session, scan_id: int) -> None:
     """Detect and store payload testing opportunities for endpoints in this scan."""
-    scan = (
-        db.query(Scan)
-        .options(selectinload(Scan.target))
-        .filter(Scan.id == scan_id)
-        .first()
-    )
+    scan = db.query(Scan).options(selectinload(Scan.target)).filter(Scan.id == scan_id).first()
     if not scan or not scan.target:
         return
     target = scan.target
@@ -441,9 +405,7 @@ def _detect_payload_opportunities(db: Session, scan_id: int) -> None:
                 .filter(
                     PayloadOpportunity.endpoint_id == endpoint.id,
                     PayloadOpportunity.parameter_name == opp["parameter_name"],
-                    PayloadOpportunity.vulnerability_type.in_(
-                        opp["vulnerability_types"]
-                    ),
+                    PayloadOpportunity.vulnerability_type.in_(opp["vulnerability_types"]),
                 )
                 .first()
             )
@@ -466,9 +428,7 @@ def _detect_payload_opportunities(db: Session, scan_id: int) -> None:
                     domain = target.domain  # Use target domain as base
                     modified_payloads = []
                     for payload in payloads[:3]:  # Only use first 3 blind XSS payloads
-                        modified_payload = BlindXssService.create_payload_with_token(
-                            payload, token, domain
-                        )
+                        modified_payload = BlindXssService.create_payload_with_token(payload, token, domain)
                         modified_payloads.append(modified_payload)
 
                     payloads = modified_payloads
@@ -482,14 +442,10 @@ def _detect_payload_opportunities(db: Session, scan_id: int) -> None:
                     )  # Will be updated with opp ID after creation
 
                     # Replace __TOKEN__ placeholder with actual token and domain
-                    domain = settings.backend_callback_url.split("://")[
-                        -1
-                    ]  # Use callback backend URL
+                    domain = settings.backend_callback_url.split("://")[-1]  # Use callback backend URL
                     modified_payloads = []
                     for payload in payloads[:5]:  # Use first 5 SSRF payloads
-                        modified_payload = SsrfService.create_payload_with_token(
-                            payload, token, domain
-                        )
+                        modified_payload = SsrfService.create_payload_with_token(payload, token, domain)
                         modified_payloads.append(modified_payload)
 
                     payloads = modified_payloads
@@ -554,9 +510,7 @@ def _extract_parameters(url: str) -> list[str]:
         return []
 
 
-async def _generate_ai_reports(
-    db: Session, scan: Scan, all_vulnerabilities: list[dict]
-) -> None:
+async def _generate_ai_reports(db: Session, scan: Scan, all_vulnerabilities: list[dict]) -> None:
     """Generate AI-powered elite reports for high/critical vulnerabilities.
 
     Args:
@@ -570,29 +524,18 @@ async def _generate_ai_reports(
         return
 
     # Filter for high/critical vulnerabilities
-    high_critical_vulns = [
-        vuln
-        for vuln in all_vulnerabilities
-        if vuln.get("severity") in ["high", "critical"]
-    ]
+    high_critical_vulns = [vuln for vuln in all_vulnerabilities if vuln.get("severity") in ["high", "critical"]]
 
     if not high_critical_vulns:
         return
 
     # Count existing AI reports for this scan
-    existing_reports = (
-        db.query(AIReport)
-        .join(Vulnerability)
-        .filter(Vulnerability.scan_id == scan.id)
-        .count()
-    )
+    existing_reports = db.query(AIReport).join(Vulnerability).filter(Vulnerability.scan_id == scan.id).count()
 
     reports_generated = 0
     for vuln in high_critical_vulns[:5]:  # Limit to top 5 to manage API usage
         # Check safety controls
-        if not _should_generate_report(
-            vuln.get("severity", ""), existing_reports + reports_generated
-        ):
+        if not _should_generate_report(vuln.get("severity", ""), existing_reports + reports_generated):
             continue
 
         try:
@@ -676,9 +619,7 @@ async def _generate_ai_reports(
 
                 # Internal websocket notification
                 if vuln.get("severity") == "critical":
-                    await notify_critical_vulnerability(
-                        scan.target.owner_id, vuln_payload
-                    )
+                    await notify_critical_vulnerability(scan.target.owner_id, vuln_payload)
 
                 # External notifications (Slack/Discord)
                 await notification_service.notify_critical_finding(vuln_payload)
@@ -728,16 +669,12 @@ def _compute_diff_and_notifications(db: Session, scan: Scan, target: Target) -> 
 
     current_subdomains = {row.hostname for row in scan.subdomains}
     current_endpoints = {row.normalized_url for row in scan.endpoints}
-    current_vulns = {
-        (row.template_id, row.matched_url or "", row.matcher_name or "")
-        for row in scan.vulnerabilities
-    }
+    current_vulns = {(row.template_id, row.matched_url or "", row.matcher_name or "") for row in scan.vulnerabilities}
 
     prev_subdomains = {row.hostname for row in previous_scan.subdomains}
     prev_endpoints = {row.normalized_url for row in previous_scan.endpoints}
     prev_vulns = {
-        (row.template_id, row.matched_url or "", row.matcher_name or "")
-        for row in previous_scan.vulnerabilities
+        (row.template_id, row.matched_url or "", row.matcher_name or "") for row in previous_scan.vulnerabilities
     }
 
     new_subdomains = sorted(current_subdomains - prev_subdomains)
@@ -752,8 +689,7 @@ def _compute_diff_and_notifications(db: Session, scan: Scan, target: Target) -> 
             "source": row.source,
         }
         for row in scan.vulnerabilities
-        if (row.template_id, row.matched_url or "", row.matcher_name or "")
-        not in prev_vulns
+        if (row.template_id, row.matched_url or "", row.matcher_name or "") not in prev_vulns
     ]
     if not new_subdomains and not new_endpoints and not new_vulns:
         return
@@ -861,9 +797,7 @@ async def _scan_stage_subfinder_async(payload: int | dict) -> dict:
             result,
         )
         if result.status != "success":
-            _fail_scan(
-                scan, db, stage="subfinder", message=result.error or "subfinder failed"
-            )
+            _fail_scan(scan, db, stage="subfinder", message=result.error or "subfinder failed")
             raise RuntimeError(result.error or "subfinder failed")
 
         merged_map: dict[str, str] = {}
@@ -886,13 +820,9 @@ async def _scan_stage_subfinder_async(payload: int | dict) -> dict:
                     db,
                     "ai_subdomain_analysis",
                     {
-                        "high_value_count": len(
-                            ai_analysis.get("high_value_targets", [])
-                        ),
+                        "high_value_count": len(ai_analysis.get("high_value_targets", [])),
                         "potential_leaks": len(ai_analysis.get("potential_leaks", [])),
-                        "suggested_templates": ai_analysis.get(
-                            "suggested_nuclei_templates", []
-                        ),
+                        "suggested_templates": ai_analysis.get("suggested_nuclei_templates", []),
                         "total_processed": ai_analysis.get("total_processed", 0),
                         "batches_processed": ai_analysis.get("batches_processed", 0),
                     },
@@ -936,9 +866,7 @@ async def _scan_stage_active_dns_async(payload: dict) -> dict:
         wl = mods.active_dns.wordlist_path or ""
         if not wl and settings.seclists_base_path:
             wl = f"{settings.seclists_base_path}/Discovery/DNS/subdomains-top1million-110000.txt"
-        max_l = min(
-            mods.active_dns.max_fuzz_labels, settings.scan_active_dns_max_labels
-        )
+        max_l = min(mods.active_dns.max_fuzz_labels, settings.scan_active_dns_max_labels)
         extra, ff_res = run_ffuf_dns(target.domain, wl, max_l)
         if ff_res:
             _log_step(
@@ -949,10 +877,7 @@ async def _scan_stage_active_dns_async(payload: dict) -> dict:
                 {"count": len(extra), "parsed_json": {"hosts": extra[:100]}},
                 ff_res,
             )
-        existing = {
-            r.hostname.lower()
-            for r in db.query(Subdomain).filter(Subdomain.scan_id == scan.id).all()
-        }
+        existing = {r.hostname.lower() for r in db.query(Subdomain).filter(Subdomain.scan_id == scan.id).all()}
         added = 0
         for h in extra:
             k = h.lower().rstrip(".")
@@ -989,9 +914,7 @@ async def _scan_stage_httpx_async(payload: dict) -> dict:
             return payload
         _set_stage(scan, db, "httpx")
 
-        subdomains = payload.get("subdomains") or [
-            row.hostname for row in scan.subdomains
-        ]
+        subdomains = payload.get("subdomains") or [row.hostname for row in scan.subdomains]
         if not subdomains:
             _soft_log(
                 scan,
@@ -1013,9 +936,7 @@ async def _scan_stage_httpx_async(payload: dict) -> dict:
                 httpx_result,
             )
         if httpx_result and httpx_result.status != "success":
-            _fail_scan(
-                scan, db, stage="httpx", message=httpx_result.error or "httpx failed"
-            )
+            _fail_scan(scan, db, stage="httpx", message=httpx_result.error or "httpx failed")
             raise RuntimeError(httpx_result.error or "httpx failed")
 
         enrich_data, enrich_result = run_httpx_enrich(live_hosts)
@@ -1029,9 +950,7 @@ async def _scan_stage_httpx_async(payload: dict) -> dict:
                 enrich_result,
             )
             if enrich_result.status != "success":
-                _append_warning(
-                    scan, db, enrich_result.error or "subdomain enrichment failed"
-                )
+                _append_warning(scan, db, enrich_result.error or "subdomain enrichment failed")
         else:
             _soft_log(scan, db, "enrichment", {"count": 0, "parsed_json": {}})
 
@@ -1062,15 +981,9 @@ async def _scan_stage_httpx_async(payload: dict) -> dict:
                         db,
                         "ai_live_host_analysis",
                         {
-                            "high_value_count": len(
-                                ai_analysis.get("high_value_targets", [])
-                            ),
-                            "potential_leaks": len(
-                                ai_analysis.get("potential_leaks", [])
-                            ),
-                            "suggested_templates": ai_analysis.get(
-                                "suggested_nuclei_templates", []
-                            ),
+                            "high_value_count": len(ai_analysis.get("high_value_targets", [])),
+                            "potential_leaks": len(ai_analysis.get("potential_leaks", [])),
+                            "suggested_templates": ai_analysis.get("suggested_nuclei_templates", []),
                         },
                     )
                     # Store AI insights in scan metadata
@@ -1123,9 +1036,7 @@ async def _scan_stage_port_scan_async(payload: dict) -> dict:
         hosts = list(dict.fromkeys(hosts))
         out, res = run_nmap_ports(hosts, mods.port_scan.ports)
         if res:
-            _log_step(
-                db, scan.id, "port_scan", res.status, {"preview_chars": len(out)}, res
-            )
+            _log_step(db, scan.id, "port_scan", res.status, {"preview_chars": len(out)}, res)
             persist_scan_artifact(
                 db,
                 scan_id=scan.id,
@@ -1160,9 +1071,7 @@ async def _scan_stage_screenshots_async(payload: dict) -> dict:
         live = payload.get("live_hosts") or []
         lines = [u for u in live if isinstance(u, str) and u.startswith("http")]
         out_dir = tempfile.mkdtemp(prefix=f"gowitness_scan_{scan.id}_")
-        _, res = run_gowitness_screenshots(
-            lines, out_dir, mods.screenshots.delay_seconds
-        )
+        _, res = run_gowitness_screenshots(lines, out_dir, mods.screenshots.delay_seconds)
         if res:
             _log_step(db, scan.id, "screenshots", res.status, {"out_dir": out_dir}, res)
             persist_scan_artifact(
@@ -1196,17 +1105,11 @@ async def _scan_stage_waf_fingerprint_async(payload: dict) -> dict:
             return payload
         _set_stage(scan, db, "waf_fingerprint")
         mods = parse_modules_from_config(scan.scan_config_json or {})
-        live = [
-            u
-            for u in (payload.get("live_hosts") or [])
-            if isinstance(u, str) and u.startswith("http")
-        ]
+        live = [u for u in (payload.get("live_hosts") or []) if isinstance(u, str) and u.startswith("http")]
         sample = live[: mods.waf_fingerprint.sample_size]
         out, res = run_wafw00f_sample(sample)
         if res:
-            _log_step(
-                db, scan.id, "waf_fingerprint", res.status, {"sample": len(sample)}, res
-            )
+            _log_step(db, scan.id, "waf_fingerprint", res.status, {"sample": len(sample)}, res)
             persist_scan_artifact(
                 db,
                 scan_id=scan.id,
@@ -1308,15 +1211,9 @@ async def _scan_stage_gau_async(payload: dict) -> dict:
         # AI-powered JavaScript and endpoint analysis
         try:
             js_urls = [row["url"] for row in js_candidates if row.get("url")]
-            endpoint_urls = [
-                row["normalized_url"] for row in normalized + derived_endpoints
-            ]
+            endpoint_urls = [row["normalized_url"] for row in normalized + derived_endpoints]
             if js_urls or endpoint_urls or asset_rows:
-                js_summaries = (
-                    build_javascript_asset_summaries_for_ai(asset_rows)
-                    if asset_rows
-                    else []
-                )
+                js_summaries = build_javascript_asset_summaries_for_ai(asset_rows) if asset_rows else []
                 ai_analysis = await analyze_javascript_endpoints(
                     js_urls, endpoint_urls, asset_summaries=js_summaries or None
                 )
@@ -1326,15 +1223,9 @@ async def _scan_stage_gau_async(payload: dict) -> dict:
                         db,
                         "ai_javascript_analysis",
                         {
-                            "high_value_count": len(
-                                ai_analysis.get("high_value_targets", [])
-                            ),
-                            "potential_leaks": len(
-                                ai_analysis.get("potential_leaks", [])
-                            ),
-                            "suggested_templates": ai_analysis.get(
-                                "suggested_nuclei_templates", []
-                            ),
+                            "high_value_count": len(ai_analysis.get("high_value_targets", [])),
+                            "potential_leaks": len(ai_analysis.get("potential_leaks", [])),
+                            "suggested_templates": ai_analysis.get("suggested_nuclei_templates", []),
                             "js_files_analyzed": len(js_urls),
                             "endpoints_analyzed": len(endpoint_urls),
                         },
@@ -1410,11 +1301,7 @@ async def _scan_stage_katana_async(payload: dict) -> dict:
             return payload
         _set_stage(scan, db, "katana")
         mods = parse_modules_from_config(scan.scan_config_json or {})
-        live = [
-            u
-            for u in (payload.get("live_hosts") or [])
-            if isinstance(u, str) and u.startswith("http")
-        ]
+        live = [u for u in (payload.get("live_hosts") or []) if isinstance(u, str) and u.startswith("http")]
         seeds = live[:5] if live else [f"https://{target.domain}"]
         urls, res = run_katana(seeds, mods.url_sources.katana_depth)
         if res:
@@ -1510,10 +1397,7 @@ async def _scan_stage_aggressive_async(payload: dict) -> dict:
             {
                 row.url
                 for row in rows
-                if "?" in (row.url or "")
-                and row.url.startswith(
-                    tuple(f"{s}://" for s in settings.allowed_schemes)
-                )
+                if "?" in (row.url or "") and row.url.startswith(tuple(f"{s}://" for s in settings.allowed_schemes))
             }
         )
         previews: list[str] = []
@@ -1593,9 +1477,7 @@ async def _scan_stage_nuclei_async(payload: dict) -> dict:
 
         vulnerabilities, nuclei_result = run_nuclei(nuclei_targets, scan_config)
         if nuclei_result:
-            command_preview = " ".join(
-                shlex.quote(part) for part in nuclei_result.command
-            )
+            command_preview = " ".join(shlex.quote(part) for part in nuclei_result.command)
             _log_step(
                 db,
                 scan.id,
@@ -1622,9 +1504,7 @@ async def _scan_stage_nuclei_async(payload: dict) -> dict:
                 },
             )
         if nuclei_result and nuclei_result.status != "success":
-            _fail_scan(
-                scan, db, stage="nuclei", message=nuclei_result.error or "nuclei failed"
-            )
+            _fail_scan(scan, db, stage="nuclei", message=nuclei_result.error or "nuclei failed")
             raise RuntimeError(nuclei_result.error or "nuclei failed")
 
         _create_vulnerabilities(db, scan.id, vulnerabilities)
@@ -1645,15 +1525,9 @@ async def _scan_stage_nuclei_async(payload: dict) -> dict:
                         db,
                         "ai_nuclei_analysis",
                         {
-                            "high_value_count": len(
-                                ai_analysis.get("high_value_targets", [])
-                            ),
-                            "potential_leaks": len(
-                                ai_analysis.get("potential_leaks", [])
-                            ),
-                            "suggested_templates": ai_analysis.get(
-                                "suggested_nuclei_templates", []
-                            ),
+                            "high_value_count": len(ai_analysis.get("high_value_targets", [])),
+                            "potential_leaks": len(ai_analysis.get("potential_leaks", [])),
+                            "suggested_templates": ai_analysis.get("suggested_nuclei_templates", []),
                             "vulnerabilities_analyzed": min(len(vulnerabilities), 50),
                         },
                     )
@@ -1671,14 +1545,9 @@ async def _scan_stage_nuclei_async(payload: dict) -> dict:
             )
 
         endpoints = (
-            db.query(Endpoint)
-            .filter(Endpoint.scan_id == scan.id)
-            .order_by(Endpoint.priority_score.desc())
-            .all()
+            db.query(Endpoint).filter(Endpoint.scan_id == scan.id).order_by(Endpoint.priority_score.desc()).all()
         )
-        js_assets = (
-            db.query(JavaScriptAsset).filter(JavaScriptAsset.scan_id == scan.id).all()
-        )
+        js_assets = db.query(JavaScriptAsset).filter(JavaScriptAsset.scan_id == scan.id).all()
         subdomains = db.query(Subdomain).filter(Subdomain.scan_id == scan.id).all()
 
         header_findings, headers_result = check_headers(
@@ -1697,9 +1566,7 @@ async def _scan_stage_nuclei_async(payload: dict) -> dict:
                 headers_result,
             )
             if headers_result.status != "success":
-                _append_warning(
-                    scan, db, headers_result.error or "header analysis failed"
-                )
+                _append_warning(scan, db, headers_result.error or "header analysis failed")
         else:
             _soft_log(
                 scan,
@@ -1708,9 +1575,7 @@ async def _scan_stage_nuclei_async(payload: dict) -> dict:
                 {"count": 0, "parsed_json": {"vulnerabilities": []}},
             )
 
-        heuristic_findings = synthesize_heuristic_findings(
-            endpoints, js_assets, subdomains
-        )
+        heuristic_findings = synthesize_heuristic_findings(endpoints, js_assets, subdomains)
         if header_findings:
             heuristic_findings.extend(header_findings)
         _create_vulnerabilities(db, scan.id, heuristic_findings)
@@ -1734,9 +1599,7 @@ async def _scan_stage_nuclei_async(payload: dict) -> dict:
         refreshed_scan, _ = await _load_scan(scan.id, db)
         if not refreshed_scan:
             return payload
-        ranked_attack_paths = rank_attack_paths(
-            refreshed_scan.endpoints, refreshed_scan.vulnerabilities
-        )
+        ranked_attack_paths = rank_attack_paths(refreshed_scan.endpoints, refreshed_scan.vulnerabilities)
         _create_attack_paths(db, scan.id, ranked_attack_paths)
         _log_step(
             db,
@@ -1752,11 +1615,7 @@ async def _scan_stage_nuclei_async(payload: dict) -> dict:
         # Detect payload testing opportunities
         try:
             _detect_payload_opportunities(db, scan.id)
-            opp_count = (
-                db.query(PayloadOpportunity)
-                .filter(PayloadOpportunity.scan_id == scan.id)
-                .count()
-            )
+            opp_count = db.query(PayloadOpportunity).filter(PayloadOpportunity.scan_id == scan.id).count()
             _log_step(
                 db,
                 scan.id,
@@ -1776,9 +1635,7 @@ async def _scan_stage_nuclei_async(payload: dict) -> dict:
         refreshed_scan, _ = await _load_scan(scan.id, db)
         if refreshed_scan:
             _compute_diff_and_notifications(db, refreshed_scan, target)
-            stages_done = (refreshed_scan.metadata_json or {}).get(
-                "pipeline_stages"
-            ) or [
+            stages_done = (refreshed_scan.metadata_json or {}).get("pipeline_stages") or [
                 "subfinder",
                 "httpx",
                 "gau",
@@ -1801,9 +1658,7 @@ async def _scan_stage_nuclei_async(payload: dict) -> dict:
                 "endpoints_count": len(refreshed_scan.endpoints),
                 "attack_paths_count": len(refreshed_scan.attack_paths),
             }
-            await notify_scan_completed(
-                target.owner_id, target.domain, refreshed_scan.id, results
-            )
+            await notify_scan_completed(target.owner_id, target.domain, refreshed_scan.id, results)
 
             # Send notifications for critical vulnerabilities
             for vuln in refreshed_scan.vulnerabilities:
@@ -1818,9 +1673,7 @@ async def _scan_stage_nuclei_async(payload: dict) -> dict:
 
                     # Internal websocket notification
                     if vuln.severity == "critical":
-                        await notify_critical_vulnerability(
-                            target.owner_id, vuln_payload
-                        )
+                        await notify_critical_vulnerability(target.owner_id, vuln_payload)
 
                     # External notifications (Slack/Discord)
                     await notification_service.notify_critical_finding(vuln_payload)
@@ -1879,9 +1732,7 @@ def check_scheduled_scans() -> dict:
     try:
         now = datetime.now(timezone.utc)
         due_schedules = (
-            db.query(ScheduledScan)
-            .filter(ScheduledScan.enabled.is_(True), ScheduledScan.next_run <= now)
-            .all()
+            db.query(ScheduledScan).filter(ScheduledScan.enabled.is_(True), ScheduledScan.next_run <= now).all()
         )
         created = 0
         for schedule in due_schedules:
@@ -1899,10 +1750,7 @@ def check_scheduled_scans() -> dict:
             scan = Scan(
                 target_id=schedule.target_id,
                 status="pending",
-                metadata_json=_default_metadata(
-                    "queued", 0, pipeline_stage_total(sched_cfg)
-                )
-                | {"scheduled": True},
+                metadata_json=_default_metadata("queued", 0, pipeline_stage_total(sched_cfg)) | {"scheduled": True},
                 scan_config_json=sched_cfg,
             )
             db.add(scan)
@@ -1933,9 +1781,7 @@ async def _run_advanced_recon_stages(db: Session, scan: Scan, target: Target) ->
         # Get stealth configuration for target
         from app.models.advanced_recon import StealthConfig
 
-        stealth_config = (
-            db.query(StealthConfig).filter(StealthConfig.target_id == target.id).first()
-        )
+        stealth_config = db.query(StealthConfig).filter(StealthConfig.target_id == target.id).first()
 
         if not stealth_config:
             # Create default stealth config
@@ -1958,9 +1804,7 @@ async def _run_advanced_recon_stages(db: Session, scan: Scan, target: Target) ->
 
         # Get endpoints for parameter discovery
         endpoints = db.query(Endpoint).filter(Endpoint.scan_id == scan.id).all()
-        endpoint_urls = [
-            endpoint.url for endpoint in endpoints[:50]
-        ]  # Limit to 50 endpoints
+        endpoint_urls = [endpoint.url for endpoint in endpoints[:50]]  # Limit to 50 endpoints
 
         if endpoint_urls:
             # Stage 5: Parameter Discovery
@@ -2020,15 +1864,11 @@ async def _run_advanced_recon_stages(db: Session, scan: Scan, target: Target) ->
 
             async with stealth_scanner(stealth_config) as scanner:
                 # Fuzz admin paths
-                admin_endpoints = await fuzzing_engine.fuzz_content(
-                    base_urls[0], "admin", scanner, scan.id
-                )
+                admin_endpoints = await fuzzing_engine.fuzz_content(base_urls[0], "admin", scanner, scan.id)
                 fuzzed_endpoints.extend(admin_endpoints)
 
                 # Fuzz API paths
-                api_endpoints = await fuzzing_engine.fuzz_content(
-                    base_urls[0], "api", scanner, scan.id
-                )
+                api_endpoints = await fuzzing_engine.fuzz_content(base_urls[0], "api", scanner, scan.id)
                 fuzzed_endpoints.extend(api_endpoints)
 
                 # Store fuzzed endpoints
@@ -2071,9 +1911,7 @@ async def _run_advanced_recon_stages(db: Session, scan: Scan, target: Target) ->
                             {
                                 "endpoint_url": endpoint.url,
                                 "analysis": analysis,
-                                "recommendations": analysis.get(
-                                    "recommended_techniques", []
-                                ),
+                                "recommendations": analysis.get("recommended_techniques", []),
                                 "priority": analysis.get("priority_level", "medium"),
                             }
                         )
@@ -2084,9 +1922,7 @@ async def _run_advanced_recon_stages(db: Session, scan: Scan, target: Target) ->
             # Store adaptive results in scan metadata
             metadata = _merge_metadata(scan)
             metadata["adaptive_analysis"] = adaptive_results
-            metadata["advanced_recon_completed"] = datetime.now(
-                timezone.utc
-            ).isoformat()
+            metadata["advanced_recon_completed"] = datetime.now(timezone.utc).isoformat()
             _update_scan(scan, db, metadata_json=metadata)
 
             _log_step(

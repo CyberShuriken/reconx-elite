@@ -40,11 +40,7 @@ class GraphQLTester:
                             "type": "graphql_introspection",
                             "severity": "MEDIUM",
                             "details": "Introspection enabled - schema exposed",
-                            "schema_types": len(
-                                data.get("data", {})
-                                .get("__schema", {})
-                                .get("types", [])
-                            ),
+                            "schema_types": len(data.get("data", {}).get("__schema", {}).get("types", [])),
                         }
         except Exception:
             pass
@@ -52,9 +48,7 @@ class GraphQLTester:
         return {"vulnerable": False, "type": "graphql_introspection"}
 
     @staticmethod
-    async def test_alias_overloading(
-        endpoint: str, base_url: str = ""
-    ) -> dict[str, Any]:
+    async def test_alias_overloading(endpoint: str, base_url: str = "") -> dict[str, Any]:
         """Test GraphQL alias overloading for DoS."""
         alias_query = "{ " + ", ".join([f"a{i}: __typename" for i in range(30)]) + " }"
         try:
@@ -80,9 +74,7 @@ class CommandInjectionTester:
     """Test file-processing endpoints for shell injection."""
 
     @staticmethod
-    async def test_command_injection(
-        endpoint: str, base_url: str = "", token: str = ""
-    ) -> dict[str, Any]:
+    async def test_command_injection(endpoint: str, base_url: str = "", token: str = "") -> dict[str, Any]:
         """Test for OS command injection in file endpoints."""
         payloads = [
             {"filename": "test.txt; whoami"},
@@ -128,9 +120,7 @@ class PromptInjectionTester:
     ]
 
     @staticmethod
-    async def test_prompt_injection(
-        endpoint: str, base_url: str = ""
-    ) -> list[dict[str, Any]]:
+    async def test_prompt_injection(endpoint: str, base_url: str = "") -> list[dict[str, Any]]:
         """Test LLM endpoints for prompt injection."""
         findings = []
 
@@ -144,10 +134,7 @@ class PromptInjectionTester:
                     response_text = response.text.lower()
 
                     # Check for system prompt leakage or restriction bypass
-                    if any(
-                        keyword in response_text
-                        for keyword in ["system prompt", "instruction:", "you are"]
-                    ):
+                    if any(keyword in response_text for keyword in ["system prompt", "instruction:", "you are"]):
                         findings.append(
                             {
                                 "vulnerable": True,
@@ -179,9 +166,7 @@ async def analyze_injection(
 
     # GraphQL testing
     if "graphql" in tech_str:
-        graphql_endpoints = [
-            e for e in endpoints if "graphql" in e.get("path", "").lower()
-        ]
+        graphql_endpoints = [e for e in endpoints if "graphql" in e.get("path", "").lower()]
         for ep in graphql_endpoints:
             path = ep.get("path", "/graphql")
 
@@ -198,26 +183,16 @@ async def analyze_injection(
     # Command injection testing
     for endpoint in endpoints:
         path = endpoint.get("path", "").lower()
-        if any(
-            marker in path
-            for marker in ["upload", "export", "download", "file", "process"]
-        ):
-            cmd_result = await CommandInjectionTester.test_command_injection(
-                path, base_url, token
-            )
+        if any(marker in path for marker in ["upload", "export", "download", "file", "process"]):
+            cmd_result = await CommandInjectionTester.test_command_injection(path, base_url, token)
             if cmd_result.get("vulnerable"):
                 findings["command"].append(cmd_result)
 
     # Prompt injection testing
     for endpoint in endpoints:
         path = endpoint.get("path", "").lower()
-        if any(
-            marker in path
-            for marker in ["chat", "ask", "ai", "prompt", "llm", "completion"]
-        ):
-            prompt_findings = await PromptInjectionTester.test_prompt_injection(
-                path, base_url
-            )
+        if any(marker in path for marker in ["chat", "ask", "ai", "prompt", "llm", "completion"]):
+            prompt_findings = await PromptInjectionTester.test_prompt_injection(path, base_url)
             findings["prompt"].extend(prompt_findings)
 
     return {

@@ -184,9 +184,7 @@ class Refinement:
                         result = VerificationResult(
                             vulnerability_id=result_data["vulnerability_id"],
                             session_id=result_data["session_id"],
-                            verification_status=VerificationStatus(
-                                result_data["verification_status"]
-                            ),
+                            verification_status=VerificationStatus(result_data["verification_status"]),
                             confidence_adjustment=result_data["confidence_adjustment"],
                             manual_notes=result_data["manual_notes"],
                             verified_by=result_data["verified_by"],
@@ -195,9 +193,7 @@ class Refinement:
                             adjusted_confidence=result_data["adjusted_confidence"],
                             impact_severity=result_data["impact_severity"],
                             reproduction_success=result_data["reproduction_success"],
-                            additional_context=result_data.get(
-                                "additional_context", {}
-                            ),
+                            additional_context=result_data.get("additional_context", {}),
                         )
                         self.verification_results.append(result)
 
@@ -270,21 +266,15 @@ class Refinement:
         for result in self.verification_results:
             try:
                 # Extract learning patterns from verification result
-                learning_patterns = await self._extract_patterns_from_verification(
-                    result
-                )
+                learning_patterns = await self._extract_patterns_from_verification(result)
 
                 for pattern in learning_patterns:
                     self.learning_entries.append(pattern)
 
             except Exception as e:
-                logger.debug(
-                    f"Failed to process verification result {result.vulnerability_id}: {e}"
-                )
+                logger.debug(f"Failed to process verification result {result.vulnerability_id}: {e}")
 
-    async def _extract_patterns_from_verification(
-        self, result: VerificationResult
-    ) -> List[LearningEntry]:
+    async def _extract_patterns_from_verification(self, result: VerificationResult) -> List[LearningEntry]:
         """Extract learning patterns from a verification result"""
         patterns = []
 
@@ -298,9 +288,7 @@ class Refinement:
                 confidence=0.9,
                 timestamp=result.verified_at,
                 source_session=result.session_id,
-                applicable_modules=self._get_applicable_modules(
-                    result.vulnerability_id
-                ),
+                applicable_modules=self._get_applicable_modules(result.vulnerability_id),
             )
             patterns.append(pattern)
 
@@ -314,9 +302,7 @@ class Refinement:
                 confidence=0.9,
                 timestamp=result.verified_at,
                 source_session=result.session_id,
-                applicable_modules=self._get_applicable_modules(
-                    result.vulnerability_id
-                ),
+                applicable_modules=self._get_applicable_modules(result.vulnerability_id),
             )
             patterns.append(pattern)
 
@@ -330,9 +316,7 @@ class Refinement:
                 confidence=0.8,
                 timestamp=result.verified_at,
                 source_session=result.session_id,
-                applicable_modules=self._get_applicable_modules(
-                    result.vulnerability_id
-                ),
+                applicable_modules=self._get_applicable_modules(result.vulnerability_id),
             )
             patterns.append(pattern)
 
@@ -375,13 +359,9 @@ class Refinement:
                 try:
                     await self._analyze_pattern_group(learning_type, entries)
                 except Exception as e:
-                    logger.debug(
-                        f"Failed to analyze pattern group {learning_type}: {e}"
-                    )
+                    logger.debug(f"Failed to analyze pattern group {learning_type}: {e}")
 
-    async def _analyze_pattern_group(
-        self, learning_type: str, entries: List[LearningEntry]
-    ) -> None:
+    async def _analyze_pattern_group(self, learning_type: str, entries: List[LearningEntry]) -> None:
         """Analyze a specific pattern group using AI"""
         # Prepare data for AI analysis
         entries_data = []
@@ -453,9 +433,7 @@ class Refinement:
 
         # Generate examples from confirmed vulnerabilities
         confirmed_results = [
-            r
-            for r in self.verification_results
-            if r.verification_status == VerificationStatus.CONFIRMED
+            r for r in self.verification_results if r.verification_status == VerificationStatus.CONFIRMED
         ]
 
         for result in confirmed_results[:10]:  # Limit to 10 examples
@@ -464,13 +442,9 @@ class Refinement:
                 if example:
                     self.few_shot_examples.append(example)
             except Exception as e:
-                logger.debug(
-                    f"Failed to create few-shot example for {result.vulnerability_id}: {e}"
-                )
+                logger.debug(f"Failed to create few-shot example for {result.vulnerability_id}: {e}")
 
-    async def _create_few_shot_example(
-        self, result: VerificationResult
-    ) -> Optional[FewShotExample]:
+    async def _create_few_shot_example(self, result: VerificationResult) -> Optional[FewShotExample]:
         """Create a few-shot example from a verification result"""
         prompt = f"""
         Create a few-shot learning example from this verified vulnerability:
@@ -523,9 +497,7 @@ class Refinement:
 
     async def _update_ai_prompts(self) -> None:
         """Update AI system prompts with learning context"""
-        await self.ws_manager.send_log(
-            self.session_id, "info", "Updating AI system prompts...", phase="refinement"
-        )
+        await self.ws_manager.send_log(self.session_id, "info", "Updating AI system prompts...", phase="refinement")
 
         # Create learning context for AI prompts
         learning_context = await self._create_learning_context()
@@ -548,9 +520,7 @@ class Refinement:
         )[:20]
 
         # Get relevant few-shot examples
-        relevant_examples = [e for e in self.few_shot_examples if e.confidence > 0.8][
-            :10
-        ]
+        relevant_examples = [e for e in self.few_shot_examples if e.confidence > 0.8][:10]
 
         # Calculate confidence adjustments by module
         confidence_adjustments = {}
@@ -572,14 +542,10 @@ class Refinement:
             "few_shot_examples": [asdict(example) for example in relevant_examples],
             "confidence_adjustments": avg_adjustments,
             "false_positive_patterns": [
-                entry.pattern
-                for entry in recent_entries
-                if entry.learning_type == LearningType.FALSE_POSITIVE_PATTERN
+                entry.pattern for entry in recent_entries if entry.learning_type == LearningType.FALSE_POSITIVE_PATTERN
             ],
             "true_positive_patterns": [
-                entry.pattern
-                for entry in recent_entries
-                if entry.learning_type == LearningType.TRUE_POSITIVE_PATTERN
+                entry.pattern for entry in recent_entries if entry.learning_type == LearningType.TRUE_POSITIVE_PATTERN
             ],
             "generated_at": datetime.now().isoformat(),
             "session_id": self.session_id,
@@ -588,15 +554,11 @@ class Refinement:
 
     async def _save_learning_data(self) -> None:
         """Save learning data to files"""
-        await self.ws_manager.send_log(
-            self.session_id, "info", "Saving learning data...", phase="refinement"
-        )
+        await self.ws_manager.send_log(self.session_id, "info", "Saving learning data...", phase="refinement")
 
         # Save verification results and learning entries
         learning_data = {
-            "verification_results": [
-                asdict(result) for result in self.verification_results
-            ],
+            "verification_results": [asdict(result) for result in self.verification_results],
             "learning_entries": [asdict(entry) for entry in self.learning_entries],
             "metadata": {
                 "last_updated": datetime.now().isoformat(),
@@ -615,9 +577,7 @@ class Refinement:
 
         # Save few-shot examples
         few_shot_data = {
-            "few_shot_examples": [
-                asdict(example) for example in self.few_shot_examples
-            ],
+            "few_shot_examples": [asdict(example) for example in self.few_shot_examples],
             "metadata": {
                 "last_updated": datetime.now().isoformat(),
                 "total_examples": len(self.few_shot_examples),
@@ -641,61 +601,34 @@ class Refinement:
             "verification_results": {
                 "total_count": len(self.verification_results),
                 "confirmed_count": len(
-                    [
-                        r
-                        for r in self.verification_results
-                        if r.verification_status == VerificationStatus.CONFIRMED
-                    ]
+                    [r for r in self.verification_results if r.verification_status == VerificationStatus.CONFIRMED]
                 ),
                 "false_positive_count": len(
-                    [
-                        r
-                        for r in self.verification_results
-                        if r.verification_status == VerificationStatus.FALSE_POSITIVE
-                    ]
+                    [r for r in self.verification_results if r.verification_status == VerificationStatus.FALSE_POSITIVE]
                 ),
                 "partial_count": len(
-                    [
-                        r
-                        for r in self.verification_results
-                        if r.verification_status == VerificationStatus.PARTIAL
-                    ]
+                    [r for r in self.verification_results if r.verification_status == VerificationStatus.PARTIAL]
                 ),
-                "average_confidence_adjustment": sum(
-                    r.confidence_adjustment for r in self.verification_results
-                )
+                "average_confidence_adjustment": sum(r.confidence_adjustment for r in self.verification_results)
                 / max(len(self.verification_results), 1),
             },
             "learning_entries": {
                 "total_count": len(self.learning_entries),
-                "learning_types": list(
-                    set(entry.learning_type.value for entry in self.learning_entries)
-                ),
-                "high_confidence_count": len(
-                    [e for e in self.learning_entries if e.confidence > 0.8]
-                ),
-                "results": [
-                    asdict(entry) for entry in self.learning_entries[:20]
-                ],  # Limit for response size
+                "learning_types": list(set(entry.learning_type.value for entry in self.learning_entries)),
+                "high_confidence_count": len([e for e in self.learning_entries if e.confidence > 0.8]),
+                "results": [asdict(entry) for entry in self.learning_entries[:20]],  # Limit for response size
             },
             "few_shot_examples": {
                 "total_count": len(self.few_shot_examples),
-                "modules": list(
-                    set(example.module for example in self.few_shot_examples)
-                ),
-                "high_confidence_count": len(
-                    [e for e in self.few_shot_examples if e.confidence > 0.8]
-                ),
-                "results": [
-                    asdict(example) for example in self.few_shot_examples[:10]
-                ],  # Limit for response size
+                "modules": list(set(example.module for example in self.few_shot_examples)),
+                "high_confidence_count": len([e for e in self.few_shot_examples if e.confidence > 0.8]),
+                "results": [asdict(example) for example in self.few_shot_examples[:10]],  # Limit for response size
             },
             "summary": {
                 "total_verifications": len(self.verification_results),
                 "total_learning_entries": len(self.learning_entries),
                 "total_few_shot_examples": len(self.few_shot_examples),
-                "learning_rate": len(self.learning_entries)
-                / max(len(self.verification_results), 1),
+                "learning_rate": len(self.learning_entries) / max(len(self.verification_results), 1),
                 "recommendation": "Continue manual verification to improve learning accuracy",
             },
         }
@@ -706,23 +639,15 @@ class Refinement:
             result = VerificationResult(
                 vulnerability_id=verification_data["vulnerability_id"],
                 session_id=verification_data.get("session_id", self.session_id),
-                verification_status=VerificationStatus(
-                    verification_data["verification_status"]
-                ),
-                confidence_adjustment=verification_data.get(
-                    "confidence_adjustment", 0.0
-                ),
+                verification_status=VerificationStatus(verification_data["verification_status"]),
+                confidence_adjustment=verification_data.get("confidence_adjustment", 0.0),
                 manual_notes=verification_data.get("manual_notes", ""),
                 verified_by=verification_data.get("verified_by", "manual"),
-                verified_at=verification_data.get(
-                    "verified_at", datetime.now().isoformat()
-                ),
+                verified_at=verification_data.get("verified_at", datetime.now().isoformat()),
                 original_confidence=verification_data.get("original_confidence", 0.0),
                 adjusted_confidence=verification_data.get("adjusted_confidence", 0.0),
                 impact_severity=verification_data.get("impact_severity", "medium"),
-                reproduction_success=verification_data.get(
-                    "reproduction_success", True
-                ),
+                reproduction_success=verification_data.get("reproduction_success", True),
                 additional_context=verification_data.get("additional_context", {}),
             )
 

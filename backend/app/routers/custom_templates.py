@@ -17,9 +17,7 @@ router = APIRouter(prefix="/templates", tags=["custom-templates"])
 class TemplateGenerateDescription(BaseModel):
     """Model for generating a template from description."""
 
-    description: str = Field(
-        ..., description="Vulnerability description or requirements"
-    )
+    description: str = Field(..., description="Vulnerability description or requirements")
 
 
 class TemplateGenerateHTTP(BaseModel):
@@ -35,9 +33,7 @@ async def generate_template_from_description(
 ):
     """Generate a Nuclei template from a description using AI."""
 
-    template_yaml = await template_generator.generate_from_description(
-        request.description
-    )
+    template_yaml = await template_generator.generate_from_description(request.description)
 
     if not template_yaml:
         raise HTTPException(status_code=500, detail="Failed to generate template")
@@ -46,14 +42,10 @@ async def generate_template_from_description(
 
 
 @router.post("/generate/http")
-async def generate_template_from_http(
-    request: TemplateGenerateHTTP, current_user: User = Depends(get_current_user)
-):
+async def generate_template_from_http(request: TemplateGenerateHTTP, current_user: User = Depends(get_current_user)):
     """Generate a Nuclei template from HTTP traffic using AI."""
 
-    template_yaml = await template_generator.generate_from_http(
-        request.request, request.response
-    )
+    template_yaml = await template_generator.generate_from_http(request.request, request.response)
 
     if not template_yaml:
         raise HTTPException(status_code=500, detail="Failed to generate template")
@@ -141,13 +133,9 @@ async def get_templates(
     """Get custom templates for the current user."""
 
     if search:
-        templates = template_engine.search_templates(
-            db, current_user.id, search, include_public
-        )
+        templates = template_engine.search_templates(db, current_user.id, search, include_public)
     else:
-        templates = template_engine.get_user_templates(
-            db, current_user.id, include_public, only_active
-        )
+        templates = template_engine.get_user_templates(db, current_user.id, include_public, only_active)
 
     return {
         "templates": [
@@ -379,9 +367,7 @@ async def get_template_results(
 
 
 @router.get("/categories")
-async def get_template_categories(
-    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
-):
+async def get_template_categories(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Get available template categories."""
 
     templates = template_engine.get_user_templates(db, current_user.id)
@@ -391,9 +377,7 @@ async def get_template_categories(
 
 
 @router.get("/statistics")
-async def get_template_statistics(
-    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
-):
+async def get_template_statistics(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Get template statistics for the current user."""
 
     templates = template_engine.get_user_templates(db, current_user.id)

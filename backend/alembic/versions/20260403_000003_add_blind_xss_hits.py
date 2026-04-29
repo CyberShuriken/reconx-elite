@@ -59,17 +59,13 @@ def upgrade() -> None:
         ["payload_opportunity_id"],
     )
     op.create_index("ix_blind_xss_hits_ip_address", "blind_xss_hits", ["ip_address"])
-    op.create_index(
-        "ix_blind_xss_hits_triggered_at", "blind_xss_hits", ["triggered_at"]
-    )
+    op.create_index("ix_blind_xss_hits_triggered_at", "blind_xss_hits", ["triggered_at"])
 
 
 def downgrade() -> None:
     op.drop_index("ix_blind_xss_hits_triggered_at", table_name="blind_xss_hits")
     op.drop_index("ix_blind_xss_hits_ip_address", table_name="blind_xss_hits")
-    op.drop_index(
-        "ix_blind_xss_hits_payload_opportunity_id", table_name="blind_xss_hits"
-    )
+    op.drop_index("ix_blind_xss_hits_payload_opportunity_id", table_name="blind_xss_hits")
     op.drop_index("ix_blind_xss_hits_token", table_name="blind_xss_hits")
     op.drop_index("ix_blind_xss_hits_user_id", table_name="blind_xss_hits")
     op.drop_table("blind_xss_hits")

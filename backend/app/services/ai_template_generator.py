@@ -56,9 +56,7 @@ class AITemplateGenerator:
 
             # Clean up potential markdown blocks if AI ignored instructions
             if "```yaml" in template_yaml:
-                template_yaml = (
-                    template_yaml.split("```yaml")[1].split("```")[0].strip()
-                )
+                template_yaml = template_yaml.split("```yaml")[1].split("```")[0].strip()
             elif "```" in template_yaml:
                 template_yaml = template_yaml.split("```")[1].split("```")[0].strip()
 
@@ -68,9 +66,7 @@ class AITemplateGenerator:
             logger.error(f"Failed to generate template from description: {e}")
             return None
 
-    async def generate_from_http(
-        self, request: str, response: Optional[str] = None
-    ) -> Optional[str]:
+    async def generate_from_http(self, request: str, response: Optional[str] = None) -> Optional[str]:
         """Generate a Nuclei template from raw HTTP request/response."""
 
         if not _is_ai_enabled(task="report"):
@@ -95,9 +91,7 @@ class AITemplateGenerator:
 
             # Clean up markdown
             if "```yaml" in template_yaml:
-                template_yaml = (
-                    template_yaml.split("```yaml")[1].split("```")[0].strip()
-                )
+                template_yaml = template_yaml.split("```yaml")[1].split("```")[0].strip()
             elif "```" in template_yaml:
                 template_yaml = template_yaml.split("```")[1].split("```")[0].strip()
 

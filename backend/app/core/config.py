@@ -85,14 +85,10 @@ class Settings(BaseSettings):
     ai_scan_provider: str = "gemini"  # Low-cost, high-speed (Gemini Flash)
     ai_scan_model: str = "gemini-1.5-flash"
 
-    ai_analyze_provider: str = (
-        "gemini"  # Balanced reasoning (GPT-4o mini, Llama 3.1 70B)
-    )
+    ai_analyze_provider: str = "gemini"  # Balanced reasoning (GPT-4o mini, Llama 3.1 70B)
     ai_analyze_model: str = "gemini-1.5-flash"  # Default to flash if not set
 
-    ai_report_provider: str = (
-        "gemini"  # High reasoning, expert writing (GPT-4o, Gemini Pro, Claude 3.5 Sonnet)
-    )
+    ai_report_provider: str = "gemini"  # High reasoning, expert writing (GPT-4o, Gemini Pro, Claude 3.5 Sonnet)
     ai_report_model: str = "gemini-1.5-pro"
 
     # Notification webhooks
@@ -157,16 +153,10 @@ class Settings(BaseSettings):
     interactsh_server_url: str = ""
 
     # Database connection pool tuning
-    db_pool_size: int = Field(
-        default=20, ge=5, le=100, description="Database connection pool size"
-    )
-    db_max_overflow: int = Field(
-        default=30, ge=5, le=50, description="Database connection pool overflow"
-    )
+    db_pool_size: int = Field(default=20, ge=5, le=100, description="Database connection pool size")
+    db_max_overflow: int = Field(default=30, ge=5, le=50, description="Database connection pool overflow")
     db_pool_recycle: int = 3600
-    db_pool_timeout: int = Field(
-        default=30, ge=5, le=300, description="Database connection pool timeout"
-    )
+    db_pool_timeout: int = Field(default=30, ge=5, le=300, description="Database connection pool timeout")
 
     # HTTPS / proxy
     https_behind_proxy: bool = False
@@ -199,27 +189,15 @@ class Settings(BaseSettings):
 
     @cached_property
     def cors_allowed_origins_list(self) -> list[str]:
-        return [
-            value.strip()
-            for value in self.cors_allowed_origins.split(",")
-            if value.strip()
-        ]
+        return [value.strip() for value in self.cors_allowed_origins.split(",") if value.strip()]
 
     @cached_property
     def allowed_schemes(self) -> tuple[str, ...]:
-        return tuple(
-            value.strip().lower()
-            for value in self.scan_allowed_schemes.split(",")
-            if value.strip()
-        )
+        return tuple(value.strip().lower() for value in self.scan_allowed_schemes.split(",") if value.strip())
 
     @cached_property
     def takeover_indicators(self) -> tuple[str, ...]:
-        return tuple(
-            value.strip().lower()
-            for value in self.takeover_cname_indicators.split(",")
-            if value.strip()
-        )
+        return tuple(value.strip().lower() for value in self.takeover_cname_indicators.split(",") if value.strip())
 
     @property
     def openrouter_api_key(self) -> str:

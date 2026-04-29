@@ -133,10 +133,7 @@ class TestSessionManifest:
         """Test handling large session manifests."""
         # Arrange
         session = {
-            "findings": [
-                {"id": f"finding-{i}", "type": "vulnerability", "severity": "high"}
-                for i in range(10000)
-            ]
+            "findings": [{"id": f"finding-{i}", "type": "vulnerability", "severity": "high"} for i in range(10000)]
         }
 
         # Assert

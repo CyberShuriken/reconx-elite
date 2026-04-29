@@ -71,9 +71,7 @@ class CloudHunter:
                     pass
         return found
 
-    async def _hunt_azure_storage(
-        self, permutations: list[str]
-    ) -> list[dict[str, Any]]:
+    async def _hunt_azure_storage(self, permutations: list[str]) -> list[dict[str, Any]]:
         """Attempt to enumerate Azure Storage containers."""
         found = []
         async with httpx.AsyncClient(timeout=10.0) as client:
@@ -82,9 +80,7 @@ class CloudHunter:
                     url = f"https://{perm}.blob.core.windows.net/"
                     response = await client.head(url, follow_redirects=True)
                     if response.status_code in [200, 403, 404]:
-                        found.append(
-                            {"account_name": perm, "status": response.status_code}
-                        )
+                        found.append({"account_name": perm, "status": response.status_code})
                 except Exception:
                     pass
         return found
@@ -98,9 +94,7 @@ class CloudHunter:
                     url = f"https://storage.googleapis.com/{perm}/"
                     response = await client.head(url, follow_redirects=True)
                     if response.status_code in [200, 403, 404]:
-                        found.append(
-                            {"bucket_name": perm, "status": response.status_code}
-                        )
+                        found.append({"bucket_name": perm, "status": response.status_code})
                 except Exception:
                     pass
         return found

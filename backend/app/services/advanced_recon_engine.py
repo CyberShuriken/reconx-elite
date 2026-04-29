@@ -36,9 +36,7 @@ class StealthScanner:
 
     async def __aenter__(self):
         """Async context manager entry."""
-        self.session = httpx.AsyncClient(
-            timeout=httpx.Timeout(30.0), follow_redirects=False, verify=True
-        )
+        self.session = httpx.AsyncClient(timeout=httpx.Timeout(30.0), follow_redirects=False, verify=True)
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -73,9 +71,7 @@ class StealthScanner:
 
     def _calculate_delay(self) -> float:
         """Calculate delay with jitter."""
-        base_delay = random.uniform(
-            self.config.random_delay_min / 1000.0, self.config.random_delay_max / 1000.0
-        )
+        base_delay = random.uniform(self.config.random_delay_min / 1000.0, self.config.random_delay_max / 1000.0)
 
         if self.config.use_jitter:
             jitter = base_delay * (self.config.jitter_percentage / 100.0)
@@ -116,9 +112,7 @@ class StealthScanner:
                 response = await self.session.request(method, url, **kwargs)
 
                 # Log request for monitoring
-                logger.debug(
-                    f"Stealth request: {method} {url} -> {response.status_code}"
-                )
+                logger.debug(f"Stealth request: {method} {url} -> {response.status_code}")
 
                 return response
 
@@ -233,16 +227,12 @@ class ParameterDiscovery:
         for param in self.common_params:
             try:
                 # Test with GET parameter
-                result = await self._test_parameter(
-                    base_url, param, "query", scan_id, stealth_scanner
-                )
+                result = await self._test_parameter(base_url, param, "query", scan_id, stealth_scanner)
                 if result:
                     discovered_params.append(result)
 
                 # Test with POST parameter if applicable
-                result = await self._test_parameter(
-                    base_url, param, "post", scan_id, stealth_scanner
-                )
+                result = await self._test_parameter(base_url, param, "post", scan_id, stealth_scanner)
                 if result:
                     discovered_params.append(result)
 
@@ -276,9 +266,7 @@ class ParameterDiscovery:
                     test_url = f"{base_url}?{param_name}={value}"
                     test_response = await stealth_scanner.make_request("GET", test_url)
                 else:  # POST
-                    test_response = await stealth_scanner.make_request(
-                        "POST", base_url, data={param_name: value}
-                    )
+                    test_response = await stealth_scanner.make_request("POST", base_url, data={param_name: value})
 
                 # Analyze differences
                 indicators = []
@@ -292,9 +280,7 @@ class ParameterDiscovery:
                 # Response length change
                 test_length = len(test_response.content)
                 if abs(test_length - baseline_length) > 100:
-                    indicators.append(
-                        f"length_change:{abs(test_length - baseline_length)}"
-                    )
+                    indicators.append(f"length_change:{abs(test_length - baseline_length)}")
                     confidence += 20
 
                 # Reflection detection
@@ -473,9 +459,7 @@ class ContentFuzzer:
                         response_length=len(response.content),
                         response_time_ms=int(response.elapsed.total_seconds() * 1000),
                         is_interesting=True,
-                        interest_reasons=json.dumps(
-                            self._get_interest_reasons(response)
-                        ),
+                        interest_reasons=json.dumps(self._get_interest_reasons(response)),
                         content_type=response.headers.get("content-type", ""),
                         server_header=response.headers.get("server", ""),
                         wordlist_used=wordlist_category,
@@ -587,15 +571,11 @@ class AdaptiveScanner:
         content_type = response.headers.get("content-type", "").lower()
 
         # API endpoints
-        if any(
-            indicator in path for indicator in ["api", "v1", "v2", "graphql", "rest"]
-        ):
+        if any(indicator in path for indicator in ["api", "v1", "v2", "graphql", "rest"]):
             return "api"
 
         # Admin endpoints
-        if any(
-            indicator in path for indicator in ["admin", "manage", "config", "settings"]
-        ):
+        if any(indicator in path for indicator in ["admin", "manage", "config", "settings"]):
             return "admin"
 
         # Login endpoints
@@ -603,9 +583,7 @@ class AdaptiveScanner:
             return "login"
 
         # File endpoints
-        if any(
-            indicator in path for indicator in ["file", "upload", "download", "backup"]
-        ):
+        if any(indicator in path for indicator in ["file", "upload", "download", "backup"]):
             return "file"
 
         # Content endpoints

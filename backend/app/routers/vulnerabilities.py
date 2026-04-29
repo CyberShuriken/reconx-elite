@@ -21,9 +21,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/vulnerabilities", tags=["vulnerabilities"])
 
 
-def _vulnerability_cache_key(
-    user_id: int, target_id: int, skip: int, limit: int
-) -> str:
+def _vulnerability_cache_key(user_id: int, target_id: int, skip: int, limit: int) -> str:
     return build_cache_key(
         user_id,
         f"vulnerabilities:{target_id}",
@@ -57,11 +55,7 @@ async def get_vulnerability_exploit(
         raise HTTPException(status_code=404, detail="Not found")
 
     # Step 3: Get target and verify ownership (explicit check)
-    target = (
-        db.query(Target)
-        .filter(Target.id == scan.target_id, Target.owner_id == user.id)
-        .first()
-    )
+    target = db.query(Target).filter(Target.id == scan.target_id, Target.owner_id == user.id).first()
 
     if not target:
         raise HTTPException(status_code=403, detail="Access denied")
@@ -100,11 +94,7 @@ def list_vulnerabilities(  # FIX #7: Remove async - only sync db operations
         skip = 0
 
     # Verify user owns target
-    target = (
-        db.query(Target)
-        .filter(Target.id == target_id, Target.owner_id == user.id)
-        .first()
-    )
+    target = db.query(Target).filter(Target.id == target_id, Target.owner_id == user.id).first()
     if not target:
         raise HTTPException(status_code=404, detail="Not found")
 
@@ -136,9 +126,7 @@ def list_vulnerabilities(  # FIX #7: Remove async - only sync db operations
     try:
         asyncio.run(
             asyncio.wait_for(
-                set_cached(
-                    cache_key, [item.model_dump(mode="json") for item in result]
-                ),
+                set_cached(cache_key, [item.model_dump(mode="json") for item in result]),
                 timeout=2.0,
             )
         )
@@ -168,11 +156,7 @@ def update_vulnerability(  # FIX #7: Remove async - only sync db operations
     if not scan:
         raise HTTPException(status_code=404, detail="Not found")
 
-    target = (
-        db.query(Target)
-        .filter(Target.id == scan.target_id, Target.owner_id == user.id)
-        .first()
-    )
+    target = db.query(Target).filter(Target.id == scan.target_id, Target.owner_id == user.id).first()
 
     if not target:
         raise HTTPException(status_code=403, detail="Access denied")

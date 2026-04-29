@@ -25,11 +25,7 @@ def generate_json_report(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    target = (
-        db.query(Target)
-        .filter(Target.id == target_id, Target.owner_id == user.id)
-        .first()
-    )
+    target = db.query(Target).filter(Target.id == target_id, Target.owner_id == user.id).first()
     if not target:
         raise HTTPException(status_code=404, detail="Target not found")
 
@@ -145,9 +141,7 @@ def generate_json_report(
     return Response(
         content=json.dumps(report, indent=2),
         media_type="application/json",
-        headers={
-            "Content-Disposition": f"attachment; filename={target.domain}_report.json"
-        },
+        headers={"Content-Disposition": f"attachment; filename={target.domain}_report.json"},
     )
 
 
@@ -159,11 +153,7 @@ def generate_pdf_report(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    target = (
-        db.query(Target)
-        .filter(Target.id == target_id, Target.owner_id == user.id)
-        .first()
-    )
+    target = db.query(Target).filter(Target.id == target_id, Target.owner_id == user.id).first()
     if not target:
         raise HTTPException(status_code=404, detail="Target not found")
 
@@ -285,7 +275,5 @@ def generate_pdf_report(
     return Response(
         content=pdf_content,
         media_type="application/pdf",
-        headers={
-            "Content-Disposition": f"attachment; filename={target.domain}_report.pdf"
-        },
+        headers={"Content-Disposition": f"attachment; filename={target.domain}_report.pdf"},
     )

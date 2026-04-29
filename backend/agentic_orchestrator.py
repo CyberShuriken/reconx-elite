@@ -57,9 +57,7 @@ class AgenticOrchestrator:
         start_time = datetime.utcnow()
 
         try:
-            await self._send_log(
-                "info", "Starting Agentic Vulnerability Research Pipeline"
-            )
+            await self._send_log("info", "Starting Agentic Vulnerability Research Pipeline")
 
             # Phase 1: Enhanced Reconnaissance
             await self._send_log("info", "Phase 1: Enhanced Reconnaissance")
@@ -120,12 +118,8 @@ class AgenticOrchestrator:
         token = self.session_tokens.get("session_a", "")
 
         # Test 1: BAC & IDOR (if dual session tokens provided)
-        if self.session_tokens.get("session_a") and self.session_tokens.get(
-            "session_b"
-        ):
-            await self._send_log(
-                "info", "Testing BAC & IDOR with dual-session validator"
-            )
+        if self.session_tokens.get("session_a") and self.session_tokens.get("session_b"):
+            await self._send_log("info", "Testing BAC & IDOR with dual-session validator")
             idor_findings = await self._test_idor(api_endpoints, base_url, token)
             all_findings.extend(idor_findings)
 
@@ -149,15 +143,11 @@ class AgenticOrchestrator:
         injection_findings = await self._test_injection(api_endpoints, base_url, token)
         all_findings.extend(injection_findings)
 
-        await self._send_log(
-            "success", f"Vulnerability testing complete: {len(all_findings)} findings"
-        )
+        await self._send_log("success", f"Vulnerability testing complete: {len(all_findings)} findings")
 
         return all_findings
 
-    async def _test_idor(
-        self, endpoints: list, base_url: str, token: str
-    ) -> list[dict]:
+    async def _test_idor(self, endpoints: list, base_url: str, token: str) -> list[dict]:
         """Test for IDOR vulnerabilities using dual-session comparison."""
         findings = []
         for endpoint in endpoints[:5]:
@@ -189,9 +179,7 @@ class AgenticOrchestrator:
 
         return findings
 
-    async def _test_business_logic(
-        self, endpoints: list, base_url: str, token: str
-    ) -> list[dict]:
+    async def _test_business_logic(self, endpoints: list, base_url: str, token: str) -> list[dict]:
         """Test for business logic vulnerabilities."""
         findings = []
 
@@ -208,9 +196,7 @@ class AgenticOrchestrator:
 
         return findings
 
-    async def _test_ssrf(
-        self, endpoints: list, base_url: str, token: str
-    ) -> list[dict]:
+    async def _test_ssrf(self, endpoints: list, base_url: str, token: str) -> list[dict]:
         """Test for SSRF vulnerabilities."""
         findings = []
 
@@ -250,9 +236,7 @@ class AgenticOrchestrator:
 
         return findings
 
-    async def _test_misconfiguration(
-        self, live_hosts: list, base_url: str
-    ) -> list[dict]:
+    async def _test_misconfiguration(self, live_hosts: list, base_url: str) -> list[dict]:
         """Test for misconfigurations."""
         findings = []
 
@@ -275,18 +259,14 @@ class AgenticOrchestrator:
                             "endpoint": path,
                             "host": host,
                             "severity": "MEDIUM",
-                            "cvss": CVSS4Calculator.from_vulnerability_type(
-                                "misconfiguration"
-                            ),
+                            "cvss": CVSS4Calculator.from_vulnerability_type("misconfiguration"),
                             "confidence": evaluation["confidence"],
                         }
                     )
 
         return findings
 
-    async def _test_injection(
-        self, endpoints: list, base_url: str, token: str
-    ) -> list[dict]:
+    async def _test_injection(self, endpoints: list, base_url: str, token: str) -> list[dict]:
         """Test for injection vulnerabilities."""
         findings = []
 
@@ -312,9 +292,7 @@ class AgenticOrchestrator:
                             "type": "graphql_introspection",
                             "endpoint": path,
                             "severity": "MEDIUM",
-                            "cvss": CVSS4Calculator.from_vulnerability_type(
-                                "sql_injection"
-                            ),
+                            "cvss": CVSS4Calculator.from_vulnerability_type("sql_injection"),
                             "confidence": evaluation["confidence"],
                         }
                     )
@@ -326,12 +304,8 @@ class AgenticOrchestrator:
         all_findings = {
             "idor": [f for f in findings if f.get("type") == "idor"],
             "ssrf": [f for f in findings if f.get("type") == "ssrf"],
-            "business_logic": [
-                f for f in findings if f.get("type") == "business_logic"
-            ],
-            "misconfiguration": [
-                f for f in findings if f.get("type") == "misconfiguration"
-            ],
+            "business_logic": [f for f in findings if f.get("type") == "business_logic"],
+            "misconfiguration": [f for f in findings if f.get("type") == "misconfiguration"],
             "injection": [f for f in findings if "injection" in f.get("type", "")],
         }
 
@@ -355,9 +329,7 @@ class AgenticOrchestrator:
         )
 
         report_path = f"./reports/report_{self.target.replace('.', '_')}.md"
-        self.manifest.update_phase(
-            "phase_7", "completed", [{"report_path": report_path}]
-        )
+        self.manifest.update_phase("phase_7", "completed", [{"report_path": report_path}])
 
         return report_path
 

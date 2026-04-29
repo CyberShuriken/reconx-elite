@@ -135,9 +135,7 @@ async def analyze_ssrf(
                     {
                         "parameter": param,
                         "type": param_type,
-                        "test_payloads": SSRFTester.INTERNAL_TARGETS[
-                            :5
-                        ],  # Top 5 targets
+                        "test_payloads": SSRFTester.INTERNAL_TARGETS[:5],  # Top 5 targets
                     }
                 )
 

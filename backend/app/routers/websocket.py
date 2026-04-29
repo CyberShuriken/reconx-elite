@@ -26,9 +26,7 @@ def _extract_websocket_token(websocket: WebSocket) -> str | None:
 
 
 @router.websocket("/{user_id}")
-async def websocket_endpoint(
-    websocket: WebSocket, user_id: int, db: Session = Depends(get_db)
-):
+async def websocket_endpoint(websocket: WebSocket, user_id: int, db: Session = Depends(get_db)):
     """
     WebSocket endpoint for real-time notifications.
     Clients connect to ws://localhost:8000/ws/{user_id}
@@ -78,26 +76,16 @@ async def websocket_endpoint(
                 # Handle different message types from client
                 if message.get("type") == "ping":
                     # Respond to ping with pong
-                    await websocket.send_text(
-                        json.dumps(
-                            {"type": "pong", "timestamp": manager._get_timestamp()}
-                        )
-                    )
+                    await websocket.send_text(json.dumps({"type": "pong", "timestamp": manager._get_timestamp()}))
                 elif message.get("type") == "subscribe":
                     # Handle subscription to specific notification types
-                    await handle_subscription(
-                        websocket, user_id, message.get("channels", [])
-                    )
+                    await handle_subscription(websocket, user_id, message.get("channels", []))
                 else:
-                    logger.warning(
-                        f"Unknown message type from WebSocket: {message.get('type')}"
-                    )
+                    logger.warning(f"Unknown message type from WebSocket: {message.get('type')}")
 
             except json.JSONDecodeError:
                 logger.error(f"Invalid JSON received from WebSocket: {data}")
-                await websocket.send_text(
-                    json.dumps({"type": "error", "message": "Invalid JSON format"})
-                )
+                await websocket.send_text(json.dumps({"type": "error", "message": "Invalid JSON format"}))
 
     except WebSocketDisconnect:
         # Handle disconnection
@@ -164,15 +152,11 @@ async def agent_log_websocket(
             try:
                 message = json.loads(data)
             except json.JSONDecodeError:
-                await websocket.send_text(
-                    json.dumps({"type": "error", "message": "Invalid JSON format"})
-                )
+                await websocket.send_text(json.dumps({"type": "error", "message": "Invalid JSON format"}))
                 continue
 
             if message.get("type") == "ping":
-                await websocket.send_text(
-                    json.dumps({"type": "pong", "timestamp": manager._get_timestamp()})
-                )
+                await websocket.send_text(json.dumps({"type": "pong", "timestamp": manager._get_timestamp()}))
             else:
                 await websocket.send_text(
                     json.dumps(

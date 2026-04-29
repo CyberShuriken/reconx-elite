@@ -18,9 +18,7 @@ class StealthConfig(Base):
     )
 
     # Scan mode configuration
-    scan_mode = Column(
-        Text, nullable=False, default="balanced"
-    )  # aggressive, balanced, stealth
+    scan_mode = Column(Text, nullable=False, default="balanced")  # aggressive, balanced, stealth
 
     # Rate limiting
     requests_per_second = Column(Integer, default=5)
@@ -55,9 +53,7 @@ class DiscoveredParameter(Base):
     __tablename__ = "discovered_parameters"
 
     id = Column(Integer, primary_key=True, index=True)
-    scan_id = Column(
-        Integer, ForeignKey("scans.id", ondelete="CASCADE"), nullable=False, index=True
-    )
+    scan_id = Column(Integer, ForeignKey("scans.id", ondelete="CASCADE"), nullable=False, index=True)
     endpoint_id = Column(
         Integer,
         ForeignKey("endpoints.id", ondelete="CASCADE"),
@@ -71,9 +67,7 @@ class DiscoveredParameter(Base):
     parameter_value = Column(Text, nullable=True)  # discovered value if any
 
     # Discovery metadata
-    discovery_method = Column(
-        Text, nullable=False
-    )  # fuzzing, parameter_bruteforce, analysis
+    discovery_method = Column(Text, nullable=False)  # fuzzing, parameter_bruteforce, analysis
     confidence_score = Column(Integer, default=50)  # 0-100
     response_indicators = Column(Text, nullable=True)  # JSON array of indicators
 
@@ -96,9 +90,7 @@ class FuzzedEndpoint(Base):
     __tablename__ = "fuzzed_endpoints"
 
     id = Column(Integer, primary_key=True, index=True)
-    scan_id = Column(
-        Integer, ForeignKey("scans.id", ondelete="CASCADE"), nullable=False, index=True
-    )
+    scan_id = Column(Integer, ForeignKey("scans.id", ondelete="CASCADE"), nullable=False, index=True)
 
     # Endpoint details
     url = Column(Text, nullable=False)
@@ -133,9 +125,7 @@ class SmartWordlist(Base):
     __tablename__ = "smart_wordlists"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(
-        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
-    )
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
 
     # Wordlist details
     name = Column(Text, nullable=False)

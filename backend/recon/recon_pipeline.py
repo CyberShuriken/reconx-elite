@@ -85,9 +85,7 @@ class ReconPipeline:
             for sub in new_subs:
                 self.context_tree.add_subdomain(sub)
 
-            logger.info(
-                f"Level {current_depth}: Found {len(new_subs)} additional subdomains"
-            )
+            logger.info(f"Level {current_depth}: Found {len(new_subs)} additional subdomains")
 
             if not new_subs:
                 break
@@ -144,9 +142,7 @@ Focus on common patterns like: dev-, staging-, api-, admin-, internal-, test-
 Return only subdomain names, one per line, no explanations."""
 
         try:
-            result = await self.ai_router.call_model(
-                "orchestrator", prompt, max_tokens=512
-            )
+            result = await self.ai_router.call_model("orchestrator", prompt, max_tokens=512)
             output = result.get("output", "")
 
             # Parse AI output
@@ -221,9 +217,7 @@ Return only subdomain names, one per line, no explanations."""
         for result in s3_results:
             if isinstance(result, dict) and result.get("exists"):
                 cloud_assets["s3"].append(result)
-                self.context_tree.add_cloud_asset(
-                    "s3", result["url"], result.get("permissions")
-                )
+                self.context_tree.add_cloud_asset("s3", result["url"], result.get("permissions"))
 
         # Check Azure Blobs
         azure_tasks = [self._check_azure_blob(perm) for perm in permutations]
@@ -232,9 +226,7 @@ Return only subdomain names, one per line, no explanations."""
         for result in azure_results:
             if isinstance(result, dict) and result.get("exists"):
                 cloud_assets["azure"].append(result)
-                self.context_tree.add_cloud_asset(
-                    "azure", result["url"], result.get("permissions")
-                )
+                self.context_tree.add_cloud_asset("azure", result["url"], result.get("permissions"))
 
         # Check GCP Storage
         gcp_tasks = [self._check_gcp_storage(perm) for perm in permutations]
@@ -243,9 +235,7 @@ Return only subdomain names, one per line, no explanations."""
         for result in gcp_results:
             if isinstance(result, dict) and result.get("exists"):
                 cloud_assets["gcp"].append(result)
-                self.context_tree.add_cloud_asset(
-                    "gcp", result["url"], result.get("permissions")
-                )
+                self.context_tree.add_cloud_asset("gcp", result["url"], result.get("permissions"))
 
         total_found = sum(len(v) for v in cloud_assets.values())
         logger.info(f"Cloud discovery complete: Found {total_found} assets")
@@ -374,9 +364,7 @@ Return only subdomain names, one per line, no explanations."""
         if not live_hosts:
             # If no live hosts yet, check subdomains
             all_subs = self.context_tree.tree["subdomains"]["discovered"]
-            live_hosts = await self._check_live_hosts(
-                all_subs[:10]
-            )  # Limit for performance
+            live_hosts = await self._check_live_hosts(all_subs[:10])  # Limit for performance
 
         port_results = {}
 
@@ -386,12 +374,7 @@ Return only subdomain names, one per line, no explanations."""
         # Scan each host
         for host in live_hosts[:10]:  # Limit for performance
             # Extract hostname from URL
-            hostname = (
-                host.replace("http://", "")
-                .replace("https://", "")
-                .split("/")[0]
-                .split(":")[0]
-            )
+            hostname = host.replace("http://", "").replace("https://", "").split("/")[0].split(":")[0]
 
             # Run nmap scan
             nmap_result = await self.tool_runner.run_nmap(hostname)
@@ -401,18 +384,14 @@ Return only subdomain names, one per line, no explanations."""
 
             # Check dev ports individually
             dev_port_tasks = [self._check_port(hostname, port) for port in dev_ports]
-            dev_port_results = await asyncio.gather(
-                *dev_port_tasks, return_exceptions=True
-            )
+            dev_port_results = await asyncio.gather(*dev_port_tasks, return_exceptions=True)
 
             for result in dev_port_results:
                 if isinstance(result, dict) and result.get("open"):
                     all_ports.append(result["port"])
 
             port_results[hostname] = all_ports
-            self.context_tree.add_port_info(
-                hostname, [{"port": p, "service": "unknown"} for p in all_ports]
-            )
+            self.context_tree.add_port_info(hostname, [{"port": p, "service": "unknown"} for p in all_ports])
 
         logger.info(f"Port scan complete: {len(port_results)} hosts scanned")
         return port_results
@@ -420,9 +399,7 @@ Return only subdomain names, one per line, no explanations."""
     async def _check_port(self, host: str, port: int) -> dict[str, Any]:
         """Check if a specific port is open."""
         try:
-            reader, writer = await asyncio.wait_for(
-                asyncio.open_connection(host, port), timeout=3.0
-            )
+            reader, writer = await asyncio.wait_for(asyncio.open_connection(host, port), timeout=3.0)
             writer.close()
             await writer.wait_closed()
             return {"port": port, "open": True}
@@ -465,9 +442,7 @@ Return only subdomain names, one per line, no explanations."""
             )
             self.context_tree.add_subdomain(result)
 
-        logger.info(
-            f"Acquisition mapping complete: Found {len(subsidiaries)} related entities"
-        )
+        logger.info(f"Acquisition mapping complete: Found {len(subsidiaries)} related entities")
         return subsidiaries
 
     async def _whois_lookup(self, domain: str) -> dict[str, Any]:
@@ -502,16 +477,10 @@ Return only subdomain names, one per line, no explanations."""
             # Use API for reverse IP (viewdns.info alternative)
             async with httpx.AsyncClient(timeout=10.0) as client:
                 # Using hackertarget.com API (free, no key required)
-                response = await client.get(
-                    f"https://api.hackertarget.com/reverseiplookup/?q={ip}"
-                )
+                response = await client.get(f"https://api.hackertarget.com/reverseiplookup/?q={ip}")
 
                 if response.status_code == 200:
-                    domains = [
-                        line.strip()
-                        for line in response.text.split("\n")
-                        if line.strip()
-                    ]
+                    domains = [line.strip() for line in response.text.split("\n") if line.strip()]
                     return domains
         except Exception as e:
             logger.error(f"Reverse IP lookup failed for {domain}: {e}")

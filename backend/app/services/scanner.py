@@ -13,9 +13,7 @@ def run_command(command: list[str], input_data: str | None = None) -> list[str]:
         check=False,
     )
     if process.returncode != 0:
-        raise RuntimeError(
-            f"Command failed: {' '.join(command)} :: {process.stderr.strip()}"
-        )
+        raise RuntimeError(f"Command failed: {' '.join(command)} :: {process.stderr.strip()}")
     return [line.strip() for line in process.stdout.splitlines() if line.strip()]
 
 

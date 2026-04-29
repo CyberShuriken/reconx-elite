@@ -41,9 +41,7 @@ class ScanResponse(BaseModel):
 
 app = FastAPI(title="ReconX-Elite - 7-Phase Autonomous Vulnerability Research Pipeline")
 # Configure CORS origins from environment
-cors_origins = (
-    os.getenv("CORS_ORIGINS", "").split(",") if os.getenv("CORS_ORIGINS") else []
-)
+cors_origins = os.getenv("CORS_ORIGINS", "").split(",") if os.getenv("CORS_ORIGINS") else []
 if not cors_origins and os.getenv("ENVIRONMENT") != "production":
     # Fallback for development
     cors_origins = [
@@ -81,9 +79,7 @@ async def startup_event() -> None:
         except Exception as e:
             if attempt == max_retries - 1:
                 # Last attempt failed, log and continue with degraded functionality
-                print(
-                    f"Failed to initialize database after {max_retries} attempts: {str(e)}"
-                )
+                print(f"Failed to initialize database after {max_retries} attempts: {str(e)}")
                 print("Application will continue with limited functionality")
             else:
                 print(f"Database connection attempt {attempt + 1} failed: {str(e)}")
@@ -116,18 +112,14 @@ async def start_scan(request: ScanRequest) -> ScanResponse:
         session_tokens["session_b"] = request.session_b_token
 
     # Start orchestrator in background with task tracking
-    task = asyncio.create_task(
-        _orchestrate_7phase(session_id, request.target, session_tokens)
-    )
+    task = asyncio.create_task(_orchestrate_7phase(session_id, request.target, session_tokens))
     background_tasks.add(task)
     task.add_done_callback(background_tasks.discard)
 
     return ScanResponse(session_id=session_id, target=request.target, status="started")
 
 
-async def _orchestrate_7phase(
-    session_id: str, target: str, session_tokens: dict[str, str]
-) -> None:
+async def _orchestrate_7phase(session_id: str, target: str, session_tokens: dict[str, str]) -> None:
     """Execute 7-phase pipeline."""
     try:
         orchestrator = SevenPhaseOrchestrator(
@@ -152,9 +144,7 @@ async def _orchestrate_7phase(
                 await session.commit()
 
     except Exception as e:
-        await ws_manager.send_log(
-            session_id, "error", f"Pipeline execution failed: {str(e)}", phase="error"
-        )
+        await ws_manager.send_log(session_id, "error", f"Pipeline execution failed: {str(e)}", phase="error")
         async with async_session() as session:
             stmt = select(Scan).where(Scan.session_id == session_id)
             db_scan = await session.execute(stmt)
@@ -175,9 +165,7 @@ class ScanStatusResponse(TypedDict):
 @app.get("/api/scan/{session_id}/status")
 async def scan_status(session_id: str) -> ScanStatusResponse:
     async with async_session() as session:
-        result = await session.execute(
-            select(Scan).where(Scan.session_id == session_id)
-        )
+        result = await session.execute(select(Scan).where(Scan.session_id == session_id))
         scan = result.scalar_one_or_none()
         if not scan:
             raise HTTPException(status_code=404, detail="Scan not found")
@@ -204,9 +192,7 @@ class ScanFindingsResponse(TypedDict):
 @app.get("/api/scan/{session_id}/findings")
 async def scan_findings(session_id: str) -> ScanFindingsResponse:
     async with async_session() as session:
-        result = await session.execute(
-            select(Finding).where(Finding.session_id == session_id)
-        )
+        result = await session.execute(select(Finding).where(Finding.session_id == session_id))
         findings = [
             dict(
                 id=row.id,
@@ -226,9 +212,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str) -> None:
         while True:
             try:
                 # Set a timeout for receiving messages
-                message = await asyncio.wait_for(
-                    websocket.receive_text(), timeout=300.0
-                )  # 5 minute timeout
+                message = await asyncio.wait_for(websocket.receive_text(), timeout=300.0)  # 5 minute timeout
                 # Process the message if needed, or just acknowledge it
                 if message == "ping":
                     await websocket.send_text("pong")
@@ -237,9 +221,7 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str) -> None:
                 await websocket.send_text("ping")
                 # Wait for pong response
                 try:
-                    pong = await asyncio.wait_for(
-                        websocket.receive_text(), timeout=10.0
-                    )
+                    pong = await asyncio.wait_for(websocket.receive_text(), timeout=10.0)
                     if pong != "pong":
                         break  # Unexpected response, close connection
                 except asyncio.TimeoutError:

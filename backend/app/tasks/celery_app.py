@@ -73,9 +73,7 @@ _task_context: threading.local = threading.local()
 
 
 @signals.after_setup_logger.connect
-def _setup_json_logging(
-    logger: logging.Logger, **kwargs: object
-) -> None:  # noqa: ARG001
+def _setup_json_logging(logger: logging.Logger, **kwargs: object) -> None:  # noqa: ARG001
     """Apply JSON logging config to Celery's logger after it is set up."""
     configure_logging()
 

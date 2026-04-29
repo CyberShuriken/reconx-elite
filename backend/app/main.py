@@ -64,9 +64,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "default-src 'self'; connect-src 'self'; img-src 'self' data: https:; script-src 'self'; style-src 'self' 'unsafe-inline'"
         )
         if settings.https_behind_proxy:
-            response.headers["Strict-Transport-Security"] = (
-                "max-age=31536000; includeSubDomains"
-            )
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         return response
 
 
@@ -106,9 +104,7 @@ init_engine()
 app = FastAPI(title=settings.app_name, lifespan=lifespan)
 allowed_origins = settings.cors_allowed_origins_list or ["http://localhost:5173"]
 if "*" in allowed_origins:
-    raise RuntimeError(
-        "CORS wildcard origin is not allowed when credentials are enabled"
-    )
+    raise RuntimeError("CORS wildcard origin is not allowed when credentials are enabled")
 
 
 def _trusted_hosts_from_origins(origins: list[str]) -> list[str]:

@@ -208,9 +208,7 @@ async def replay_vulnerability_request(
     # Get vulnerability
     from app.models.vulnerability import Vulnerability
 
-    vulnerability = (
-        db.query(Vulnerability).filter(Vulnerability.id == vulnerability_id).first()
-    )
+    vulnerability = db.query(Vulnerability).filter(Vulnerability.id == vulnerability_id).first()
 
     if not vulnerability:
         raise HTTPException(status_code=404, detail="Vulnerability not found")
@@ -233,9 +231,7 @@ async def replay_vulnerability_request(
         base_request["params"]["test"] = payload
 
     # Queue replay task
-    background_tasks.add_task(
-        manual_request_task, current_user.id, base_request, vulnerability_id
-    )
+    background_tasks.add_task(manual_request_task, current_user.id, base_request, vulnerability_id)
 
     return {
         "message": "Vulnerability replay task queued",
@@ -293,16 +289,10 @@ async def compare_responses(
 
     # Compare responses
     comparison = {
-        "status_codes_different": result1.get("status_code")
-        != result2.get("status_code"),
-        "response_time_diff_ms": abs(
-            result1.get("response_time_ms", 0) - result2.get("response_time_ms", 0)
-        ),
-        "response_size_diff": abs(
-            result1.get("response_size", 0) - result2.get("response_size", 0)
-        ),
-        "headers_different": result1.get("response_headers", {})
-        != result2.get("response_headers", {}),
+        "status_codes_different": result1.get("status_code") != result2.get("status_code"),
+        "response_time_diff_ms": abs(result1.get("response_time_ms", 0) - result2.get("response_time_ms", 0)),
+        "response_size_diff": abs(result1.get("response_size", 0) - result2.get("response_size", 0)),
+        "headers_different": result1.get("response_headers", {}) != result2.get("response_headers", {}),
     }
 
     # Check for body differences
@@ -310,8 +300,7 @@ async def compare_responses(
     body2 = result2.get("response_body", "")
     comparison["body_different"] = body1 != body2
     comparison["body_similarity"] = (
-        len(set(body1.split()) & set(body2.split()))
-        / max(len(set(body1.split())), len(set(body2.split())))
+        len(set(body1.split()) & set(body2.split())) / max(len(set(body1.split())), len(set(body2.split())))
         if body1 and body2
         else 0
     )

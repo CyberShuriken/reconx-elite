@@ -91,12 +91,8 @@ class Watchdog:
 
         # File paths
         self.baseline_dir = Path("baselines")
-        self.baseline_file = (
-            self.baseline_dir / f"{self.target.replace('.', '_')}_baseline.json"
-        )
-        self.changes_file = (
-            self.baseline_dir / f"{self.target.replace('.', '_')}_changes.json"
-        )
+        self.baseline_file = self.baseline_dir / f"{self.target.replace('.', '_')}_baseline.json"
+        self.changes_file = self.baseline_dir / f"{self.target.replace('.', '_')}_changes.json"
 
         # Ensure baseline directory exists
         self.baseline_dir.mkdir(exist_ok=True)
@@ -201,9 +197,7 @@ class Watchdog:
             phase="watchdog",
         )
 
-    async def _baseline_subdomains(
-        self, scan_results: Dict[str, Any], timestamp: str
-    ) -> None:
+    async def _baseline_subdomains(self, scan_results: Dict[str, Any], timestamp: str) -> None:
         """Baseline subdomain enumeration"""
         recon_results = scan_results.get("reconnaissance", {})
         subdomains = recon_results.get("subdomains", {}).get("results", [])
@@ -225,9 +219,7 @@ class Watchdog:
 
                     self.baseline[entry.path] = entry
 
-    async def _baseline_js_files(
-        self, scan_results: Dict[str, Any], timestamp: str
-    ) -> None:
+    async def _baseline_js_files(self, scan_results: Dict[str, Any], timestamp: str) -> None:
         """Baseline JavaScript files"""
         recon_results = scan_results.get("reconnaissance", {})
         js_assets = recon_results.get("js_assets", {}).get("results", [])
@@ -251,9 +243,7 @@ class Watchdog:
 
                     self.baseline[entry.path] = entry
 
-    async def _baseline_ssl_certs(
-        self, scan_results: Dict[str, Any], timestamp: str
-    ) -> None:
+    async def _baseline_ssl_certs(self, scan_results: Dict[str, Any], timestamp: str) -> None:
         """Baseline SSL certificates"""
         recon_results = scan_results.get("reconnaissance", {})
         ssl_info = recon_results.get("ssl_info", {})
@@ -272,9 +262,7 @@ class Watchdog:
 
             self.baseline[entry.path] = entry
 
-    async def _baseline_headers(
-        self, scan_results: Dict[str, Any], timestamp: str
-    ) -> None:
+    async def _baseline_headers(self, scan_results: Dict[str, Any], timestamp: str) -> None:
         """Baseline HTTP headers"""
         recon_results = scan_results.get("reconnaissance", {})
         headers_info = recon_results.get("headers", {})
@@ -293,9 +281,7 @@ class Watchdog:
 
             self.baseline[entry.path] = entry
 
-    async def _baseline_technology(
-        self, scan_results: Dict[str, Any], timestamp: str
-    ) -> None:
+    async def _baseline_technology(self, scan_results: Dict[str, Any], timestamp: str) -> None:
         """Baseline technology stack"""
         context_tree = scan_results.get("context_tree", {})
         tech_stack = context_tree.get("technology_stack", {})
@@ -468,9 +454,7 @@ class Watchdog:
             phase="watchdog",
         )
 
-    async def _detect_subdomain_changes(
-        self, current_results: Dict[str, Any], timestamp: str
-    ) -> None:
+    async def _detect_subdomain_changes(self, current_results: Dict[str, Any], timestamp: str) -> None:
         """Detect subdomain changes"""
         current_subdomains = set()
         current_subdomain_data = {}
@@ -525,9 +509,7 @@ class Watchdog:
 
             self.detected_changes.append(change)
 
-    async def _detect_js_changes(
-        self, current_results: Dict[str, Any], timestamp: str
-    ) -> None:
+    async def _detect_js_changes(self, current_results: Dict[str, Any], timestamp: str) -> None:
         """Detect JavaScript file changes"""
         current_js_files = {}
 
@@ -549,9 +531,7 @@ class Watchdog:
 
                 if js_url in current_js_files:
                     current_js_data = current_js_files[js_url]
-                    current_hash = self._calculate_hash(
-                        current_js_data.get("content", "")
-                    )
+                    current_hash = self._calculate_hash(current_js_data.get("content", ""))
 
                     if current_hash != entry.hash_value:
                         change = ChangeDetection(
@@ -566,9 +546,7 @@ class Watchdog:
 
                         self.detected_changes.append(change)
 
-    async def _detect_ssl_changes(
-        self, current_results: Dict[str, Any], timestamp: str
-    ) -> None:
+    async def _detect_ssl_changes(self, current_results: Dict[str, Any], timestamp: str) -> None:
         """Detect SSL certificate changes"""
         recon_results = current_results.get("reconnaissance", {})
         current_ssl = recon_results.get("ssl_info", {})
@@ -591,9 +569,7 @@ class Watchdog:
 
                 self.detected_changes.append(change)
 
-    async def _detect_header_changes(
-        self, current_results: Dict[str, Any], timestamp: str
-    ) -> None:
+    async def _detect_header_changes(self, current_results: Dict[str, Any], timestamp: str) -> None:
         """Detect HTTP header changes"""
         recon_results = current_results.get("reconnaissance", {})
         current_headers = recon_results.get("headers", {})
@@ -616,9 +592,7 @@ class Watchdog:
 
                 self.detected_changes.append(change)
 
-    async def _detect_tech_changes(
-        self, current_results: Dict[str, Any], timestamp: str
-    ) -> None:
+    async def _detect_tech_changes(self, current_results: Dict[str, Any], timestamp: str) -> None:
         """Detect technology stack changes"""
         context_tree = current_results.get("context_tree", {})
         current_tech = context_tree.get("technology_stack", {})
@@ -699,33 +673,17 @@ class Watchdog:
             "module": "watchdog",
             "baseline": {
                 "total_entries": len(self.baseline),
-                "subdomain_count": len(
-                    [p for p in self.baseline.keys() if p.startswith("subdomain:")]
-                ),
-                "js_file_count": len(
-                    [p for p in self.baseline.keys() if p.startswith("js:")]
-                ),
-                "ssl_count": len(
-                    [p for p in self.baseline.keys() if p.startswith("ssl:")]
-                ),
-                "header_count": len(
-                    [p for p in self.baseline.keys() if p.startswith("headers:")]
-                ),
-                "tech_count": len(
-                    [p for p in self.baseline.keys() if p.startswith("tech:")]
-                ),
-                "baseline_timestamp": self.baseline.get("subdomain:example", {}).get(
-                    "timestamp", "unknown"
-                ),
+                "subdomain_count": len([p for p in self.baseline.keys() if p.startswith("subdomain:")]),
+                "js_file_count": len([p for p in self.baseline.keys() if p.startswith("js:")]),
+                "ssl_count": len([p for p in self.baseline.keys() if p.startswith("ssl:")]),
+                "header_count": len([p for p in self.baseline.keys() if p.startswith("headers:")]),
+                "tech_count": len([p for p in self.baseline.keys() if p.startswith("tech:")]),
+                "baseline_timestamp": self.baseline.get("subdomain:example", {}).get("timestamp", "unknown"),
             },
             "changes": {
                 "total_changes": len(self.detected_changes),
-                "change_types": list(
-                    set(c.change_type.value for c in self.detected_changes)
-                ),
-                "high_impact_changes": len(
-                    [c for c in self.detected_changes if c.requires_full_scan]
-                ),
+                "change_types": list(set(c.change_type.value for c in self.detected_changes)),
+                "high_impact_changes": len([c for c in self.detected_changes if c.requires_full_scan]),
                 "results": [asdict(change) for change in self.detected_changes],
             },
             "configuration": {
@@ -741,9 +699,7 @@ class Watchdog:
             "summary": {
                 "baseline_entries": len(self.baseline),
                 "changes_detected": len(self.detected_changes),
-                "high_impact_changes": len(
-                    [c for c in self.detected_changes if c.requires_full_scan]
-                ),
+                "high_impact_changes": len([c for c in self.detected_changes if c.requires_full_scan]),
                 "monitoring_active": self.monitoring_active,
                 "recommendation": "Review detected changes and consider full scan for high-impact modifications",
             },

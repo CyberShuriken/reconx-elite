@@ -41,10 +41,8 @@ def _queued_metadata(scan_config: dict | None = None) -> dict:
 def _build_scan_config_from_request(payload: ScanConfigRequest) -> dict:
     """Build and validate scan configuration from request (FIX #5: Input validation)."""
     cfg: dict = {
-        "selected_templates": payload.selected_templates
-        or DEFAULT_SCAN_CONFIG["selected_templates"],
-        "severity_filter": payload.severity_filter
-        or DEFAULT_SCAN_CONFIG["severity_filter"],
+        "selected_templates": payload.selected_templates or DEFAULT_SCAN_CONFIG["selected_templates"],
+        "severity_filter": payload.severity_filter or DEFAULT_SCAN_CONFIG["severity_filter"],
     }
 
     if payload.profile is not None:
@@ -77,11 +75,7 @@ def _build_scan_config_from_request(payload: ScanConfigRequest) -> dict:
 
 
 def _guard_scan_request(db: Session, target_id: int, user_id: int) -> Target:
-    target = (
-        db.query(Target)
-        .filter(Target.id == target_id, Target.owner_id == user_id)
-        .first()
-    )
+    target = db.query(Target).filter(Target.id == target_id, Target.owner_id == user_id).first()
     if not target:
         raise HTTPException(status_code=404, detail="Target not found")
 
@@ -92,13 +86,9 @@ def _guard_scan_request(db: Session, target_id: int, user_id: int) -> Target:
         .first()
     )
     if running:
-        raise HTTPException(
-            status_code=409, detail="Scan already in progress for this target"
-        )
+        raise HTTPException(status_code=409, detail="Scan already in progress for this target")
 
-    recent_threshold = datetime.now(timezone.utc) - timedelta(
-        seconds=settings.scan_throttle_seconds
-    )
+    recent_threshold = datetime.now(timezone.utc) - timedelta(seconds=settings.scan_throttle_seconds)
     recent = (
         db.query(Scan)
         .join(Target, Target.id == Scan.target_id)
@@ -130,17 +120,11 @@ def trigger_scan(
 
     # FIX #6: Use FOR UPDATE to prevent race condition
     running_scan = db.execute(
-        select(Scan)
-        .where(
-            and_(Scan.target_id == target.id, Scan.status.in_(["pending", "running"]))
-        )
-        .with_for_update()
+        select(Scan).where(and_(Scan.target_id == target.id, Scan.status.in_(["pending", "running"]))).with_for_update()
     ).scalar_one_or_none()
 
     if running_scan:
-        raise HTTPException(
-            status_code=409, detail="Scan already in progress for this target"
-        )
+        raise HTTPException(status_code=409, detail="Scan already in progress for this target")
 
     scan = Scan(
         target_id=target.id,
@@ -169,9 +153,7 @@ def trigger_scan(
         db.commit()  # Single commit point
     except IntegrityError:
         db.rollback()
-        raise HTTPException(
-            status_code=409, detail="Scan already in progress for this target"
-        )
+        raise HTTPException(status_code=409, detail="Scan already in progress for this target")
 
     db.refresh(scan)
     start_scan_chain(scan.id)
@@ -196,17 +178,11 @@ def trigger_scan_with_config(
 
     # FIX #6: Use FOR UPDATE to prevent race condition
     running_scan = db.execute(
-        select(Scan)
-        .where(
-            and_(Scan.target_id == target.id, Scan.status.in_(["pending", "running"]))
-        )
-        .with_for_update()
+        select(Scan).where(and_(Scan.target_id == target.id, Scan.status.in_(["pending", "running"]))).with_for_update()
     ).scalar_one_or_none()
 
     if running_scan:
-        raise HTTPException(
-            status_code=409, detail="Scan already in progress for this target"
-        )
+        raise HTTPException(status_code=409, detail="Scan already in progress for this target")
 
     scan = Scan(
         target_id=target.id,
@@ -235,9 +211,7 @@ def trigger_scan_with_config(
         db.commit()
     except IntegrityError:
         db.rollback()
-        raise HTTPException(
-            status_code=409, detail="Scan already in progress for this target"
-        )
+        raise HTTPException(status_code=409, detail="Scan already in progress for this target")
 
     db.refresh(scan)
     start_scan_chain(scan.id)

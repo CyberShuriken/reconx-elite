@@ -72,9 +72,7 @@ class WebSocketManager:
         await self.broadcast(session_id, "finding", finding_dict)
 
     async def send_phase_update(self, session_id: str, phase: str, status: str) -> None:
-        await self.broadcast(
-            session_id, "phase_update", {"phase": phase, "status": status}
-        )
+        await self.broadcast(session_id, "phase_update", {"phase": phase, "status": status})
 
     async def send_stats(self, session_id: str, stats_dict: dict) -> None:
         await self.broadcast(session_id, "stats_update", stats_dict)

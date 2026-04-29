@@ -29,12 +29,8 @@ class DualSessionValidator:
         params = {"id": resource_id} if method == "GET" else None
         json_payload = payload if method != "GET" else None
 
-        response_a = await self._make_request(
-            url, method, session_a_token, params, json_payload
-        )
-        response_b = await self._make_request(
-            url, method, session_b_token, params, json_payload
-        )
+        response_a = await self._make_request(url, method, session_a_token, params, json_payload)
+        response_b = await self._make_request(url, method, session_b_token, params, json_payload)
 
         return self._analyze_discrepancy(response_a, response_b, endpoint, resource_id)
 
@@ -56,9 +52,7 @@ class DualSessionValidator:
                 if method == "GET":
                     response = await client.get(url, headers=headers, params=params)
                 elif method == "POST":
-                    response = await client.post(
-                        url, headers=headers, json=json_payload
-                    )
+                    response = await client.post(url, headers=headers, json=json_payload)
                 else:
                     response = await client.get(url, headers=headers)
 
@@ -108,9 +102,7 @@ class DualSessionValidator:
         return common_chars / max_len if max_len > 0 else 0.0
 
 
-async def analyze_bac_idor(
-    endpoints: list[dict[str, Any]], model_router: Any
-) -> dict[str, Any]:
+async def analyze_bac_idor(endpoints: list[dict[str, Any]], model_router: Any) -> dict[str, Any]:
     """Analyze endpoints for Broken Access Control and IDOR vulnerabilities."""
     idor_candidates = []
 
@@ -118,21 +110,15 @@ async def analyze_bac_idor(
         path = endpoint.get("path", "")
         params = endpoint.get("parameters", [])
 
-        uuid_pattern = (
-            r"\{?[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\}?"
-        )
+        uuid_pattern = r"\{?[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\}?"
         numeric_pattern = r"\{?id\}?|\{?\d+\}?"
 
-        if re.search(uuid_pattern, path, re.IGNORECASE) or re.search(
-            numeric_pattern, path, re.IGNORECASE
-        ):
+        if re.search(uuid_pattern, path, re.IGNORECASE) or re.search(numeric_pattern, path, re.IGNORECASE):
             idor_candidates.append(
                 {
                     "endpoint": path,
                     "method": endpoint.get("method", "GET"),
-                    "parameter_type": (
-                        "uuid" if re.search(uuid_pattern, path) else "numeric"
-                    ),
+                    "parameter_type": ("uuid" if re.search(uuid_pattern, path) else "numeric"),
                     "test_strategy": "Use DualSessionValidator to compare responses",
                 }
             )

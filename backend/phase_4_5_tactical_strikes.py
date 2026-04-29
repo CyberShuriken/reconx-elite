@@ -30,19 +30,14 @@ class TacticalStrikesOrchestrator:
         for endpoint in endpoints:
             if endpoint.get("method") == "GET":
                 # Check for ID parameters (uuid, numeric ID)
-                if (
-                    "id" in str(endpoint.get("params", [])).lower()
-                    or "uuid" in str(endpoint).lower()
-                ):
+                if "id" in str(endpoint.get("params", [])).lower() or "uuid" in str(endpoint).lower():
                     payload_prompt = f"""Generate 5 different test payloads for IDOR attack on:
                     Endpoint: {endpoint.get('path')}
                     Parameters: {endpoint.get('params', [])}
                     
                     Return JSON with payloads array containing test IDs."""
 
-                    result = await self.ai_router.call_model(
-                        self.model_role, payload_prompt, max_tokens=300
-                    )
+                    result = await self.ai_router.call_model(self.model_role, payload_prompt, max_tokens=300)
                     if result.get("output"):
                         findings.append(
                             {
@@ -74,10 +69,7 @@ class TacticalStrikesOrchestrator:
 
         for endpoint in endpoints:
             # Look for parameters that might accept URLs
-            if any(
-                param in str(endpoint).lower()
-                for param in ["url", "endpoint", "webhook", "callback", "fetch"]
-            ):
+            if any(param in str(endpoint).lower() for param in ["url", "endpoint", "webhook", "callback", "fetch"]):
                 prompt = f"""Generate SSRF exploitation tactics for:
                 Endpoint: {endpoint.get('path')}
                 Parameter: {endpoint.get('params', [])}
@@ -88,9 +80,7 @@ class TacticalStrikesOrchestrator:
                 
                 Return exploitation steps and expected responses."""
 
-                result = await self.ai_router.call_model(
-                    self.model_role, prompt, max_tokens=400
-                )
+                result = await self.ai_router.call_model(self.model_role, prompt, max_tokens=400)
                 if result.get("output"):
                     findings.append(
                         {
@@ -103,9 +93,7 @@ class TacticalStrikesOrchestrator:
 
         return findings
 
-    async def execute_business_logic_strikes(
-        self, endpoints: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    async def execute_business_logic_strikes(self, endpoints: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Execute business logic attacks targeting financial flows."""
         findings = []
 
@@ -137,9 +125,7 @@ class TacticalStrikesOrchestrator:
                 
                 Return JSON with attack_scenarios array."""
 
-                result = await self.ai_router.call_model(
-                    self.model_role, prompt, max_tokens=500
-                )
+                result = await self.ai_router.call_model(self.model_role, prompt, max_tokens=500)
                 if result.get("output"):
                     findings.append(
                         {
@@ -160,9 +146,7 @@ class AdvancedInjectionOrchestrator:
         self.ai_router = ai_router
         self.model_role = "code_engine"  # Qwen3 Coder
 
-    async def execute_graphql_strikes(
-        self, graphql_endpoints: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    async def execute_graphql_strikes(self, graphql_endpoints: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Execute GraphQL introspection and query exhaustion attacks."""
         findings = []
 
@@ -190,9 +174,7 @@ class AdvancedInjectionOrchestrator:
                 
                 Return array of malicious queries."""
 
-                exhaustion_result = await self.ai_router.call_model(
-                    self.model_role, exhaustion_prompt, max_tokens=400
-                )
+                exhaustion_result = await self.ai_router.call_model(self.model_role, exhaustion_prompt, max_tokens=400)
 
                 findings.append(
                     {
@@ -244,20 +226,14 @@ class AdvancedInjectionOrchestrator:
                 
                 Return array of jailbreak payloads with explanations."""
 
-                result = await self.ai_router.call_model(
-                    self.model_role, jailbreak_prompt, max_tokens=600
-                )
+                result = await self.ai_router.call_model(self.model_role, jailbreak_prompt, max_tokens=600)
 
                 findings.append(
                     {
                         "type": "Prompt Injection",
                         "endpoint": endpoint.get("path"),
                         "jailbreak_suite": result.get("output", ""),
-                        "severity": (
-                            "CRITICAL"
-                            if "system_prompt" in result.get("output", "").lower()
-                            else "HIGH"
-                        ),
+                        "severity": ("CRITICAL" if "system_prompt" in result.get("output", "").lower() else "HIGH"),
                     }
                 )
 
@@ -285,9 +261,7 @@ class AdvancedInjectionOrchestrator:
             
             Return JSON with payload_sets array, each with type and examples."""
 
-            result = await self.ai_router.call_model(
-                self.model_role, injection_prompt, max_tokens=500
-            )
+            result = await self.ai_router.call_model(self.model_role, injection_prompt, max_tokens=500)
 
             if result.get("output"):
                 findings.append(

@@ -73,9 +73,7 @@ class SevenPhaseOrchestrator:
 
             return {"status": "complete", "session_id": self.session_id}
         except Exception as e:
-            await self.ws_manager.send_log(
-                self.session_id, "error", f"Pipeline failed: {str(e)}", phase="error"
-            )
+            await self.ws_manager.send_log(self.session_id, "error", f"Pipeline failed: {str(e)}", phase="error")
             self.manifest.update_phase("phase_error", "failed", [{"error": str(e)}])
             return {"status": "failed", "error": str(e)}
 
@@ -154,9 +152,7 @@ class SevenPhaseOrchestrator:
                     f"Phase 1 critical failure: {str(e)}",
                     phase="phase_1",
                 )
-                self.manifest.update_phase(
-                    "phase_1", "failed", [{"error": str(e), "critical": True}]
-                )
+                self.manifest.update_phase("phase_1", "failed", [{"error": str(e), "critical": True}])
                 raise  # Re-raise to halt pipeline
             else:
                 # Non-critical error - log but continue
@@ -227,9 +223,7 @@ class SevenPhaseOrchestrator:
                     {
                         "tech_stack_items": len(tech_stack),
                         "cve_findings": len(cve_findings),
-                        "api_endpoints": len(
-                            api_surface.get("rest", []) + api_surface.get("graphql", [])
-                        ),
+                        "api_endpoints": len(api_surface.get("rest", []) + api_surface.get("graphql", [])),
                     }
                 ],
             )
@@ -251,9 +245,7 @@ class SevenPhaseOrchestrator:
                     f"Phase 2 critical failure: {str(e)}",
                     phase="phase_2",
                 )
-                self.manifest.update_phase(
-                    "phase_2", "failed", [{"error": str(e), "critical": True}]
-                )
+                self.manifest.update_phase("phase_2", "failed", [{"error": str(e), "critical": True}])
                 raise  # Re-raise to halt pipeline
             else:
                 # Non-critical error - log but continue
@@ -279,18 +271,14 @@ class SevenPhaseOrchestrator:
         )
 
         try:
-            if not self.session_tokens.get("session_a") or not self.session_tokens.get(
-                "session_b"
-            ):
+            if not self.session_tokens.get("session_a") or not self.session_tokens.get("session_b"):
                 await self.ws_manager.send_log(
                     self.session_id,
                     "warning",
                     "Phase 3 skipped: No session tokens provided",
                     phase="phase_3",
                 )
-                self.manifest.update_phase(
-                    "phase_3", "skipped", [{"reason": "No session tokens"}]
-                )
+                self.manifest.update_phase("phase_3", "skipped", [{"reason": "No session tokens"}])
                 return
 
             endpoints = self.manifest.data["context_tree"].get("api_endpoints", [])
@@ -303,12 +291,8 @@ class SevenPhaseOrchestrator:
                 endpoints,
             )
 
-            self.manifest.add_context(
-                "idor_targets", idor_results.get("idor_candidates", [])
-            )
-            self.manifest.update_phase(
-                "phase_3", "completed", idor_results.get("idor_candidates", [])
-            )
+            self.manifest.add_context("idor_targets", idor_results.get("idor_candidates", []))
+            self.manifest.update_phase("phase_3", "completed", idor_results.get("idor_candidates", []))
 
             await self.ws_manager.send_log(
                 self.session_id,
@@ -327,9 +311,7 @@ class SevenPhaseOrchestrator:
                     f"Phase 3 critical failure: {str(e)}",
                     phase="phase_3",
                 )
-                self.manifest.update_phase(
-                    "phase_3", "failed", [{"error": str(e), "critical": True}]
-                )
+                self.manifest.update_phase("phase_3", "failed", [{"error": str(e), "critical": True}])
                 raise  # Re-raise to halt pipeline
             else:
                 # Non-critical error - log but continue
@@ -364,9 +346,7 @@ class SevenPhaseOrchestrator:
             idor_findings = await orchestrator.execute_bac_idor_strikes(
                 endpoints, self.session_tokens.get("session_a", "")
             )
-            ssrf_findings = await orchestrator.execute_ssrf_strikes(
-                endpoints, tech_stack
-            )
+            ssrf_findings = await orchestrator.execute_ssrf_strikes(endpoints, tech_stack)
             bl_findings = await orchestrator.execute_business_logic_strikes(endpoints)
 
             all_strike_findings = idor_findings + ssrf_findings + bl_findings
@@ -399,9 +379,7 @@ class SevenPhaseOrchestrator:
                     f"Phase 4 critical failure: {str(e)}",
                     phase="phase_4",
                 )
-                self.manifest.update_phase(
-                    "phase_4", "failed", [{"error": str(e), "critical": True}]
-                )
+                self.manifest.update_phase("phase_4", "failed", [{"error": str(e), "critical": True}])
                 raise  # Re-raise to halt pipeline
             else:
                 # Non-critical error - log but continue
@@ -434,23 +412,15 @@ class SevenPhaseOrchestrator:
 
             # GraphQL attacks
             graphql_endpoints = [ep for ep in endpoints if ep.get("type") == "GraphQL"]
-            graphql_findings = await orchestrator.execute_graphql_strikes(
-                graphql_endpoints
-            )
+            graphql_findings = await orchestrator.execute_graphql_strikes(graphql_endpoints)
 
             # Prompt injection attacks
-            prompt_findings = await orchestrator.execute_prompt_injection_strikes(
-                endpoints, tech_stack
-            )
+            prompt_findings = await orchestrator.execute_prompt_injection_strikes(endpoints, tech_stack)
 
             # General injection attacks
-            injection_findings = await orchestrator.execute_injection_strikes(
-                endpoints, tech_stack
-            )
+            injection_findings = await orchestrator.execute_injection_strikes(endpoints, tech_stack)
 
-            all_injection_findings = (
-                graphql_findings + prompt_findings + injection_findings
-            )
+            all_injection_findings = graphql_findings + prompt_findings + injection_findings
             self.manifest.add_context("vulnerability_findings", all_injection_findings)
 
             self.manifest.update_phase(
@@ -481,9 +451,7 @@ class SevenPhaseOrchestrator:
                     f"Phase 5 critical failure: {str(e)}",
                     phase="phase_5",
                 )
-                self.manifest.update_phase(
-                    "phase_5", "failed", [{"error": str(e), "critical": True}]
-                )
+                self.manifest.update_phase("phase_5", "failed", [{"error": str(e), "critical": True}])
                 raise  # Re-raise to halt pipeline
             else:
                 # Non-critical error - log but continue
@@ -501,14 +469,10 @@ class SevenPhaseOrchestrator:
 
     async def phase_6_poc_generation(self) -> None:
         """Phase 6: Automated PoC Generation."""
-        await self.ws_manager.send_log(
-            self.session_id, "info", "Starting Phase 6: PoC Generation", phase="phase_6"
-        )
+        await self.ws_manager.send_log(self.session_id, "info", "Starting Phase 6: PoC Generation", phase="phase_6")
 
         try:
-            findings = self.manifest.data["context_tree"].get(
-                "vulnerability_findings", []
-            )
+            findings = self.manifest.data["context_tree"].get("vulnerability_findings", [])
             pocs = []
 
             # Apply sampling if needed
@@ -531,9 +495,7 @@ class SevenPhaseOrchestrator:
                 pocs.append(poc)
 
             self.manifest.add_context("pocs", pocs)
-            self.manifest.update_phase(
-                "phase_6", "completed", [{"pocs_generated": len(pocs)}]
-            )
+            self.manifest.update_phase("phase_6", "completed", [{"pocs_generated": len(pocs)}])
 
             await self.ws_manager.send_log(
                 self.session_id,
@@ -552,9 +514,7 @@ class SevenPhaseOrchestrator:
                     f"Phase 6 critical failure: {str(e)}",
                     phase="phase_6",
                 )
-                self.manifest.update_phase(
-                    "phase_6", "failed", [{"error": str(e), "critical": True}]
-                )
+                self.manifest.update_phase("phase_6", "failed", [{"error": str(e), "critical": True}])
                 raise  # Re-raise to halt pipeline
             else:
                 # Non-critical error - log but continue
@@ -587,13 +547,9 @@ class SevenPhaseOrchestrator:
                 "pocs": self.manifest.data["context_tree"].get("pocs", []),
             }
 
-            report = self.report_generator.generate_report(
-                self.target, all_findings, self.manifest.data
-            )
+            report = self.report_generator.generate_report(self.target, all_findings, self.manifest.data)
 
-            self.manifest.update_phase(
-                "phase_7", "completed", [{"report_generated": True}]
-            )
+            self.manifest.update_phase("phase_7", "completed", [{"report_generated": True}])
 
             await self.ws_manager.send_log(
                 self.session_id,

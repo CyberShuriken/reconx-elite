@@ -73,15 +73,11 @@ class CVSS4Calculator:
         }
 
     @classmethod
-    def _calculate_base_score(
-        cls, av: str, ac: str, pr: str, ui: str, c: str, i: str, a: str
-    ) -> float:
+    def _calculate_base_score(cls, av: str, ac: str, pr: str, ui: str, c: str, i: str, a: str) -> float:
         """Calculate base score from metrics."""
         # Impact subscore
         impact = (
-            (1 - cls.CONFIDENTIALITY.get(c, 0.2))
-            * (1 - cls.INTEGRITY.get(i, 0.2))
-            * (1 - cls.AVAILABILITY.get(a, 0.2))
+            (1 - cls.CONFIDENTIALITY.get(c, 0.2)) * (1 - cls.INTEGRITY.get(i, 0.2)) * (1 - cls.AVAILABILITY.get(a, 0.2))
         )
         impact_score = 1 - impact
 
@@ -117,19 +113,12 @@ class CVSS4Calculator:
             return "NONE"
 
     @classmethod
-    def _build_vector_string(
-        cls, av: str, ac: str, pr: str, ui: str, c: str, i: str, a: str
-    ) -> str:
+    def _build_vector_string(cls, av: str, ac: str, pr: str, ui: str, c: str, i: str, a: str) -> str:
         """Build CVSS 4.0 vector string."""
-        return (
-            f"CVSS:4.0/AV:{av[0]}/AC:{ac[0]}/PR:{pr[0]}/UI:{ui[0]}/"
-            f"C:{c[0]}/I:{i[0]}/A:{a[0]}"
-        )
+        return f"CVSS:4.0/AV:{av[0]}/AC:{ac[0]}/PR:{pr[0]}/UI:{ui[0]}/" f"C:{c[0]}/I:{i[0]}/A:{a[0]}"
 
     @classmethod
-    def from_vulnerability_type(
-        cls, vuln_type: str, context: dict = None
-    ) -> dict[str, Any]:
+    def from_vulnerability_type(cls, vuln_type: str, context: dict = None) -> dict[str, Any]:
         """Calculate CVSS score based on vulnerability type."""
         vuln_profiles = {
             "idor": {
@@ -206,9 +195,7 @@ class CVSS4Calculator:
             },
         }
 
-        metrics = vuln_profiles.get(
-            vuln_type.lower(), vuln_profiles["misconfiguration"]
-        )
+        metrics = vuln_profiles.get(vuln_type.lower(), vuln_profiles["misconfiguration"])
 
         if context:
             metrics.update(context.get("cvss_overrides", {}))

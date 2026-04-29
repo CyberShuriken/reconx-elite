@@ -109,10 +109,7 @@ class CustomTemplateEngine:
             return False, "Template info missing required 'severity' field"
 
         # Check for at least one request/matcher
-        if not any(
-            key in yaml_content
-            for key in ["requests", "http", "dns", "network", "file"]
-        ):
+        if not any(key in yaml_content for key in ["requests", "http", "dns", "network", "file"]):
             return False, "Template must contain at least one request/matcher section"
 
         return True, "Template structure is valid"
@@ -134,9 +131,7 @@ class CustomTemplateEngine:
         else:
             return "other"
 
-    def update_template(
-        self, db: Session, user_id: int, template_id: int, updates: Dict
-    ) -> Tuple[bool, str]:
+    def update_template(self, db: Session, user_id: int, template_id: int, updates: Dict) -> Tuple[bool, str]:
         """Update an existing custom template."""
 
         try:
@@ -193,9 +188,7 @@ class CustomTemplateEngine:
             logger.error(f"Failed to update template {template_id}: {e}")
             return False, f"Failed to update template: {str(e)}"
 
-    def delete_template(
-        self, db: Session, user_id: int, template_id: int
-    ) -> Tuple[bool, str]:
+    def delete_template(self, db: Session, user_id: int, template_id: int) -> Tuple[bool, str]:
         """Delete a custom template."""
 
         try:
@@ -226,11 +219,7 @@ class CustomTemplateEngine:
         """Run a custom template against target URLs."""
 
         try:
-            template = (
-                db.query(CustomNucleiTemplate)
-                .filter(CustomNucleiTemplate.id == template_id)
-                .first()
-            )
+            template = db.query(CustomNucleiTemplate).filter(CustomNucleiTemplate.id == template_id).first()
 
             if not template:
                 return False, "Template not found", []
@@ -239,9 +228,7 @@ class CustomTemplateEngine:
                 return False, f"Template is invalid: {template.validation_error}", []
 
             # Write template to temporary file
-            template_file = os.path.join(
-                self.template_dir, f"template_{template_id}.yaml"
-            )
+            template_file = os.path.join(self.template_dir, f"template_{template_id}.yaml")
             with open(template_file, "w") as f:
                 f.write(template.template_content)
 
@@ -271,9 +258,7 @@ class CustomTemplateEngine:
             # Parse results
             findings = []
             if result.stdout:
-                findings = self._parse_nuclei_output(
-                    result.stdout, template_id, scan_id
-                )
+                findings = self._parse_nuclei_output(result.stdout, template_id, scan_id)
 
             # Store results in database
             stored_results = []
@@ -320,9 +305,7 @@ class CustomTemplateEngine:
             logger.error(f"Failed to run template {template_id}: {e}")
             return False, f"Failed to run template: {str(e)}", []
 
-    def _parse_nuclei_output(
-        self, output: str, template_id: int, scan_id: int
-    ) -> List[Dict]:
+    def _parse_nuclei_output(self, output: str, template_id: int, scan_id: int) -> List[Dict]:
         """Parse Nuclei JSON output."""
         findings = []
 
@@ -348,9 +331,7 @@ class CustomTemplateEngine:
     ) -> List[CustomNucleiTemplate]:
         """Get templates for a user."""
 
-        query = db.query(CustomNucleiTemplate).filter(
-            CustomNucleiTemplate.user_id == user_id
-        )
+        query = db.query(CustomNucleiTemplate).filter(CustomNucleiTemplate.user_id == user_id)
 
         if include_public:
             query = query.union(
@@ -365,9 +346,7 @@ class CustomTemplateEngine:
 
         return query.order_by(CustomNucleiTemplate.created_at.desc()).all()
 
-    def get_template_results(
-        self, db: Session, template_id: int, limit: int = 100
-    ) -> List[CustomTemplateResult]:
+    def get_template_results(self, db: Session, template_id: int, limit: int = 100) -> List[CustomTemplateResult]:
         """Get results for a specific template."""
 
         return (
@@ -378,9 +357,7 @@ class CustomTemplateEngine:
             .all()
         )
 
-    def get_public_templates(
-        self, db: Session, limit: int = 50
-    ) -> List[CustomNucleiTemplate]:
+    def get_public_templates(self, db: Session, limit: int = 50) -> List[CustomNucleiTemplate]:
         """Get public templates from all users."""
 
         return (

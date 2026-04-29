@@ -69,9 +69,7 @@ class PredictiveSandbox:
         self.confidence_threshold = confidence_threshold
 
         # Initialize logic simulator
-        self.logic_simulator = LogicSimulator(
-            session_id, target, ai_router, tool_runner, ws_manager
-        )
+        self.logic_simulator = LogicSimulator(session_id, target, ai_router, tool_runner, ws_manager)
 
         # Storage for results
         self.sandbox_tests: List[SandboxTest] = []
@@ -88,9 +86,7 @@ class PredictiveSandbox:
             "financial_impact": ["payment", "transaction", "transfer", "refund"],
         }
 
-    async def execute(
-        self, vulnerability_findings: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+    async def execute(self, vulnerability_findings: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Execute predictive sandbox on vulnerability findings"""
         await self.ws_manager.send_log(
             self.session_id,
@@ -138,9 +134,7 @@ class PredictiveSandbox:
             )
             raise
 
-    async def _assess_vulnerability_risks(
-        self, vulnerability_findings: List[Dict[str, Any]]
-    ) -> None:
+    async def _assess_vulnerability_risks(self, vulnerability_findings: List[Dict[str, Any]]) -> None:
         """Assess risk levels for vulnerability findings"""
         await self.ws_manager.send_log(
             self.session_id,
@@ -161,9 +155,7 @@ class PredictiveSandbox:
                 # Assess risk factors
                 risk_factors = self._identify_risk_factors(vuln_type, payload)
                 risk_level = self._calculate_risk_level(risk_factors)
-                potential_impact = self._assess_potential_impact(
-                    vuln_type, risk_factors
-                )
+                potential_impact = self._assess_potential_impact(vuln_type, risk_factors)
 
                 # Create risk assessment
                 risk_assessment = RiskAssessment(
@@ -172,9 +164,7 @@ class PredictiveSandbox:
                     risk_factors=risk_factors,
                     potential_impact=potential_impact,
                     confidence_score=0.5,  # Initial confidence
-                    recommendation=self._generate_recommendation(
-                        risk_level, risk_factors
-                    ),
+                    recommendation=self._generate_recommendation(risk_level, risk_factors),
                 )
 
                 self.risk_assessments.append(risk_assessment)
@@ -182,9 +172,7 @@ class PredictiveSandbox:
             except Exception as e:
                 logger.debug(f"Risk assessment failed for finding {i}: {e}")
 
-    def _identify_risk_factors(
-        self, vuln_type: str, payload: Dict[str, Any]
-    ) -> List[str]:
+    def _identify_risk_factors(self, vuln_type: str, payload: Dict[str, Any]) -> List[str]:
         """Identify risk factors for vulnerability"""
         risk_factors = []
 
@@ -264,21 +252,15 @@ class PredictiveSandbox:
     def _generate_recommendation(self, risk_level: str, risk_factors: List[str]) -> str:
         """Generate recommendation based on risk assessment"""
         if risk_level == "critical":
-            return (
-                "Immediate remediation required. Do not execute exploit in production."
-            )
+            return "Immediate remediation required. Do not execute exploit in production."
         elif risk_level == "high":
-            return (
-                "High priority remediation. Execute only in isolated test environment."
-            )
+            return "High priority remediation. Execute only in isolated test environment."
         elif risk_level == "medium":
             return "Schedule remediation. Execute with caution and monitoring."
         else:
             return "Standard remediation. Safe to execute with proper monitoring."
 
-    async def _simulate_vulnerability_exploitation(
-        self, vulnerability_findings: List[Dict[str, Any]]
-    ) -> None:
+    async def _simulate_vulnerability_exploitation(self, vulnerability_findings: List[Dict[str, Any]]) -> None:
         """Simulate vulnerability exploitation using AI reasoning"""
         await self.ws_manager.send_log(
             self.session_id,
@@ -298,9 +280,7 @@ class PredictiveSandbox:
                 vuln_type = finding.get("vulnerability_type", "unknown")
 
                 # Use AI to predict response
-                predicted_response = await self._ai_predict_exploitation_result(
-                    endpoint, method, payload, vuln_type
-                )
+                predicted_response = await self._ai_predict_exploitation_result(endpoint, method, payload, vuln_type)
 
                 # Create sandbox test
                 sandbox_test = SandboxTest(
@@ -392,15 +372,11 @@ class PredictiveSandbox:
                 risk_assessment = self._get_risk_assessment_for_test(test.test_id)
 
                 # Calculate confidence score
-                confidence = await self._calculate_test_confidence(
-                    test, risk_assessment
-                )
+                confidence = await self._calculate_test_confidence(test, risk_assessment)
                 test.confidence_score = confidence
 
             except Exception as e:
-                logger.debug(
-                    f"Confidence calculation failed for test {test.test_id}: {e}"
-                )
+                logger.debug(f"Confidence calculation failed for test {test.test_id}: {e}")
                 test.confidence_score = 0.5  # Default confidence
 
     def _get_risk_assessment_for_test(self, test_id: str) -> Optional[RiskAssessment]:
@@ -416,9 +392,7 @@ class PredictiveSandbox:
 
         return None
 
-    async def _calculate_test_confidence(
-        self, test: SandboxTest, risk_assessment: Optional[RiskAssessment]
-    ) -> float:
+    async def _calculate_test_confidence(self, test: SandboxTest, risk_assessment: Optional[RiskAssessment]) -> float:
         """Calculate confidence score for a specific test"""
         confidence_factors = []
 
@@ -429,9 +403,7 @@ class PredictiveSandbox:
         # Factor 2: Risk level adjustment
         if risk_assessment:
             risk_adjustments = {"critical": 0.3, "high": 0.5, "medium": 0.7, "low": 0.9}
-            confidence_factors.append(
-                risk_adjustments.get(risk_assessment.risk_level, 0.5)
-            )
+            confidence_factors.append(risk_adjustments.get(risk_assessment.risk_level, 0.5))
 
         # Factor 3: Vulnerability type reliability
         vuln_reliability = {
@@ -461,9 +433,7 @@ class PredictiveSandbox:
         # Calculate weighted average
         weights = [0.3, 0.2, 0.3, 0.2]  # AI, risk, reliability, historical
 
-        confidence = sum(
-            factor * weight for factor, weight in zip(confidence_factors, weights)
-        )
+        confidence = sum(factor * weight for factor, weight in zip(confidence_factors, weights))
 
         return min(max(confidence, 0.0), 1.0)  # Clamp between 0 and 1
 
@@ -480,9 +450,7 @@ class PredictiveSandbox:
             return 0.5  # Default confidence
 
         # Calculate success rate
-        successful_executions = [
-            execution for execution in type_history if execution.get("success", False)
-        ]
+        successful_executions = [execution for execution in type_history if execution.get("success", False)]
 
         success_rate = len(successful_executions) / len(type_history)
 
@@ -556,11 +524,7 @@ class PredictiveSandbox:
             phase="test_execution",
         )
 
-        executable_tests = [
-            test
-            for test in self.sandbox_tests
-            if test.execution_decision == ExecutionDecision.EXECUTE
-        ]
+        executable_tests = [test for test in self.sandbox_tests if test.execution_decision == ExecutionDecision.EXECUTE]
 
         for test in executable_tests:
             try:
@@ -627,9 +591,7 @@ class PredictiveSandbox:
             # Execute request based on method
             if test.method.upper() == "GET":
                 if test.payload:
-                    query_params = "&".join(
-                        [f"{k}={v}" for k, v in test.payload.items()]
-                    )
+                    query_params = "&".join([f"{k}={v}" for k, v in test.payload.items()])
                     url = f"{test.endpoint}?{query_params}"
                 else:
                     url = test.endpoint
@@ -680,9 +642,7 @@ class PredictiveSandbox:
 
         return "unexpected_result"
 
-    def _update_execution_history(
-        self, test: SandboxTest, result: str, execution_time: float
-    ) -> None:
+    def _update_execution_history(self, test: SandboxTest, result: str, execution_time: float) -> None:
         """Update execution history"""
         history_entry = {
             "timestamp": time.time(),
@@ -703,16 +663,8 @@ class PredictiveSandbox:
 
     def _compile_results(self) -> Dict[str, Any]:
         """Compile predictive sandbox results"""
-        executed_tests = [
-            t
-            for t in self.sandbox_tests
-            if t.execution_decision == ExecutionDecision.EXECUTE
-        ]
-        successful_tests = [
-            t
-            for t in executed_tests
-            if t.test_result and t.test_result.startswith("success")
-        ]
+        executed_tests = [t for t in self.sandbox_tests if t.execution_decision == ExecutionDecision.EXECUTE]
+        successful_tests = [t for t in executed_tests if t.test_result and t.test_result.startswith("success")]
 
         return {
             "target": self.target,
@@ -721,17 +673,11 @@ class PredictiveSandbox:
             "confidence_threshold": self.confidence_threshold,
             "risk_assessments": {
                 "total_count": len(self.risk_assessments),
-                "critical_count": len(
-                    [r for r in self.risk_assessments if r.risk_level == "critical"]
-                ),
-                "high_count": len(
-                    [r for r in self.risk_assessments if r.risk_level == "high"]
-                ),
+                "critical_count": len([r for r in self.risk_assessments if r.risk_level == "critical"]),
+                "high_count": len([r for r in self.risk_assessments if r.risk_level == "high"]),
                 "results": [asdict(assessment) for assessment in self.risk_assessments],
                 "risk_distribution": {
-                    level: len(
-                        [r for r in self.risk_assessments if r.risk_level == level]
-                    )
+                    level: len([r for r in self.risk_assessments if r.risk_level == level])
                     for level in ["critical", "high", "medium", "low"]
                 },
             },
@@ -740,33 +686,21 @@ class PredictiveSandbox:
                 "executed_count": len(executed_tests),
                 "successful_count": len(successful_tests),
                 "aborted_count": len(
-                    [
-                        t
-                        for t in self.sandbox_tests
-                        if t.execution_decision == ExecutionDecision.ABORT
-                    ]
+                    [t for t in self.sandbox_tests if t.execution_decision == ExecutionDecision.ABORT]
                 ),
                 "results": [asdict(test) for test in self.sandbox_tests],
                 "execution_decisions": {
                     decision: len(
-                        [
-                            t
-                            for t in self.sandbox_tests
-                            if t.execution_decision == ExecutionDecision(decision)
-                        ]
+                        [t for t in self.sandbox_tests if t.execution_decision == ExecutionDecision(decision)]
                     )
                     for decision in ["EXECUTE", "SIMULATE_ONLY", "ABORT"]
                 },
             },
             "execution_history": {
                 "total_executions": len(self.execution_history),
-                "success_rate": len(
-                    [h for h in self.execution_history if h.get("success", False)]
-                )
+                "success_rate": len([h for h in self.execution_history if h.get("success", False)])
                 / max(len(self.execution_history), 1),
-                "average_execution_time": sum(
-                    h.get("execution_time", 0) for h in self.execution_history
-                )
+                "average_execution_time": sum(h.get("execution_time", 0) for h in self.execution_history)
                 / max(len(self.execution_history), 1),
                 "recent_executions": [h for h in self.execution_history[-10:]],
             },
@@ -774,11 +708,8 @@ class PredictiveSandbox:
                 "total_tests_analyzed": len(self.sandbox_tests),
                 "tests_executed": len(executed_tests),
                 "vulnerabilities_confirmed": len(successful_tests),
-                "execution_success_rate": len(successful_tests)
-                / max(len(executed_tests), 1),
-                "average_confidence": sum(
-                    t.confidence_score for t in self.sandbox_tests
-                )
+                "execution_success_rate": len(successful_tests) / max(len(executed_tests), 1),
+                "average_confidence": sum(t.confidence_score for t in self.sandbox_tests)
                 / max(len(self.sandbox_tests), 1),
                 "recommendation": "Review high-confidence successful tests for immediate remediation",
             },
