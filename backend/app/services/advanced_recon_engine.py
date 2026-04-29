@@ -37,7 +37,7 @@ class StealthScanner:
     async def __aenter__(self):
         """Async context manager entry."""
         self.session = httpx.AsyncClient(
-            timeout=httpx.Timeout(30.0), follow_redirects=False, verify=False
+            timeout=httpx.Timeout(30.0), follow_redirects=False, verify=True
         )
         return self
 

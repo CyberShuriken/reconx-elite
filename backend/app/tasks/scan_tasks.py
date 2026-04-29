@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import shlex
+import tempfile
 from datetime import datetime, timedelta, timezone
 
 from celery import chain
@@ -1158,7 +1159,7 @@ async def _scan_stage_screenshots_async(payload: dict) -> dict:
         mods = parse_modules_from_config(scan.scan_config_json or {})
         live = payload.get("live_hosts") or []
         lines = [u for u in live if isinstance(u, str) and u.startswith("http")]
-        out_dir = f"/tmp/gowitness_scan_{scan.id}"
+        out_dir = tempfile.mkdtemp(prefix=f"gowitness_scan_{scan.id}_")
         _, res = run_gowitness_screenshots(
             lines, out_dir, mods.screenshots.delay_seconds
         )

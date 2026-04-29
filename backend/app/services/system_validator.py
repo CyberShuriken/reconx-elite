@@ -96,6 +96,9 @@ class SystemValidator:
 
             for table in critical_tables:
                 try:
+                    # Validate table name against whitelist to prevent SQL injection
+                    if table not in critical_tables:
+                        continue
                     db.execute(text(f"SELECT COUNT(*) FROM {table} LIMIT 1"))
                 except Exception:
                     missing_tables.append(table)

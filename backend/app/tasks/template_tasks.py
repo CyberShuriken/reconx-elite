@@ -1,5 +1,6 @@
 """Celery tasks for custom Nuclei template execution."""
 
+import ast
 import logging
 from datetime import datetime, timezone
 
@@ -78,7 +79,7 @@ async def validate_template_task(user_id: int, template_id: int) -> dict:
             template.template_content,
             template.author,
             template.description,
-            eval(template.tags) if template.tags else [],
+            ast.literal_eval(template.tags) if template.tags else [],
             template.is_public,
         )
 

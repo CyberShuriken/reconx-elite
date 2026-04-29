@@ -11,7 +11,7 @@ from app.models.blind_xss_hit import BlindXssHit
 class BlindXssService:
     """Service for managing blind XSS tokens and hits."""
 
-    PLACEHOLDER_IP_ADDRESS = "0.0.0.0"
+    PLACEHOLDER_IP_ADDRESS = "127.0.0.1"
 
     @staticmethod
     def generate_unique_token() -> str:

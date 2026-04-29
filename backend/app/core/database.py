@@ -63,16 +63,16 @@ def get_sessionmaker():
     """Get the initialized session maker (synchronous for testing)."""
     if _async_session_maker is None:
         init_engine()
-    
+
     # For testing compatibility, return a sync sessionmaker with proper configuration
     # This allows tests to inspect .kw attributes
     sync_session_factory = sessionmaker(
-        bind=_engine.sync_engine if hasattr(_engine, 'sync_engine') else None,
+        bind=_engine.sync_engine if hasattr(_engine, "sync_engine") else None,
         autocommit=False,
         autoflush=False,
-        expire_on_commit=False
+        expire_on_commit=False,
     )
-    
+
     return sync_session_factory
 
 

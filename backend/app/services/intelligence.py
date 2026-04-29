@@ -370,6 +370,11 @@ def select_javascript_assets(endpoints: list[dict]) -> list[dict]:
 
 def fetch_javascript_asset(url: str) -> tuple[str, list[str]]:
     warnings: list[str] = []
+    # Validate URL scheme to prevent file:// or custom schemes
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        warnings.append(f"Invalid URL scheme: {parsed.scheme}")
+        return "", warnings
     request = Request(url, headers={"User-Agent": "ReconX Elite"})
     try:
         with urlopen(request, timeout=settings.js_fetch_timeout_seconds) as response:

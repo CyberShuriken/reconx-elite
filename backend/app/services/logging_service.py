@@ -4,6 +4,7 @@ import json
 import logging
 import logging.handlers
 import os
+import tempfile
 from datetime import datetime, timezone
 from typing import Dict, Any, Optional
 
@@ -19,8 +20,8 @@ class ReconXLogger:
     def setup_logging(self):
         """Setup structured logging for the application."""
 
-        # Create logs directory
-        log_dir = "/tmp/logs"
+        # Create logs directory using secure temp directory
+        log_dir = tempfile.mkdtemp(prefix="reconx_logs_")
         os.makedirs(log_dir, exist_ok=True)
 
         # Handlers list

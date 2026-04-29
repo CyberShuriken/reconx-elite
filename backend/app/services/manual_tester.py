@@ -21,7 +21,7 @@ class ManualTester:
         self.client = httpx.AsyncClient(
             timeout=httpx.Timeout(30.0),
             follow_redirects=True,
-            verify=False,  # For testing purposes
+            verify=True,
         )
 
         # Common payload templates
