@@ -7,11 +7,9 @@ import asyncio
 import hashlib
 import json
 import logging
-import os
-import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, asdict
 from enum import Enum
 
@@ -480,7 +478,6 @@ class Watchdog:
         added_subdomains = current_subdomains - baseline_subdomains
         for subdomain in added_subdomains:
             subdomain_data = current_subdomain_data.get(subdomain, {})
-            hash_value = self._calculate_hash(str(subdomain_data))
 
             change = ChangeDetection(
                 change_type=ChangeType.SUBDOMAIN_ADDED,

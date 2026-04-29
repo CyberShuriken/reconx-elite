@@ -11,7 +11,7 @@ import os
 import re
 import time
 from typing import Any, Dict, List, Optional, Tuple
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from enum import Enum
 
 from ai_router import AIRouter
@@ -203,7 +203,8 @@ class WAFAnalyzer:
             await self.ws_manager.send_log(
                 self.session_id,
                 "success",
-                f'WAF analysis completed: {self.waf_profile.waf_type.value if self.waf_profile else "unknown"} detected, '
+                f"WAF analysis completed: "
+                f'{self.waf_profile.waf_type.value if self.waf_profile else "unknown"} detected, '
                 f'recommended delay: {self.stealth_config.get("recommended_delay", 0.0)}s',
                 phase="waf_analysis",
             )
@@ -309,15 +310,15 @@ class WAFAnalyzer:
 
         prompt = f"""
         Analyze the HTTP responses to detect the Web Application Firewall (WAF) type for {self.target}:
-        
+
         Base Response:
         - Status: {response_data['base_response']['status_code']}
         - Headers: {response_data['base_response']['headers']}
         - Data Sample: {response_data['base_response']['data_sample']}
-        
+
         Payload Responses:
         {json.dumps(response_data['payload_responses'], indent=2)}
-        
+
         WAF types to consider:
         - cloudflare: Cloudflare WAF
         - akamai: Akamai WAF
@@ -330,14 +331,14 @@ class WAFAnalyzer:
         - fortinet: Fortinet FortiWeb
         - nginx: Nginx with WAF module
         - unknown: Unknown or no WAF
-        
+
         Look for:
         1. Server headers indicating WAF
         2. Custom WAF headers
         3. WAF-specific error pages
         4. Blocking patterns in responses
         5. Rate limiting indicators
-        
+
         Return as JSON: {{"waf_type": "cloudflare", "confidence": 0.9, "indicators": ["server_header", "error_page"]}}
         """
 
@@ -353,7 +354,6 @@ class WAFAnalyzer:
                 try:
                     analysis = json.loads(result["output"])
                     waf_type_str = analysis.get("waf_type", "unknown")
-                    confidence = analysis.get("confidence", 0.5)
 
                     # Convert to enum
                     for waf_type in WAFType:
@@ -549,19 +549,19 @@ class WAFAnalyzer:
         """Use AI to refine delay calculation"""
         prompt = f"""
         Refine the recommended request delay for scanning {self.target}.
-        
+
         WAF Analysis:
         - Type: {self.waf_profile.waf_type.value if self.waf_profile else 'unknown'}
         - Confidence: {self.waf_profile.confidence if self.waf_profile else 0.0}
         - Rate Limiting: {self.waf_profile.rate_limit_detected if self.waf_profile else False}
         - Initial Delay: {initial_delay}s
-        
+
         Consider:
         1. WAF sensitivity and blocking patterns
         2. Rate limiting thresholds
         3. Stealth vs. speed trade-offs
         4. Typical scanning patterns
-        
+
         Recommend a delay between 0.5 and 10.0 seconds.
         Return as JSON: {{"refined_delay": 2.5, "reasoning": "High-sensitivity WAF detected"}}
         """
@@ -612,13 +612,13 @@ class WAFAnalyzer:
         """Use AI to get evasion techniques"""
         prompt = f"""
         Recommend effective evasion techniques for {self.waf_profile.waf_type.value} WAF at {self.target}.
-        
+
         WAF Profile:
         - Type: {self.waf_profile.waf_type.value}
         - Confidence: {self.waf_profile.confidence}
         - Signatures: {len(self.waf_profile.signatures)} detected
         - Rate Limiting: {self.waf_profile.rate_limit_detected}
-        
+
         Recommend 5-8 evasion techniques from:
         - payload_encoding (URL encoding, base64, etc.)
         - request_fragmentation (splitting payloads)
@@ -630,7 +630,7 @@ class WAFAnalyzer:
         - whitespace_variation (tab, newline insertion)
         - protocol_variation (HTTP/1.0 vs HTTP/1.1)
         - user_agent_rotation (different UA strings)
-        
+
         Return as JSON: {{"techniques": ["payload_encoding", "timing_delays"]}}
         """
 
