@@ -81,7 +81,10 @@ Base = declarative_base()
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Async context manager for database sessions."""
-    maker = get_sessionmaker()
+    global _async_session_maker
+    if _async_session_maker is None:
+        init_engine()
+    maker = _async_session_maker
     async with maker() as session:
         try:
             yield session

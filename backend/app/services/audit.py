@@ -1,10 +1,11 @@
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.audit_log import AuditLog
 
 
-def log_audit_event(
-    db: Session,
+async def log_audit_event(
+    db: AsyncSession,
     *,
     action: str,
     user_id: int | None = None,
@@ -19,3 +20,4 @@ def log_audit_event(
             metadata_json=metadata_json or {},
         )
     )
+    await db.commit()

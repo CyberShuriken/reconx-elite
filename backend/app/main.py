@@ -220,16 +220,12 @@ async def health():
     """Health check endpoint with async database verification."""
     database_status = "disconnected"
     try:
-        from app.core.database import get_sessionmaker
-        from sqlalchemy import text
+        from app.core.database import get_engine
 
-        async_session_maker = get_sessionmaker()
-        async with async_session_maker() as session:
-            try:
-                await session.execute(text("SELECT 1"))
-                database_status = "connected"
-            except Exception as e:
-                database_status = f"error: {type(e).__name__}"
+        engine = get_engine()
+        async with engine.connect() as connection:
+            await connection.execute(text("SELECT 1"))
+            database_status = "connected"
     except Exception as e:
-        database_status = f"unavailable: {type(e).__name__}"
+        database_status = f"error: {type(e).__name__}"
     return {"status": "ok", "database": database_status}

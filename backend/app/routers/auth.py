@@ -3,7 +3,8 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from jose import JWTError
 from slowapi import Limiter
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
 from app.core.database import get_db
@@ -49,8 +50,9 @@ limiter = Limiter(key_func=rate_limit_key)
     "/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED
 )
 @limiter.limit(settings.register_rate_limit)
-def register(payload: RegisterRequest, request: Request, db: Session = Depends(get_db)):
-    existing = db.query(User).filter(User.email == payload.email).first()
+async def register(payload: RegisterRequest, request: Request, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).filter(User.email == payload.email))
+    existing = result.scalar_one_or_none()
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
@@ -58,13 +60,13 @@ def register(payload: RegisterRequest, request: Request, db: Session = Depends(g
         email=payload.email, password_hash=hash_password(payload.password), role="user"
     )
     db.add(user)
-    db.commit()
-    db.refresh(user)
+    await db.commit()
+    await db.refresh(user)
     access = create_access_token(str(user.id), user.role)
     refresh, jti, expires_at = create_refresh_token(str(user.id), user.role)
     db.add(RefreshToken(user_id=user.id, token_jti=jti, expires_at=expires_at))
-    db.commit()
-    log_audit_event(
+    await db.commit()
+    await log_audit_event(
         db,
         action="user_registered",
         user_id=user.id,
@@ -75,15 +77,16 @@ def register(payload: RegisterRequest, request: Request, db: Session = Depends(g
 
 @router.post("/login", response_model=TokenResponse)
 @limiter.limit(settings.login_rate_limit)
-def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == payload.email).first()
+async def login(payload: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(User).filter(User.email == payload.email))
+    user = result.scalar_one_or_none()
     if not user or not verify_password(payload.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     access = create_access_token(str(user.id), user.role)
     refresh, jti, expires_at = create_refresh_token(str(user.id), user.role)
     db.add(RefreshToken(user_id=user.id, token_jti=jti, expires_at=expires_at))
-    db.commit()
-    log_audit_event(
+    await db.commit()
+    await log_audit_event(
         db,
         action="user_login",
         user_id=user.id,
@@ -95,8 +98,8 @@ def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)
 
 @router.post("/refresh", response_model=TokenResponse)
 @limiter.limit(settings.refresh_rate_limit)
-def refresh_token(
-    payload: RefreshRequest, request: Request, db: Session = Depends(get_db)
+async def refresh_token(
+    payload: RefreshRequest, request: Request, db: AsyncSession = Depends(get_db)
 ):
     try:
         claims = decode_token(payload.refresh_token)
@@ -111,13 +114,12 @@ def refresh_token(
     if not user_id or not token_jti:
         raise HTTPException(status_code=401, detail="Malformed refresh token")
 
-    stored = (
-        db.query(RefreshToken)
-        .filter(
+    result = await db.execute(
+        select(RefreshToken).filter(
             RefreshToken.token_jti == token_jti, RefreshToken.user_id == int(user_id)
         )
-        .first()
     )
+    stored = result.scalar_one_or_none()
     if (
         not stored
         or stored.is_revoked
@@ -125,7 +127,8 @@ def refresh_token(
     ):
         raise HTTPException(status_code=401, detail="Refresh token revoked or expired")
 
-    user = db.query(User).filter(User.id == int(user_id)).first()
+    result = await db.execute(select(User).filter(User.id == int(user_id)))
+    user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
 
@@ -133,9 +136,9 @@ def refresh_token(
     access = create_access_token(str(user.id), user.role)
     refresh, new_jti, expires_at = create_refresh_token(str(user.id), user.role)
     db.add(RefreshToken(user_id=user.id, token_jti=new_jti, expires_at=expires_at))
-    db.commit()
+    await db.commit()
 
-    log_audit_event(
+    await log_audit_event(
         db,
         action="token_refreshed",
         user_id=user.id,
