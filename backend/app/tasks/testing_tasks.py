@@ -1,10 +1,7 @@
 """Celery tasks for manual testing and request replay."""
 
-import json
 import logging
 from datetime import datetime, timezone
-
-from sqlalchemy.orm import Session
 
 from app.core.database import get_sessionmaker
 from app.models.manual_test_log import ManualTestLog

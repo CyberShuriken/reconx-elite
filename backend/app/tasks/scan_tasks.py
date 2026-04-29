@@ -27,7 +27,6 @@ from app.models.subdomain import Subdomain
 from app.models.ssrf_signal import SsrfSignal
 from app.models.target import Target
 from app.models.vulnerability import Vulnerability
-from app.services.intelligence_learning import learning_service
 from app.services.intelligence import (
     analyze_javascript_assets,
     build_subdomain_record,
@@ -39,19 +38,16 @@ from app.services.intelligence import (
     synthesize_heuristic_findings,
 )
 from app.services.ai_service import (
-    analyze_scan_data,
     analyze_live_hosts,
     analyze_subdomains,
     analyze_javascript_endpoints,
     analyze_nuclei_findings,
     build_javascript_asset_summaries_for_ai,
     generate_elite_vulnerability_report,
-    estimate_bounty_potential,
     _should_generate_report,
 )
 from app.services.websocket import (
     notify_scan_completed,
-    notify_scan_failed,
     notify_critical_vulnerability,
     notify_scan_started,
 )

@@ -3,8 +3,6 @@
 import logging
 from datetime import datetime, timezone
 
-from sqlalchemy.orm import Session
-
 from app.core.database import get_sessionmaker
 from app.tasks.celery_app import celery_app
 from app.models.vulnerability import Vulnerability

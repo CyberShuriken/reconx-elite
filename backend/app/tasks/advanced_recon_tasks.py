@@ -1,15 +1,12 @@
 """Celery tasks for advanced reconnaissance features."""
 
 import asyncio
-import json
 import logging
 from datetime import datetime, timezone
 
-from sqlalchemy.orm import Session
-
 from app.core.database import get_sessionmaker
 from app.tasks.celery_app import celery_app
-from app.models.advanced_recon import StealthConfig, DiscoveredParameter, FuzzedEndpoint
+from app.models.advanced_recon import StealthConfig
 from app.models.scan import Scan
 from app.services.advanced_recon_engine import (
     stealth_scanner,

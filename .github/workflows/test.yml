@@ -104,7 +104,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
-          pip install black flake8 mypy bandit safety
+          pip install black flake8 mypy bandit safety isort
+
+      - name: Check import ordering with isort
+        run: isort backend/ --check-only --diff --profile black
 
       - name: Check code formatting with Black
         run: black backend/ --check --diff --line-length=120
@@ -118,19 +121,19 @@ jobs:
             --statistics
           flake8 backend/ \
             --count \
-            --exit-zero \
             --max-complexity=10 \
             --max-line-length=120 \
+            --extend-ignore=E203,W503 \
             --statistics
 
       - name: Type checking with mypy
-        run: mypy backend/app --ignore-missing-imports --no-error-summary || true
+        run: mypy backend/app --ignore-missing-imports --no-error-summary
 
       - name: Security check with Bandit
-        run: bandit -r backend/ -ll -f json -o bandit-report.json || true
+        run: bandit -r backend/ -ll -ii -f json -o bandit-report.json || echo 'Bandit found issues (non-blocking)'
 
       - name: Dependency vulnerability check with Safety
-        run: safety check --json || true
+        run: safety check --json || echo 'Safety found issues (non-blocking)'
 
   security-scan:
     runs-on: ubuntu-latest
@@ -143,7 +146,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@v0.9.2
+        uses: aquasecurity/trivy-action@0.29.0
         with:
           scan-type: "fs"
           scan-ref: "."
@@ -167,10 +170,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Build backend image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./backend/Dockerfile
@@ -178,7 +181,7 @@ jobs:
           tags: reconx-elite-backend:test
 
       - name: Build frontend image
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./frontend/Dockerfile
@@ -186,7 +189,7 @@ jobs:
           tags: reconx-elite-frontend:test
 
       - name: Scan backend image with Trivy
-        uses: aquasecurity/trivy-action@v0.9.2
+        uses: aquasecurity/trivy-action@0.29.0
         with:
           image-ref: "reconx-elite-backend:test"
           format: "sarif"

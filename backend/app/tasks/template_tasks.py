@@ -4,8 +4,6 @@ import ast
 import logging
 from datetime import datetime, timezone
 
-from sqlalchemy.orm import Session
-
 from app.core.database import get_sessionmaker
 from app.services.custom_template_engine import template_engine
 
