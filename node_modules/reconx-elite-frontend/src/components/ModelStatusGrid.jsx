@@ -90,7 +90,7 @@ export default function ModelStatusGrid() {
 
   async function loadStatus() {
     try {
-      const response = await api.get("/api/model-status");
+      const response = await api.get("/system/model-status");
       setModelStatus(response.data);
       setError("");
     } catch (_err) {
@@ -102,10 +102,10 @@ export default function ModelStatusGrid() {
     setIsVerifying(true);
     setError("");
     try {
-      await api.post("/api/verify-models");
+      await api.post("/system/verify-models");
       await loadStatus();
     } catch (_err) {
-      setError("Verification failed");
+      setError("Verification failed. Admin access is required to run live model verification.");
     } finally {
       setIsVerifying(false);
     }
