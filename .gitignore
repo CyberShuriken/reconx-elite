@@ -213,5 +213,3 @@ trivy-results.sarif
 trivy-*.sarif
 
 .vercel
-
-.vercel
