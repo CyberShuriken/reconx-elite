@@ -1,7 +1,8 @@
 {
   "framework": null,
-  "buildCommand": "cd frontend && npm install --legacy-peer-deps && npm run build",
-  "outputDirectory": "frontend/dist",
+  "rootDirectory": "frontend",
+  "buildCommand": "npm install --legacy-peer-deps && npm run build",
+  "outputDirectory": "dist",
   "installCommand": "echo 'skip'",
   "rewrites": [
     {
