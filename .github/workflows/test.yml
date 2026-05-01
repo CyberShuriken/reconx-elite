@@ -206,6 +206,7 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: "trivy-backend-results.sarif"
+          category: "trivy-backend"
 
       - name: Scan frontend image with Trivy
         uses: aquasecurity/trivy-action@0.35.0
@@ -219,3 +220,4 @@ jobs:
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: "trivy-frontend-results.sarif"
+          category: "trivy-frontend"
