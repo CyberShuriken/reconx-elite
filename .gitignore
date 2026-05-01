@@ -197,3 +197,5 @@ htmlcov/
 .bandit
 trivy-results.sarif
 trivy-*.sarif
+
+.vercel

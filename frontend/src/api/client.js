@@ -1,8 +1,23 @@
 import axios from "axios";
 
-const backendBaseUrl = (process.env.VITE_API_BASE_URL || "http://localhost:8000").replace(
-  /\/+$/,
-  "",
+export const SESSION_EXPIRED_MESSAGE = "Your session expired. Please sign in again.";
+
+const configuredBackendBaseUrl = process.env.VITE_API_BASE_URL;
+
+function normalizeBaseUrl(url) {
+  return (url || "").replace(/\/+$/, "");
+}
+
+function resolveDefaultBackendBaseUrl() {
+  if (typeof window === "undefined") {
+    return "http://localhost:8000";
+  }
+
+  return `http://${window.location.hostname}:8000`;
+}
+
+const backendBaseUrl = normalizeBaseUrl(
+  configuredBackendBaseUrl || resolveDefaultBackendBaseUrl(),
 );
 
 let getTokens = () => null;
@@ -72,6 +87,12 @@ api.interceptors.response.use(
       return api(config);
     } catch (_refreshError) {
       logout();
+      if (error.response) {
+        error.response.data = {
+          ...(error.response.data || {}),
+          detail: SESSION_EXPIRED_MESSAGE,
+        };
+      }
       throw error;
     }
   },

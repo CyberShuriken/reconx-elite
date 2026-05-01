@@ -1,6 +1,12 @@
 import MockAdapter from "axios-mock-adapter";
 
-import { api, formatApiErrorDetail, setAuthHandlers } from "./client";
+import {
+  api,
+  backendBaseUrl,
+  formatApiErrorDetail,
+  SESSION_EXPIRED_MESSAGE,
+  setAuthHandlers,
+} from "./client";
 
 describe("formatApiErrorDetail", () => {
   it("returns empty string for nullish", () => {
@@ -19,6 +25,12 @@ describe("formatApiErrorDetail", () => {
 
   it("reads msg from object detail", () => {
     expect(formatApiErrorDetail({ msg: "oops" })).toBe("oops");
+  });
+});
+
+describe("backendBaseUrl", () => {
+  it("normalizes the configured backend URL", () => {
+    expect(backendBaseUrl).not.toMatch(/\/$/);
   });
 });
 
@@ -55,6 +67,21 @@ describe("api 401 refresh interceptor", () => {
     mock.onPost("/auth/refresh").reply(401);
     await expect(api.post("/auth/refresh", {})).rejects.toMatchObject({
       response: { status: 401 },
+    });
+  });
+
+  it("surfaces a session-expired message when refresh fails", async () => {
+    setAuthHandlers({
+      getTokens: () => ({ accessToken: "old", refreshToken: "stale" }),
+      refreshTokens: async () => {
+        throw new Error("refresh failed");
+      },
+      logout: jest.fn(),
+    });
+    mock.onPost("/targets").replyOnce(401, { detail: "Invalid access token" });
+
+    await expect(api.post("/targets", {})).rejects.toMatchObject({
+      response: { data: { detail: SESSION_EXPIRED_MESSAGE } },
     });
   });
 });

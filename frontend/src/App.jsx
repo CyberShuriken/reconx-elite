@@ -5,13 +5,18 @@ import AdminDashboardPage from "./pages/AdminDashboardPage";
 import DashboardPage from "./pages/DashboardPage";
 import LoginPage from "./pages/LoginPage";
 import NotificationCenter from "./components/NotificationCenter";
+import { isSupabaseEnabled } from "./lib/backendMode";
+import SupabaseTargetPage from "./pages/SupabaseTargetPage";
 import TargetPage from "./pages/TargetPage";
 import ErrorBoundary from "./components/ErrorBoundary";
 
 function ProtectedRoute({ children }) {
-  const { isAuthenticated, error } = useAuth();
+  const { isAuthenticated, error, isBootstrapping } = useAuth();
   
   try {
+    if (isBootstrapping) {
+      return <div style={{ padding: "20px" }}>Checking session...</div>;
+    }
     if (error) {
       return (
         <div style={{ padding: "20px", color: "red", fontWeight: "bold" }}>
@@ -34,9 +39,12 @@ function ProtectedRoute({ children }) {
 }
 
 function AdminRoute({ children }) {
-  const { isAuthenticated, isAdmin, error } = useAuth();
+  const { isAuthenticated, isAdmin, error, isBootstrapping } = useAuth();
   
   try {
+    if (isBootstrapping) {
+      return <div style={{ padding: "20px" }}>Checking session...</div>;
+    }
     if (error) {
       return (
         <div style={{ padding: "20px", color: "red", fontWeight: "bold" }}>
@@ -86,7 +94,7 @@ function AppRoutes() {
         path="/targets/:targetId"
         element={
           <ProtectedRoute>
-            <TargetPage />
+            {isSupabaseEnabled ? <SupabaseTargetPage /> : <TargetPage />}
           </ProtectedRoute>
         }
       />

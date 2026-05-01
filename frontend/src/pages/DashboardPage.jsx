@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 
 import { api, formatApiErrorDetail } from "../api/client";
 import { useAuth } from "../context/AuthContext";
+import { isSupabaseEnabled } from "../lib/backendMode";
+import { createTarget, listNotifications, listTargets } from "../lib/supabase";
+import { normalizeDomainInput } from "../utils/targets";
 
 export default function DashboardPage() {
   const [targets, setTargets] = useState([]);
@@ -13,6 +16,12 @@ export default function DashboardPage() {
   const { logout, isAdmin } = useAuth();
 
   async function loadDashboard() {
+    if (isSupabaseEnabled) {
+      const [targetRows, notificationRows] = await Promise.all([listTargets(), listNotifications()]);
+      setTargets(targetRows);
+      setNotifications(notificationRows);
+      return;
+    }
     const [{ data: targetRows }, { data: notificationRows }] = await Promise.all([
       api.get("/targets"),
       api.get("/notifications"),
@@ -48,11 +57,19 @@ export default function DashboardPage() {
     setError("");
     setIsSubmitting(true);
     try {
-      await api.post("/targets", { domain });
+      const normalizedDomain = normalizeDomainInput(domain);
+      if (isSupabaseEnabled) {
+        await createTarget(normalizedDomain);
+      } else {
+        await api.post("/targets", { domain: normalizedDomain });
+      }
       setDomain("");
       await loadDashboard();
     } catch (requestError) {
-      setError(formatApiErrorDetail(requestError.response?.data?.detail) || "Could not add target");
+      setError(
+        formatApiErrorDetail(requestError.response?.data?.detail || requestError.message) ||
+          "Could not add target",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -74,7 +91,13 @@ export default function DashboardPage() {
               Admin Panel
             </Link>
           )}
-          <button className="primary-button" onClick={logout} type="button">
+          <button
+            className="primary-button"
+            onClick={() => {
+              logout().catch(() => {});
+            }}
+            type="button"
+          >
             Logout
           </button>
         </div>
@@ -176,9 +199,7 @@ export default function DashboardPage() {
                   </td>
                   <td>
                     <span className={`status-pill status-${target.latest_scan?.status || "idle"}`}>
-                      {target.latest_scan?.metadata_json?.stage ||
-                        target.latest_scan?.status ||
-                        "not-scanned"}
+                      {target.latest_scan?.metadata_json?.stage || target.latest_scan?.status || "ready"}
                     </span>
                   </td>
                   <td>{target.latest_scan?.endpoint_count || 0} endpoints</td>

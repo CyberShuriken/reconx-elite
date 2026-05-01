@@ -84,8 +84,8 @@ The frontend dashboard is a dark-themed interface built to make long-running rec
 ## Architecture
 
 ```text
-frontend (React/Vite, nginx in Docker)  :5173
-  └─> backend (FastAPI, uvicorn)        :8000
+frontend (React/Parcel, nginx in Docker)  :5173
+  └─> backend (FastAPI, uvicorn)          :8000
         ├─> PostgreSQL                  :5432
         ├─> Redis (broker + result)     :6379
         └─> Celery worker

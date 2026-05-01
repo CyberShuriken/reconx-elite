@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext, createContext } from "react";
 import { useAuth } from "../context/AuthContext";
+import { isSupabaseEnabled } from "../lib/backendMode";
 import websocketService from "../services/websocket";
 
 const NotificationContext = createContext(null);
@@ -15,6 +16,12 @@ function NotificationCenter({ children }) {
 
   // Initialize WebSocket connection when user is authenticated
   useEffect(() => {
+    if (isSupabaseEnabled) {
+      websocketService.disconnect();
+      setConnectionStatus("disconnected");
+      return undefined;
+    }
+
     if (isAuthenticated && user) {
       // Connect to WebSocket
       websocketService

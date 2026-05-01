@@ -3,7 +3,7 @@
 import os
 import sys
 import unittest
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -58,17 +58,14 @@ class TestAPISmoke(unittest.TestCase):
         fake_user.role = "user"
 
         db = MagicMock()
-        chain = MagicMock()
-        db.query.return_value = chain
-        chain.options.return_value = chain
-        chain.filter.return_value = chain
-        chain.order_by.return_value = chain
-        chain.all.return_value = []
+        result = MagicMock()
+        result.scalars.return_value.all.return_value = []
+        db.execute = AsyncMock(return_value=result)
 
         def override_get_current_user():
             return fake_user
 
-        def override_get_db():
+        async def override_get_db():
             yield db
 
         app.dependency_overrides[get_current_user] = override_get_current_user

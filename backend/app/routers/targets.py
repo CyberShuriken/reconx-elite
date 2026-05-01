@@ -1,7 +1,9 @@
 import asyncio
 import logging
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.core.cache import build_cache_key, get_cached, invalidate, set_cached
 from app.core.config import settings
@@ -27,13 +29,38 @@ async def _invalidate_targets_cache(cache_key: str) -> None:
         logger.warning("Cache invalidation failed: %s", exc, exc_info=False)
 
 
+async def _load_target_with_details(
+    db: AsyncSession, *, owner_id: int, target_id: int
+) -> Target | None:
+    result = await db.execute(
+        select(Target)
+        .options(
+            selectinload(Target.scans).selectinload(Scan.subdomains),
+            selectinload(Target.scans).selectinload(Scan.endpoints),
+            selectinload(Target.scans).selectinload(Scan.vulnerabilities),
+            selectinload(Target.scans).selectinload(Scan.javascript_assets),
+            selectinload(Target.scans).selectinload(Scan.attack_paths),
+            selectinload(Target.scans).selectinload(Scan.logs),
+            selectinload(Target.scans).selectinload(Scan.diffs),
+        )
+        .filter(Target.id == target_id, Target.owner_id == owner_id)
+    )
+    target = result.scalar_one_or_none()
+    if target and target.scans:
+        target.scans.sort(key=lambda row: row.created_at, reverse=True)
+        for scan in target.scans:
+            if scan.logs:
+                scan.logs.sort(key=lambda row: row.started_at)
+    return target
+
+
 @router.post("", response_model=TargetOut)
 @limiter.limit(settings.write_rate_limit)
-def create_target(  # FIX #7: Remove async - only sync db operations
+async def create_target(
     background_tasks: BackgroundTasks,
     request: Request,
     payload: TargetCreate,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
     try:
@@ -41,15 +68,18 @@ def create_target(  # FIX #7: Remove async - only sync db operations
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
-    existing = db.query(Target).filter(Target.owner_id == user.id, Target.domain == domain).first()
+    result = await db.execute(
+        select(Target).filter(Target.owner_id == user.id, Target.domain == domain)
+    )
+    existing = result.scalar_one_or_none()
     if existing:
         raise HTTPException(status_code=400, detail="Target already exists")
 
     target = Target(owner_id=user.id, domain=domain)
     db.add(target)
-    db.commit()
-    db.refresh(target)
-    log_audit_event(
+    await db.commit()
+    await db.refresh(target)
+    await log_audit_event(
         db,
         action="target_created",
         user_id=user.id,
@@ -58,14 +88,14 @@ def create_target(  # FIX #7: Remove async - only sync db operations
     )
     background_tasks.add_task(_invalidate_targets_cache, build_cache_key(user.id, "targets"))
 
-    return target
+    return await _load_target_with_details(db, owner_id=user.id, target_id=target.id)
 
 
 @router.get("", response_model=list[TargetListItemOut])
 @limiter.limit(settings.read_rate_limit)
 async def list_targets(  # FIX #7: Keep async - uses await on cache
     request: Request,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
     cache_key = build_cache_key(user.id, "targets")
@@ -78,8 +108,8 @@ async def list_targets(  # FIX #7: Keep async - uses await on cache
     except (asyncio.TimeoutError, Exception) as e:
         logger.warning(f"Cache read failed: {e}", exc_info=False)
 
-    targets = (
-        db.query(Target)
+    result = await db.execute(
+        select(Target)
         .options(
             selectinload(Target.scans).selectinload(Scan.subdomains),
             selectinload(Target.scans).selectinload(Scan.endpoints),
@@ -87,8 +117,8 @@ async def list_targets(  # FIX #7: Keep async - uses await on cache
         )
         .filter(Target.owner_id == user.id)
         .order_by(Target.created_at.desc())
-        .all()
     )
+    targets = result.scalars().all()
     payload: list[TargetListItemOut] = []
     for target in targets:
         scans = sorted(target.scans, key=lambda row: row.created_at, reverse=True)
@@ -134,23 +164,26 @@ async def list_targets(  # FIX #7: Keep async - uses await on cache
 
 @router.put("/{target_id}", response_model=TargetOut)
 @limiter.limit(settings.write_rate_limit)
-def update_target(  # FIX #7: Remove async - only sync db operations
+async def update_target(
     target_id: int,
     payload: TargetUpdate,
     background_tasks: BackgroundTasks,
     request: Request,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    target = db.query(Target).filter(Target.id == target_id, Target.owner_id == user.id).first()
+    result = await db.execute(
+        select(Target).filter(Target.id == target_id, Target.owner_id == user.id)
+    )
+    target = result.scalar_one_or_none()
     if not target:
         raise HTTPException(status_code=404, detail="Target not found")
 
     if payload.notes is not None:
         target.notes = payload.notes
-    db.commit()
-    db.refresh(target)
-    log_audit_event(
+    await db.commit()
+    await db.refresh(target)
+    await log_audit_event(
         db,
         action="target_updated",
         user_id=user.id,
@@ -159,35 +192,18 @@ def update_target(  # FIX #7: Remove async - only sync db operations
     )
     background_tasks.add_task(_invalidate_targets_cache, build_cache_key(user.id, "targets"))
 
-    return target
+    return await _load_target_with_details(db, owner_id=user.id, target_id=target.id)
 
 
 @router.get("/{target_id}", response_model=TargetOut)
 @limiter.limit(settings.read_rate_limit)
-def get_target(  # FIX #7: Keep sync - only sync db operations
+async def get_target(
     target_id: int,
     request: Request,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    target = (
-        db.query(Target)
-        .options(
-            selectinload(Target.scans).selectinload(Scan.subdomains),
-            selectinload(Target.scans).selectinload(Scan.endpoints),
-            selectinload(Target.scans).selectinload(Scan.vulnerabilities),
-            selectinload(Target.scans).selectinload(Scan.javascript_assets),
-            selectinload(Target.scans).selectinload(Scan.attack_paths),
-            selectinload(Target.scans).selectinload(Scan.logs),
-            selectinload(Target.scans).selectinload(Scan.diffs),
-        )
-        .filter(Target.id == target_id, Target.owner_id == user.id)
-        .first()
-    )
+    target = await _load_target_with_details(db, owner_id=user.id, target_id=target_id)
     if not target:
         raise HTTPException(status_code=404, detail="Target not found")
-    target.scans.sort(key=lambda row: row.created_at, reverse=True)
-    for scan in target.scans:
-        if scan.logs:
-            scan.logs.sort(key=lambda row: row.started_at)
     return target

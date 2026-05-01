@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { api, formatApiErrorDetail } from "../api/client";
+import { formatApiErrorDetail } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
 
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, register } = useAuth();
 
   function handleMouseMove(e) {
     const { clientX, clientY } = e;
@@ -47,12 +47,14 @@ export default function LoginPage() {
     setIsSubmitting(true);
     setError("");
     try {
-      const endpoint = mode === "register" ? "/auth/register" : "/auth/login";
-      const { data } = await api.post(endpoint, { email, password });
-      login(data);
+      if (mode === "register") {
+        await register({ email, password });
+      } else {
+        await login({ email, password });
+      }
       navigate("/", { replace: true });
     } catch (requestError) {
-      const detail = requestError.response?.data?.detail;
+      const detail = requestError.response?.data?.detail || requestError.message;
       setError(formatApiErrorDetail(detail) || "Authentication failed");
     } finally {
       setIsSubmitting(false);

@@ -1,15 +1,40 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import { api, setAuthHandlers } from "../api/client";
-import { decodeJwt } from "../utils/jwt";
+import { isSupabaseEnabled } from "../lib/backendMode";
+import { signInWithPassword, signOut, signUp, supabase } from "../lib/supabase";
+import { decodeJwt, isJwtExpired } from "../utils/jwt";
 
 const STORAGE_KEY = "reconx_auth";
 const AuthContext = createContext(null);
 
+function isStoredAuthShapeValid(value) {
+  return Boolean(
+    value &&
+      typeof value.accessToken === "string" &&
+      value.accessToken &&
+      typeof value.refreshToken === "string" &&
+      value.refreshToken,
+  );
+}
+
 function loadStoredAuth() {
+  if (isSupabaseEnabled) {
+    localStorage.removeItem(STORAGE_KEY);
+    return null;
+  }
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
+    const parsed = raw ? JSON.parse(raw) : null;
+    if (
+      !isStoredAuthShapeValid(parsed) ||
+      isJwtExpired(parsed.accessToken) ||
+      isJwtExpired(parsed.refreshToken)
+    ) {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+    return isStoredAuthShapeValid(parsed) ? parsed : null;
   } catch {
     return null;
   }
@@ -17,8 +42,13 @@ function loadStoredAuth() {
 
 export function AuthProvider({ children }) {
   const [auth, setAuth] = useState(loadStoredAuth);
+  const [supabaseSession, setSupabaseSession] = useState(null);
+  const [isBootstrapping, setIsBootstrapping] = useState(isSupabaseEnabled);
 
   useEffect(() => {
+    if (isSupabaseEnabled) {
+      return undefined;
+    }
     if (auth) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(auth));
     } else {
@@ -26,14 +56,69 @@ export function AuthProvider({ children }) {
     }
   }, [auth]);
 
-  const login = (tokens) => {
+  useEffect(() => {
+    if (!isSupabaseEnabled) {
+      return undefined;
+    }
+
+    let mounted = true;
+    localStorage.removeItem(STORAGE_KEY);
+
+    supabase.auth.getSession().then(({ data }) => {
+      if (mounted) {
+        setSupabaseSession(data.session || null);
+        setIsBootstrapping(false);
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (mounted) {
+        setSupabaseSession(session || null);
+        setIsBootstrapping(false);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const login = async (tokens) => {
+    if (isSupabaseEnabled) {
+      const result = await signInWithPassword(tokens);
+      setSupabaseSession(result.session || null);
+      return;
+    }
+
     setAuth({
       accessToken: tokens.access_token,
       refreshToken: tokens.refresh_token,
     });
   };
 
-  const logout = () => {
+  const register = async (tokens) => {
+    if (isSupabaseEnabled) {
+      const result = await signUp(tokens);
+      if (result.session) {
+        setSupabaseSession(result.session);
+      } else {
+        const signInResult = await signInWithPassword(tokens);
+        setSupabaseSession(signInResult.session || null);
+      }
+      return;
+    }
+    return login(tokens);
+  };
+
+  const logout = async () => {
+    if (isSupabaseEnabled) {
+      await signOut();
+      setSupabaseSession(null);
+      return;
+    }
     setAuth(null);
   };
 
@@ -51,6 +136,18 @@ export function AuthProvider({ children }) {
   };
 
   useEffect(() => {
+    if (isSupabaseEnabled) {
+      setAuthHandlers({
+        getTokens: () => null,
+        refreshTokens: async () => {
+          throw new Error("Supabase mode does not use API token refresh");
+        },
+        logout: () => {
+          logout().catch(() => {});
+        },
+      });
+      return;
+    }
     setAuthHandlers({
       getTokens: () => auth,
       refreshTokens,
@@ -58,7 +155,42 @@ export function AuthProvider({ children }) {
     });
   }, [auth]);
 
+  useEffect(() => {
+    if (isSupabaseEnabled || !auth?.refreshToken) {
+      return;
+    }
+
+    let cancelled = false;
+    refreshTokens().catch(() => {
+      if (!cancelled) {
+        setAuth(null);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const value = useMemo(() => {
+    if (isSupabaseEnabled) {
+      const user = supabaseSession?.user || null;
+      const role = user?.user_metadata?.role || "user";
+      return {
+        auth: supabaseSession,
+        accessToken: supabaseSession?.access_token ?? null,
+        refreshToken: supabaseSession?.refresh_token ?? null,
+        user: user ? { id: user.id, role, email: user.email || null } : null,
+        isAuthenticated: Boolean(user),
+        isBootstrapping,
+        role,
+        isAdmin: role === "admin",
+        login,
+        register,
+        logout,
+      };
+    }
+
     let role = null;
     let userId = null;
     if (auth?.accessToken) {
@@ -72,12 +204,14 @@ export function AuthProvider({ children }) {
       refreshToken: auth?.refreshToken ?? null,
       user: userId ? { id: userId, role } : null,
       isAuthenticated: Boolean(auth?.accessToken),
+      isBootstrapping: false,
       role,
       isAdmin: role === "admin",
       login,
+      register,
       logout,
     };
-  }, [auth]);
+  }, [auth, isBootstrapping, supabaseSession]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

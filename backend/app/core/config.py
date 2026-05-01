@@ -75,9 +75,20 @@ class Settings(BaseSettings):
     )
 
     gemini_api_key: str = ""
-    openrouter_key: str = ""
-    openrouter_api_key_secondary: str = ""
-    openrouter_api_key_tertiary: str = ""
+
+    # AI Model Registry - 10-Phase Pipeline Keys
+    openrouter_key: str = ""  # Primary: meta-llama/llama-3.3-70b-instruct:free
+    or_key_nemotron_nano: str = ""  # Phase 0 Orchestrator: nvidia/llama-3.1-nemotron-nano-8b-instruct:free
+    or_key_nemotron_super: str = ""  # Phase 7 Deep Analysis: nvidia/llama-3.3-nemotron-super-49b-v1:free
+    or_key_nemotron_super_alt: str = ""  # Fallback for SUPER
+    or_key_qwen_coder: str = ""  # Phase 4/7 Payload Generation: qwen/qwen3-coder-480b-a35b-instruct:free
+    or_key_glm_45: str = ""  # Phase 1 Classification: thudm/glm-4-9b-chat:free
+    openrouter_api_key_secondary: str = ""  # Phase 5 Parameter Discovery: google/gemma-3-27b-it:free
+    openrouter_api_key_tertiary: str = ""  # Phase 2 Metadata: google/gemma-3-12b-it:free
+    or_key_minimax: str = ""  # Phase 4 JavaScript Analysis: minimax/minimax-m1:extended
+    or_key_gpt_oss_120b: str = ""  # Phase 10 Critical Reports: microsoft/phi-4-reasoning-plus:free
+    or_key_gpt_oss_20b: str = ""  # Phase 10 Medium/Low Reports: microsoft/phi-4-mini-reasoning:free
+
     ai_provider: str = "gemini"  # legacy setting, use ai_scan_provider instead
     ai_model: str = "gemini-1.5-flash"  # legacy setting, use ai_scan_model instead
 

@@ -12,3 +12,11 @@ export function decodeJwt(token) {
     return null;
   }
 }
+
+export function isJwtExpired(token) {
+  const decoded = decodeJwt(token);
+  if (!decoded?.exp) {
+    return true;
+  }
+  return decoded.exp * 1000 <= Date.now();
+}

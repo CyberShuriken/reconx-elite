@@ -1696,7 +1696,25 @@ STAGE_REGISTRY: dict[str, object] = {
 }
 
 
-def start_scan_chain(scan_id: int) -> None:
+def start_scan_chain(scan_id: int, use_10_phase: bool = True) -> None:
+    """Start a scan chain.
+
+    Args:
+        scan_id: The scan ID to start
+        use_10_phase: If True, use the new 10-phase pipeline (default)
+    """
+    # Use 10-phase pipeline by default
+    if use_10_phase:
+        try:
+            from app.tasks.pipeline_tasks import start_10_phase_pipeline
+
+            start_10_phase_pipeline(scan_id)
+            logger.info("Started 10-phase pipeline for scan %s", scan_id)
+            return
+        except Exception as e:
+            logger.error("Failed to start 10-phase pipeline, falling back: %s", e)
+
+    # Fallback to legacy pipeline
     sm = get_sessionmaker()()
     try:
         scan = sm.query(Scan).filter(Scan.id == scan_id).first()

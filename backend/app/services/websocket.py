@@ -35,6 +35,8 @@ class WebSocketManager:
     def __init__(self):
         # Store active connections by user_id
         self.active_connections: Dict[int, Set[WebSocket]] = {}
+        # Store active connections by scan_id (per-scan live stream)
+        self.scan_connections: Dict[int, Set[WebSocket]] = {}
         self.agent_log_connections: Set[WebSocket] = set()
         # Redis client for cross-process communication
         self.redis_client = None
@@ -79,6 +81,37 @@ class WebSocketManager:
                 del self.active_connections[user_id]
 
         logger.info(f"WebSocket disconnected for user {user_id}")
+
+    async def connect_scan(self, websocket: WebSocket, scan_id: int):
+        """Accept WebSocket connection and register scan subscriber."""
+        await websocket.accept()
+        if scan_id not in self.scan_connections:
+            self.scan_connections[scan_id] = set()
+        self.scan_connections[scan_id].add(websocket)
+        logger.info("Scan WebSocket connected for scan %s", scan_id)
+
+    def disconnect_scan(self, websocket: WebSocket, scan_id: int):
+        """Remove scan websocket connection and cleanup."""
+        if scan_id in self.scan_connections:
+            self.scan_connections[scan_id].discard(websocket)
+            if not self.scan_connections[scan_id]:
+                del self.scan_connections[scan_id]
+        logger.info("Scan WebSocket disconnected for scan %s", scan_id)
+
+    async def broadcast_to_scan(self, scan_id: int, message: dict):
+        """Broadcast message to all clients subscribed to a scan."""
+        connections = self.scan_connections.get(scan_id)
+        if not connections:
+            return
+        disconnected: set[WebSocket] = set()
+        for connection in connections:
+            try:
+                await connection.send_text(json.dumps(message))
+            except Exception as e:
+                logger.error("Error broadcasting scan WebSocket message: %s", e)
+                disconnected.add(connection)
+        for connection in disconnected:
+            self.scan_connections.get(scan_id, set()).discard(connection)
 
     async def send_personal_message(self, user_id: int, message: dict):
         """Send message to specific user."""
@@ -142,6 +175,10 @@ class WebSocketManager:
             await self.redis_client.publish(f"reconx:notifications:{channel}", json.dumps(message))
         except Exception as e:
             logger.error(f"Error publishing to Redis: {e}")
+
+    async def publish_scan_event(self, scan_id: int, message: dict):
+        """Publish scan-stream event to Redis for cross-process delivery."""
+        await self.publish_to_redis(f"scan:{scan_id}", message)
 
     def _get_timestamp(self) -> str:
         """Get current timestamp in ISO format."""
@@ -282,6 +319,12 @@ async def publish_agent_log_event(message: dict):
     await manager.publish_to_redis("agent_log", payload)
 
 
+async def publish_scan_stream_event(scan_id: int, payload: dict):
+    """Publish an event to the per-scan live stream."""
+    await manager.broadcast_to_scan(scan_id, payload)
+    await manager.publish_scan_event(scan_id, payload)
+
+
 class RedisSubscriber:
     """Redis subscriber for cross-process WebSocket notifications."""
 
@@ -306,28 +349,32 @@ class RedisSubscriber:
                 "reconx:notifications:system_alerts",
                 "reconx:notifications:agent_log",
             )
+            await self.pubsub.psubscribe("reconx:notifications:scan:*")
 
             logger.info("Redis subscriber started")
 
             async for message in self.pubsub.listen():
-                if message["type"] == "message":
-                    try:
-                        data = json.loads(message["data"])
-                        channel = message["channel"]
+                if message["type"] not in ("message", "pmessage"):
+                    continue
+                try:
+                    data = json.loads(message["data"])
+                    channel = message["channel"]
 
-                        if "scan_events" in channel:
-                            await self._handle_scan_event(data)
-                        elif "security_alerts" in channel:
-                            await self._handle_security_alert(data)
-                        elif "system_alerts" in channel:
-                            await self._handle_system_alert(data)
-                        elif "agent_log" in channel:
-                            await self._handle_agent_log(data)
+                    if "scan_events" in channel:
+                        await self._handle_scan_event(data)
+                    elif "security_alerts" in channel:
+                        await self._handle_security_alert(data)
+                    elif "system_alerts" in channel:
+                        await self._handle_system_alert(data)
+                    elif "agent_log" in channel:
+                        await self._handle_agent_log(data)
+                    elif "reconx:notifications:scan:" in channel:
+                        await self._handle_scan_stream(channel, data)
 
-                    except json.JSONDecodeError as e:
-                        logger.error(f"Error decoding Redis message: {e}")
-                    except Exception as e:
-                        logger.error(f"Error handling Redis message: {e}")
+                except json.JSONDecodeError as e:
+                    logger.error(f"Error decoding Redis message: {e}")
+                except Exception as e:
+                    logger.error(f"Error handling Redis message: {e}")
         except Exception as e:
             logger.warning("Redis subscriber unavailable: %s", e)
 
@@ -359,10 +406,21 @@ class RedisSubscriber:
         record_agent_log_event(data)
         await manager.broadcast_agent_log(data)
 
+    async def _handle_scan_stream(self, channel: str, data: dict):
+        """Handle per-scan live stream events from other processes."""
+        try:
+            # channel format: reconx:notifications:scan:{scan_id}
+            scan_id = int(channel.rsplit(":", 1)[-1])
+        except Exception:
+            logger.warning("Invalid scan channel %s", channel)
+            return
+        await manager.broadcast_to_scan(scan_id, data)
+
     async def stop(self):
         """Stop the subscriber."""
         if self.pubsub:
             await self.pubsub.unsubscribe()
+            await self.pubsub.punsubscribe("reconx:notifications:scan:*")
             await self.pubsub.close()
         logger.info("Redis subscriber stopped")
 
