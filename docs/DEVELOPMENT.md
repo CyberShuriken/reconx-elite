@@ -14,7 +14,6 @@
 ```bash
 git clone <repository-url>
 cd reconx-elite
-cp .env.example .env
 # Edit .env with your configuration
 ```
 
@@ -76,7 +75,6 @@ reconx-elite/
 |-- nginx/                  # Nginx configuration
 |-- monitoring/             # Monitoring configuration
 |-- docker-compose.yml      # Main Docker orchestration
-|-- .env.example           # Environment template
 `-- README.md              # Main project documentation
 ```
 

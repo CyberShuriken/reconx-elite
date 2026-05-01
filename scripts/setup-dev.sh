@@ -16,13 +16,10 @@ if ! command -v docker-compose &> /dev/null; then
     exit 1
 fi
 
-# Create environment file if it doesn't exist
+# Check environment file exists
 if [ ! -f .env ]; then
-    echo "Creating .env file from template..."
-    cp .env.example .env
-    echo "Please edit .env file with your configuration before continuing."
-    echo "Press Enter to continue after editing .env..."
-    read -r
+    echo "ERROR: .env file not found. Please create a .env file with your configuration before continuing."
+    exit 1
 fi
 
 # Create necessary directories

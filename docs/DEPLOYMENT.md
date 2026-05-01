@@ -12,8 +12,6 @@
 
 2. **Environment Configuration**
 ```bash
-# Copy and configure production environment
-cp .env.example .env
 # Edit .env with production values
 ```
 

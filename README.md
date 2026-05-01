@@ -183,7 +183,7 @@ frontend (React/Parcel, nginx in Docker)  :5173
 │   └── Dockerfile
 ├── worker/
 ├── docker-compose.yml
-└── .env.example
+└── README.md
 ```
 
 ## Required tools
@@ -212,10 +212,9 @@ The provided Dockerfiles install pinned versions of all four tools.
 ```bash
 git clone <repository-url>
 cd reconx-elite
-cp .env.example .env
 ```
 
-Edit `.env` with your settings. For AI features, set `GEMINI_API_KEY`. Optional: `CALLBACK_URL` (or equivalent) for out-of-band callbacks as documented in `.env.example`.
+Edit `.env` with your settings. For AI features, set `GEMINI_API_KEY`. Optional: `CALLBACK_URL` (or equivalent) for out-of-band callbacks.
 
 ### Step 2: Gemini API key (AI features)
 
@@ -281,10 +280,6 @@ npm run dev
 ## Docker usage
 
 ```bash
-# Set up environment variables first (see above)
-cp .env.example .env
-# Edit .env with your settings including GEMINI_API_KEY
-
 # Build and start all services
 docker compose up --build
 ```

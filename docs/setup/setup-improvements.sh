@@ -74,11 +74,7 @@ echo -e "${GREEN}✓ Security scan completed (bandit-report.json)${NC}"
 # Environment setup
 echo -e "${BLUE}Checking environment configuration...${NC}"
 if [ ! -f ".env" ]; then
-    echo -e "${YELLOW}⚠ .env file not found. Creating from .env.example...${NC}"
-    if [ -f ".env.example" ]; then
-        cp .env.example .env
-        echo -e "${YELLOW}⚠ Please update .env with your configuration${NC}"
-    fi
+    echo -e "${YELLOW}⚠ .env file not found. Please create a .env file with your configuration.${NC}"
 fi
 
 # Docker images

@@ -18,13 +18,11 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM Create environment file if it doesn't exist
+REM Check environment file exists
 if not exist .env (
-    echo Creating .env file from template...
-    copy .env.example .env
-    echo Please edit .env file with your configuration before continuing.
-    echo Press Enter to continue after editing .env...
+    echo ERROR: .env file not found. Please create a .env file with your configuration before continuing.
     pause
+    exit /b 1
 )
 
 REM Create necessary directories

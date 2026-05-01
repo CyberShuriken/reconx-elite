@@ -65,11 +65,7 @@ safety check --json
 REM Environment setup
 echo [*] Checking environment configuration...
 if not exist ".env" (
-    echo [!] .env file not found
-    if exist ".env.example" (
-        copy .env.example .env
-        echo [!] Please update .env with your configuration
-    )
+    echo [!] .env file not found. Please create a .env file with your configuration.
 )
 
 REM Docker images

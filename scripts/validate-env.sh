@@ -13,7 +13,7 @@ echo "Validating environment variables..."
 
 # Check if .env file exists
 if [ ! -f .env ]; then
-    echo "ERROR: .env file not found. Please copy .env.example to .env and configure it."
+    echo "ERROR: .env file not found. Please create a .env file with your configuration."
     exit 1
 fi
 
