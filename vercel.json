@@ -1,18 +1,14 @@
 {
   "framework": null,
-  "installCommand": "cd frontend && npm install",
-  "buildCommand": "cd frontend && npm run build",
-  "outputDirectory": "frontend/dist",
+  "installCommand": "npm install",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "routes": [
-    {
-      "src": "/api/v1/(.*)",
-      "dest": "/api/v1/[...path].js"
-    },
     {
       "handle": "filesystem"
     },
     {
-      "src": "/.*",
+      "src": "^/(?!api/).*$",
       "dest": "/index.html"
     }
   ]

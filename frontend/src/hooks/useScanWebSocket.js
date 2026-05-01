@@ -10,6 +10,16 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 
+const configuredBackendBaseUrl =
+  process.env.VITE_API_BASE_URL === '/api/v1' ? '' : process.env.VITE_API_BASE_URL;
+
+function resolveWebSocketBaseUrl() {
+  const baseUrl =
+    configuredBackendBaseUrl ||
+    (typeof window === 'undefined' ? 'http://localhost:8000' : `http://${window.location.hostname}:8000`);
+  return baseUrl.replace(/\/+$/, '').replace(/^http:/, 'ws:').replace(/^https:/, 'wss:');
+}
+
 const WS_STATES = {
   CONNECTING: 0,
   OPEN: 1,
@@ -43,9 +53,7 @@ const useScanWebSocket = (scanId, options = {}) => {
   const isManualCloseRef = useRef(false);
 
   const getWsUrl = useCallback(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = window.location.host;
-    return `${protocol}//${host}/api/v1/ws/scan/${scanId}`;
+    return `${resolveWebSocketBaseUrl()}/ws/scan/${scanId}`;
   }, [scanId]);
 
   const clearReconnectTimeout = useCallback(() => {

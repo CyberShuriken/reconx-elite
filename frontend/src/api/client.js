@@ -2,7 +2,8 @@ import axios from "axios";
 
 export const SESSION_EXPIRED_MESSAGE = "Your session expired. Please sign in again.";
 
-const configuredBackendBaseUrl = process.env.VITE_API_BASE_URL;
+const configuredBackendBaseUrl =
+  process.env.VITE_API_BASE_URL === "/api/v1" ? "" : process.env.VITE_API_BASE_URL;
 
 function normalizeBaseUrl(url) {
   return (url || "").replace(/\/+$/, "");
@@ -11,10 +12,6 @@ function normalizeBaseUrl(url) {
 function resolveDefaultBackendBaseUrl() {
   if (typeof window === "undefined") {
     return "http://localhost:8000";
-  }
-
-  if (window.location.hostname.endsWith("vercel.app")) {
-    return "/api/v1";
   }
 
   return `http://${window.location.hostname}:8000`;

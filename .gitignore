@@ -151,6 +151,9 @@ frontend/.parcel-cache/
 node_modules/
 .parcel-cache/
 
+# Vercel must stay frontend-only in production.
+/api/
+
 # Local generated review/merge artifacts
 .merge_branch_diffs.txt
 .merge_diff_summary.json

@@ -1,5 +1,17 @@
 # Deployment Guide
 
+## Recommended Production Topology
+
+The production deployment is split across hosted services:
+
+- Vercel hosts only the React frontend.
+- Railway runs FastAPI, Celery workers, and Alembic migrations from `backend/Dockerfile`.
+- Supabase provides hosted Postgres and Supabase Auth.
+- Upstash provides hosted Redis for cache, Celery broker, and Celery result backend.
+
+See `docs/vercel-live-deployment.md` for frontend settings and
+`docs/RAILWAY_PRODUCTION.md` for backend service setup.
+
 ## Production Deployment
 
 ### Environment Setup

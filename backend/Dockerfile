@@ -90,7 +90,7 @@ HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=3 \
 ENV SERVICE_MODE=api
 
 CMD sh -c 'case "$SERVICE_MODE" in \
-  worker) exec celery -A app.celery_app worker -l info ;; \
+  worker) exec celery -A app.tasks.celery_app.celery_app worker -l info ;; \
   migrate) exec alembic upgrade head ;; \
-  *) exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 4 ;; \
+  *) exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}" --workers 4 ;; \
   esac'

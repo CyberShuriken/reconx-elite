@@ -186,6 +186,14 @@ frontend (React/Parcel, nginx in Docker)  :5173
 └── README.md
 ```
 
+## Production deployment
+
+The recommended production stack is split: Vercel hosts the React frontend,
+Railway runs the FastAPI API and Celery worker, Supabase provides Postgres/Auth,
+and Upstash provides Redis. See `docs/DEPLOYMENT.md`,
+`docs/vercel-live-deployment.md`, and `docs/RAILWAY_PRODUCTION.md` before
+deploying.
+
 ## Required tools
 
 ReconX Elite expects these CLI tools inside the backend and worker runtime:
