@@ -105,6 +105,11 @@ allowed_origins = settings.cors_allowed_origins_list or ["http://localhost:5173"
 if "*" in allowed_origins:
     raise RuntimeError("CORS wildcard origin is not allowed when credentials are enabled")
 
+# Add regex for Vercel preview deployments if not already set
+if not settings.cors_allowed_origin_regex:
+    # Allow any *.vercel.app subdomain for preview deployments
+    settings.cors_allowed_origin_regex = r"https://.*\.vercel\.app"
+
 
 def _trusted_hosts_from_origins(origins: list[str]) -> list[str]:
     hosts: list[str] = []
@@ -122,6 +127,7 @@ def _trusted_hosts_from_origins(origins: list[str]) -> list[str]:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
+    allow_origin_regex=settings.cors_allowed_origin_regex or None,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Accept"],
@@ -212,7 +218,7 @@ def root() -> HTMLResponse:
 
 @app.get("/health")
 async def health():
-    """Health check endpoint with async database verification."""
+    """Health check endpoint with async database verification and environment info."""
     database_status = "disconnected"
     try:
         from app.core.database import get_engine
@@ -223,4 +229,24 @@ async def health():
             database_status = "connected"
     except Exception as e:
         database_status = f"error: {type(e).__name__}"
-    return {"status": "ok", "database": database_status}
+    
+    return {
+        "status": "ok",
+        "database": database_status,
+        "environment": {
+            "railway_environment": settings.__dict__.get("railway_environment", "unknown"),
+            "frontend_url": settings.frontend_url or "not_set",
+            "port": "8000",
+        }
+    }
+
+
+@app.get("/health/cors-test")
+async def cors_test(request: Request):
+    """Returns the request Origin and the resolved CORS config for debugging."""
+    return {
+        "status": "ok",
+        "request_origin": request.headers.get("origin", "(none)"),
+        "allowed_origins": allowed_origins,
+        "allowed_origin_regex": settings.cors_allowed_origin_regex or None,
+    }

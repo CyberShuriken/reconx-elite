@@ -1,31 +1,16 @@
 import axios from "axios";
+import { API_BASE_URL } from "../config/api.js";
 
 export const SESSION_EXPIRED_MESSAGE = "Your session expired. Please sign in again.";
 
-const configuredBackendBaseUrl =
-  process.env.VITE_API_BASE_URL === "/api/v1" ? "" : process.env.VITE_API_BASE_URL;
-
-function normalizeBaseUrl(url) {
-  return (url || "").replace(/\/+$/, "");
-}
-
-function resolveDefaultBackendBaseUrl() {
-  if (typeof window === "undefined") {
-    return "http://localhost:8000";
-  }
-
-  return `http://${window.location.hostname}:8000`;
-}
-
-const backendBaseUrl = normalizeBaseUrl(
-  configuredBackendBaseUrl || resolveDefaultBackendBaseUrl(),
-);
+// Use centralized API configuration
+const backendBaseUrl = API_BASE_URL;
 
 let getTokens = () => null;
 let refreshTokens = async () => {
   throw new Error("No refresh handler configured");
 };
-let logout = () => {};
+let logout = () => { };
 let refreshPromise = null;
 
 export const api = axios.create({

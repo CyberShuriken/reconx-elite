@@ -9,14 +9,16 @@
  */
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-
-const configuredBackendBaseUrl =
-  process.env.VITE_API_BASE_URL === '/api/v1' ? '' : process.env.VITE_API_BASE_URL;
+import { WS_BASE_URL } from '../config/api.js';
 
 function resolveWebSocketBaseUrl() {
+  // Use the centralized WebSocket URL from config
+  if (WS_BASE_URL) {
+    return WS_BASE_URL;
+  }
+  // Fallback to localhost only if not set
   const baseUrl =
-    configuredBackendBaseUrl ||
-    (typeof window === 'undefined' ? 'http://localhost:8000' : `http://${window.location.hostname}:8000`);
+    typeof window === 'undefined' ? 'http://localhost:8000' : `http://${window.location.hostname}:8000`;
   return baseUrl.replace(/\/+$/, '').replace(/^http:/, 'ws:').replace(/^https:/, 'wss:');
 }
 

@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     refresh_token_expire_minutes: int = 10080
 
     cors_allowed_origins: str = "http://localhost:5173,http://localhost:3000"
+    cors_allowed_origin_regex: str = ""
+    frontend_url: str = ""
 
     scan_allowed_schemes: str = "http,https"
     nuclei_templates: str = ""
@@ -207,7 +209,10 @@ class Settings(BaseSettings):
 
     @cached_property
     def cors_allowed_origins_list(self) -> list[str]:
-        return [value.strip() for value in self.cors_allowed_origins.split(",") if value.strip()]
+        origins = [value.strip() for value in self.cors_allowed_origins.split(",") if value.strip()]
+        if self.frontend_url and self.frontend_url.strip():
+            origins.append(self.frontend_url.strip())
+        return origins
 
     @cached_property
     def allowed_schemes(self) -> tuple[str, ...]:

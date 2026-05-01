@@ -89,6 +89,8 @@ HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=3 \
 # Alternative: worker (celery worker), migrate (alembic migrations)
 ENV SERVICE_MODE=api
 
+# Shell form is required so ${PORT:-8000} is expanded by sh before exec.
+# Do NOT convert to exec-form JSON array — Railway injects PORT at runtime.
 CMD sh -c 'case "$SERVICE_MODE" in \
   worker) exec celery -A app.tasks.celery_app.celery_app worker -l info ;; \
   migrate) exec alembic upgrade head ;; \
