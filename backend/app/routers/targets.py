@@ -1,9 +1,5 @@
 import asyncio
 import logging
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from app.core.cache import build_cache_key, get_cached, invalidate, set_cached
 from app.core.config import settings
@@ -16,6 +12,10 @@ from app.routers.auth import limiter
 from app.schemas.target import TargetCreate, TargetListItemOut, TargetOut, TargetUpdate
 from app.services.audit import log_audit_event
 from app.services.domain import normalize_domain
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +29,7 @@ async def _invalidate_targets_cache(cache_key: str) -> None:
         logger.warning("Cache invalidation failed: %s", exc, exc_info=False)
 
 
-async def _load_target_with_details(
-    db: AsyncSession, *, owner_id: int, target_id: int
-) -> Target | None:
+async def _load_target_with_details(db: AsyncSession, *, owner_id: int, target_id: int) -> Target | None:
     result = await db.execute(
         select(Target)
         .options(
@@ -68,9 +66,7 @@ async def create_target(
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
-    result = await db.execute(
-        select(Target).filter(Target.owner_id == user.id, Target.domain == domain)
-    )
+    result = await db.execute(select(Target).filter(Target.owner_id == user.id, Target.domain == domain))
     existing = result.scalar_one_or_none()
     if existing:
         raise HTTPException(status_code=400, detail="Target already exists")
@@ -172,9 +168,7 @@ async def update_target(
     db: AsyncSession = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    result = await db.execute(
-        select(Target).filter(Target.id == target_id, Target.owner_id == user.id)
-    )
+    result = await db.execute(select(Target).filter(Target.id == target_id, Target.owner_id == user.id))
     target = result.scalar_one_or_none()
     if not target:
         raise HTTPException(status_code=404, detail="Target not found")

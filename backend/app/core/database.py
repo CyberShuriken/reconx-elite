@@ -1,11 +1,11 @@
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from sqlalchemy.exc import TimeoutError as SATimeoutError
-from sqlalchemy.orm import declarative_base, sessionmaker
-from fastapi import Request
-from fastapi.responses import JSONResponse
 from typing import AsyncGenerator
 
 from app.core.config import settings
+from fastapi import Request
+from fastapi.responses import JSONResponse
+from sqlalchemy.exc import TimeoutError as SATimeoutError
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 # Engine and session maker - initialized at application startup
 _engine = None
@@ -77,7 +77,6 @@ Base = declarative_base()
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """Async context manager for database sessions."""
-    global _async_session_maker
     if _async_session_maker is None:
         init_engine()
     maker = _async_session_maker

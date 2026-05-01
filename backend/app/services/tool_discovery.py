@@ -12,7 +12,6 @@ import shutil
 from typing import Any
 
 import redis.asyncio as redis
-
 from app.core.tool_registry import (
     ToolAvailabilityReport,
     get_all_tools,
@@ -203,9 +202,7 @@ class ToolDiscoveryService:
 
         return can_execute, missing
 
-    def adapt_command_for_tools(
-        self, base_command: list[str], available_tools: list[str]
-    ) -> list[str] | None:
+    def adapt_command_for_tools(self, base_command: list[str], available_tools: list[str]) -> list[str] | None:
         """Adapt a command based on available tools.
 
         If the primary tool is not available, tries to find alternatives.
@@ -245,9 +242,7 @@ class ToolDiscoveryService:
         # No suitable tool found
         return None
 
-    def _adapt_command_for_fallback(
-        self, original: list[str], original_tool: str, fallback_tool: str
-    ) -> list[str]:
+    def _adapt_command_for_fallback(self, original: list[str], original_tool: str, fallback_tool: str) -> list[str]:
         """Adapt command arguments for a fallback tool.
 
         Args:
@@ -397,9 +392,11 @@ class PipelineAdapter:
             "executable": all_can_execute,
             "phase_plans": results,
             "critical_missing_tools": list(set(critical_missing)),
-            "recommendations": [
-                f"Install: {tool}" for tool in set(critical_missing)
-            ] if critical_missing else ["All required tools available"],
+            "recommendations": (
+                [f"Install: {tool}" for tool in set(critical_missing)]
+                if critical_missing
+                else ["All required tools available"]
+            ),
         }
 
 

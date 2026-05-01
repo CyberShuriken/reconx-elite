@@ -5,12 +5,11 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
-from sqlalchemy.orm import Session
-from sqlalchemy import text
-
-from app.core.database import get_sessionmaker
 from app.core.config import settings
+from app.core.database import get_sessionmaker
 from app.services.logging_service import reconx_logger
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
@@ -90,12 +89,17 @@ class SystemValidator:
             critical_tables = ["users", "targets", "scans", "vulnerabilities"]
             missing_tables = []
 
+            # Map of validated table names to their safe SQL probes.
+            # Using a static dict (not user input) eliminates any SQL injection risk.
+            table_probes: dict[str, str] = {
+                "users": "SELECT COUNT(*) FROM users LIMIT 1",
+                "targets": "SELECT COUNT(*) FROM targets LIMIT 1",
+                "scans": "SELECT COUNT(*) FROM scans LIMIT 1",
+                "vulnerabilities": "SELECT COUNT(*) FROM vulnerabilities LIMIT 1",
+            }
             for table in critical_tables:
                 try:
-                    # Validate table name against whitelist to prevent SQL injection
-                    if table not in critical_tables:
-                        continue
-                    db.execute(text(f"SELECT COUNT(*) FROM {table} LIMIT 1"))
+                    db.execute(text(table_probes[table]))
                 except Exception:
                     missing_tables.append(table)
 
@@ -127,9 +131,9 @@ class SystemValidator:
 
         try:
             from app.services.ai_service import (
+                MODEL_MAP,
                 _is_ai_enabled,
                 get_model_status_snapshot,
-                MODEL_MAP,
             )
 
             if not _is_ai_enabled("scan") and not _is_ai_enabled("report"):
@@ -161,17 +165,17 @@ class SystemValidator:
         try:
             # Test importing all models
             from app.models import (
-                User,
-                Target,
-                Scan,
-                Vulnerability,
-                ExploitValidation,
-                OutOfBandInteraction,
-                LearningPattern,
-                SuccessfulPayload,
-                HighValueEndpoint,
-                CustomNucleiTemplate,
                 AIReport,
+                CustomNucleiTemplate,
+                ExploitValidation,
+                HighValueEndpoint,
+                LearningPattern,
+                OutOfBandInteraction,
+                Scan,
+                SuccessfulPayload,
+                Target,
+                User,
+                Vulnerability,
             )
 
             # Check if all models can be instantiated (basic structure check)
@@ -219,12 +223,12 @@ class SystemValidator:
             # Test importing all services
             from app.services import (
                 ai_service,
-                exploit_validator,
-                out_of_band_service,
-                manual_tester,
-                intelligence_learning,
                 custom_template_engine,
+                exploit_validator,
+                intelligence_learning,
                 logging_service,
+                manual_tester,
+                out_of_band_service,
             )
 
             services_to_check = [

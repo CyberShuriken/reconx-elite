@@ -2,19 +2,17 @@ import json
 import logging
 from typing import Dict
 
-from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
-from sqlalchemy import and_
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.core.security import decode_token
 from app.models.scan import Scan
 from app.models.target import Target
 from app.models.user import User
-from app.services.websocket import manager, redis_subscriber
 from app.services.audit import log_audit_event
+from app.services.websocket import manager, redis_subscriber
+from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect
+from sqlalchemy import and_, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 logger = logging.getLogger(__name__)
 
@@ -30,9 +28,7 @@ def _extract_websocket_token(websocket: WebSocket) -> str | None:
 
 
 @router.websocket("/{user_id}")
-async def websocket_endpoint(
-    websocket: WebSocket, user_id: int, db: AsyncSession = Depends(get_db)
-):
+async def websocket_endpoint(websocket: WebSocket, user_id: int, db: AsyncSession = Depends(get_db)):
     """
     WebSocket endpoint for real-time notifications.
     Clients connect to ws://localhost:8000/ws/{user_id}
@@ -121,10 +117,9 @@ async def websocket_endpoint(
             metadata_json={"error": str(e)},
         )
 
+
 @router.websocket("/scan/{scan_id}")
-async def scan_websocket(
-    websocket: WebSocket, scan_id: int, db: AsyncSession = Depends(get_db)
-):
+async def scan_websocket(websocket: WebSocket, scan_id: int, db: AsyncSession = Depends(get_db)):
     """Per-scan WebSocket endpoint for live scan streaming."""
     token = _extract_websocket_token(websocket)
     if not token:
@@ -194,6 +189,7 @@ async def scan_websocket(
             ip_address=websocket.client.host if websocket.client else None,
             metadata_json={"scan_id": scan_id},
         )
+
 
 @router.websocket("/agent-log")
 async def agent_log_websocket(

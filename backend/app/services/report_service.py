@@ -21,6 +21,7 @@ from app.services.openrouter_client import get_openrouter_client
 
 logger = logging.getLogger(__name__)
 
+
 # CVSS 3.1 score to severity mapping
 def cvss_to_severity(score: float) -> str:
     """Convert CVSS score to severity rating."""
@@ -95,9 +96,7 @@ class ReportService:
         self.openrouter = get_openrouter_client()
         self.template = load_report_template()
 
-    async def generate_hackerone_report(
-        self, finding: dict[str, Any], model_role: str | None = None
-    ) -> dict[str, Any]:
+    async def generate_hackerone_report(self, finding: dict[str, Any], model_role: str | None = None) -> dict[str, Any]:
         """Generate HackerOne-format report for a finding.
 
         Args:
@@ -222,7 +221,9 @@ Impact:
 
     async def _generate_remediation(self, finding: dict[str, Any], role: str) -> str:
         """Generate remediation advice using AI."""
-        system_prompt = "Provide specific, actionable remediation steps for a security vulnerability. Be concrete, not generic."
+        system_prompt = (
+            "Provide specific, actionable remediation steps for a security vulnerability. Be concrete, not generic."
+        )
 
         user_message = f"""
 Provide specific remediation steps for:

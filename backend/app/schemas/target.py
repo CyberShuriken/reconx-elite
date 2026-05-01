@@ -1,8 +1,7 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
-
 from app.schemas.vulnerability import VulnerabilityOut
+from pydantic import BaseModel, Field
 
 
 class TargetCreate(BaseModel):

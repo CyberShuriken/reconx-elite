@@ -268,9 +268,7 @@ Provide your testing checklist in JSON format.
             "jwt_tests": jwt_tests,
         }
 
-    async def generate_turbo_intruder_script(
-        self, endpoint: str, payload: dict[str, Any]
-    ) -> str:
+    async def generate_turbo_intruder_script(self, endpoint: str, payload: dict[str, Any]) -> str:
         """Generate Turbo Intruder script for race condition testing.
 
         Args:
@@ -280,7 +278,7 @@ Provide your testing checklist in JSON format.
         Returns:
             Turbo Intruder Python script
         """
-        script = f'''def queueRequests(target, wordlists):
+        script = f"""def queueRequests(target, wordlists):
     engine = RequestEngine(endpoint=target,
                            concurrentConnections=5,
                            requestsPerConnection=100,
@@ -294,6 +292,6 @@ Provide your testing checklist in JSON format.
 def handleResponse(req, interesting):
     if interesting:
         table.add(req)
-'''
+"""
 
         return script

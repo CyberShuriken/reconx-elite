@@ -1,8 +1,8 @@
 import logging
-from pathlib import Path
 from functools import cached_property
+from pathlib import Path
 
-from pydantic import field_validator, Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 REPO_ROOT = Path(__file__).resolve().parents[3]

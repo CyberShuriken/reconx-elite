@@ -1,6 +1,6 @@
 """Prometheus metrics for ReconX Elite."""
 
-from prometheus_client import Counter, Histogram, Gauge, CollectorRegistry
+from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram
 
 # Create registry
 registry = CollectorRegistry()
@@ -76,7 +76,7 @@ ai_api_errors = Counter(
 ai_tokens_used = Counter(
     "ai_tokens_used_total",
     "Total tokens used in AI calls",
-    ["model", "type"],  # type: input or output
+    ["model", "type"],  # token_kind: input or output
     registry=registry,
 )
 

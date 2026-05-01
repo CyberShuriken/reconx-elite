@@ -1,11 +1,5 @@
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from jose import JWTError
-from slowapi import Limiter
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.security import (
@@ -24,6 +18,11 @@ from app.schemas.auth import (
     TokenResponse,
 )
 from app.services.audit import log_audit_event
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from jose import JWTError
+from slowapi import Limiter
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

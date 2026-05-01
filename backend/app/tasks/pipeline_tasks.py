@@ -22,9 +22,6 @@ import logging
 from datetime import datetime, timezone
 from typing import Any
 
-from celery import chain
-from sqlalchemy.orm import Session, selectinload
-
 from app.core.config import settings
 from app.core.database import get_sessionmaker
 from app.core.model_registry import get_model_config, get_task_role
@@ -32,8 +29,10 @@ from app.core.tool_registry import get_tools_for_phase
 from app.models.scan import Scan
 from app.models.target import Target
 from app.services.openrouter_client import get_openrouter_client
-from app.services.tool_discovery import get_tool_discovery_service, get_pipeline_adapter
+from app.services.tool_discovery import get_pipeline_adapter, get_tool_discovery_service
 from app.tasks.celery_app import celery_app
+from celery import chain
+from sqlalchemy.orm import Session, selectinload
 
 logger = logging.getLogger(__name__)
 
@@ -111,17 +110,19 @@ def _emit_phase_update(
         from app.services.websocket import publish_agent_log_event
 
         loop.create_task(
-            publish_agent_log_event({
-                "event": "phase_update",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "scan_id": scan_id,
-                "phase": phase,
-                "phase_name": PHASE_NAMES.get(phase, f"phase_{phase}"),
-                "status": status,
-                "progress": progress,
-                "message": message,
-                "model": model,
-            })
+            publish_agent_log_event(
+                {
+                    "event": "phase_update",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "scan_id": scan_id,
+                    "phase": phase,
+                    "phase_name": PHASE_NAMES.get(phase, f"phase_{phase}"),
+                    "status": status,
+                    "progress": progress,
+                    "message": message,
+                    "model": model,
+                }
+            )
         )
     except Exception:
         logger.debug("WebSocket publish unavailable", exc_info=True)
@@ -140,15 +141,17 @@ def _emit_tool_log(
         from app.services.websocket import publish_agent_log_event
 
         loop.create_task(
-            publish_agent_log_event({
-                "event": "tool_log",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "scan_id": scan_id,
-                "tool": tool,
-                "hosts": hosts,
-                "status": status,
-                "output": output[:500],  # Truncate long output
-            })
+            publish_agent_log_event(
+                {
+                    "event": "tool_log",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "scan_id": scan_id,
+                    "tool": tool,
+                    "hosts": hosts,
+                    "status": status,
+                    "output": output[:500],  # Truncate long output
+                }
+            )
         )
     except Exception:
         pass
@@ -166,14 +169,16 @@ def _emit_model_activity(
         from app.services.websocket import publish_agent_log_event
 
         loop.create_task(
-            publish_agent_log_event({
-                "event": "model_activity",
-                "timestamp": datetime.now(timezone.utc).isoformat(),
-                "scan_id": scan_id,
-                "model_role": model_role,
-                "action": action,
-                "tokens_used": tokens_used,
-            })
+            publish_agent_log_event(
+                {
+                    "event": "model_activity",
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
+                    "scan_id": scan_id,
+                    "model_role": model_role,
+                    "action": action,
+                    "tokens_used": tokens_used,
+                }
+            )
         )
     except Exception:
         pass
@@ -181,12 +186,7 @@ def _emit_model_activity(
 
 async def _get_scan_and_target(scan_id: int, db: Session) -> tuple[Scan | None, Target | None]:
     """Load scan and target from database."""
-    scan = (
-        db.query(Scan)
-        .options(selectinload(Scan.target))
-        .filter(Scan.id == scan_id)
-        .first()
-    )
+    scan = db.query(Scan).options(selectinload(Scan.target)).filter(Scan.id == scan_id).first()
     if not scan:
         return None, None
     return scan, scan.target
@@ -221,6 +221,7 @@ async def _update_scan_phase(
 # =============================================================================
 # Phase 0: Orchestrator Initialization
 # =============================================================================
+
 
 async def _phase_0_orchestrator_init(scan_id: int) -> PhaseResult:
     """Phase 0: Initialize orchestrator, parse scope, set global parameters.
@@ -304,6 +305,7 @@ async def _phase_0_orchestrator_init(scan_id: int) -> PhaseResult:
 # Phase 1: Recursive Reconnaissance
 # =============================================================================
 
+
 async def _phase_1_recursive_recon(scan_id: int, previous_data: dict[str, Any] | None = None) -> PhaseResult:
     """Phase 1: Subdomain enumeration with AI classification.
 
@@ -359,6 +361,7 @@ async def _phase_1_recursive_recon(scan_id: int, previous_data: dict[str, Any] |
 # Phase 2: Context-Aware Profiling
 # =============================================================================
 
+
 async def _phase_2_context_profiling(scan_id: int, previous_data: dict[str, Any] | None = None) -> PhaseResult:
     """Phase 2: HTTP probing and tech detection.
 
@@ -396,6 +399,7 @@ async def _phase_2_context_profiling(scan_id: int, previous_data: dict[str, Any]
 # =============================================================================
 # Phase 3: Port Scanning & Service Analysis
 # =============================================================================
+
 
 async def _phase_3_port_scanning(scan_id: int, previous_data: dict[str, Any] | None = None) -> PhaseResult:
     """Phase 3: Port scanning with AI interpretation.
@@ -435,6 +439,7 @@ async def _phase_3_port_scanning(scan_id: int, previous_data: dict[str, Any] | N
 # =============================================================================
 # Phase 4: JavaScript Analysis
 # =============================================================================
+
 
 async def _phase_4_javascript_analysis(scan_id: int, previous_data: dict[str, Any] | None = None) -> PhaseResult:
     """Phase 4: JavaScript crawling and analysis.
@@ -481,6 +486,7 @@ async def _phase_4_javascript_analysis(scan_id: int, previous_data: dict[str, An
 # Phase 5: Parameter Discovery
 # =============================================================================
 
+
 async def _phase_5_parameter_discovery(scan_id: int, previous_data: dict[str, Any] | None = None) -> PhaseResult:
     """Phase 5: URL and parameter discovery.
 
@@ -519,6 +525,7 @@ async def _phase_5_parameter_discovery(scan_id: int, previous_data: dict[str, An
 # =============================================================================
 # Phase 6: Vulnerability Testing
 # =============================================================================
+
 
 async def _phase_6_vulnerability_testing(scan_id: int, previous_data: dict[str, Any] | None = None) -> PhaseResult:
     """Phase 6: Vulnerability scanning.
@@ -563,6 +570,7 @@ async def _phase_6_vulnerability_testing(scan_id: int, previous_data: dict[str, 
 # Phase 7: AI Deep Analysis & Exploit Chaining
 # =============================================================================
 
+
 async def _phase_7_ai_deep_analysis(scan_id: int, previous_data: dict[str, Any] | None = None) -> PhaseResult:
     """Phase 7: Deep analysis and exploit chaining.
 
@@ -606,6 +614,7 @@ async def _phase_7_ai_deep_analysis(scan_id: int, previous_data: dict[str, Any] 
 # Phase 8: Business Logic Testing
 # =============================================================================
 
+
 async def _phase_8_business_logic(scan_id: int, previous_data: dict[str, Any] | None = None) -> PhaseResult:
     """Phase 8: Business logic testing guidance.
 
@@ -643,6 +652,7 @@ async def _phase_8_business_logic(scan_id: int, previous_data: dict[str, Any] | 
 # =============================================================================
 # Phase 9: Intelligence Correlation
 # =============================================================================
+
 
 async def _phase_9_intelligence_correlation(scan_id: int, previous_data: dict[str, Any] | None = None) -> PhaseResult:
     """Phase 9: Finding deduplication and correlation.
@@ -682,6 +692,7 @@ async def _phase_9_intelligence_correlation(scan_id: int, previous_data: dict[st
 # =============================================================================
 # Phase 10: Report Generation
 # =============================================================================
+
 
 async def _phase_10_report_generation(scan_id: int, previous_data: dict[str, Any] | None = None) -> PhaseResult:
     """Phase 10: HackerOne-format report generation.
@@ -737,6 +748,7 @@ async def _phase_10_report_generation(scan_id: int, previous_data: dict[str, Any
 # =============================================================================
 # Celery Tasks
 # =============================================================================
+
 
 @celery_app.task(name="app.tasks.pipeline_tasks.phase_0_orchestrator_init", bind=True, max_retries=3)
 def phase_0_orchestrator_init(self, scan_id: int) -> dict:

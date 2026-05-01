@@ -168,9 +168,7 @@ class ScanRateLimiter:
         allowed, _ = await self.limiter.check_rate_limit(scan_id, "dns", mode)
         return allowed
 
-    async def check_port_scan(
-        self, scan_id: str, port_count: int = 1, mode: ScanMode = ScanMode.BALANCED
-    ) -> bool:
+    async def check_port_scan(self, scan_id: str, port_count: int = 1, mode: ScanMode = ScanMode.BALANCED) -> bool:
         """Check if port scan batch is allowed.
 
         Args:

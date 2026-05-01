@@ -10,10 +10,8 @@ from dataclasses import dataclass
 from urllib.parse import parse_qsl, urljoin, urlparse
 from urllib.request import Request, urlopen
 
-import logging
-
 from app.core.config import settings
-from app.services.ai_service import call_model, ORCHESTRATOR_SYSTEM_PROMPT
+from app.services.ai_service import ORCHESTRATOR_SYSTEM_PROMPT, call_model
 
 logger = logging.getLogger(__name__)
 
@@ -353,7 +351,9 @@ def fetch_javascript_asset(url: str) -> tuple[str, list[str]]:
         return "", warnings
     request = Request(url, headers={"User-Agent": "ReconX Elite"})
     try:
-        with urlopen(request, timeout=settings.js_fetch_timeout_seconds) as response:
+        with urlopen(
+            request, timeout=settings.js_fetch_timeout_seconds
+        ) as response:  # nosec B310 – scheme validated above
             body = response.read(settings.js_fetch_max_bytes + 1)
         if len(body) > settings.js_fetch_max_bytes:
             warnings.append("asset truncated at configured byte cap")

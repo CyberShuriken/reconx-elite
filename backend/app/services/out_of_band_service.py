@@ -11,11 +11,10 @@ import uuid
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
 
-from sqlalchemy.orm import Session
-
 from app.core.config import settings
 from app.models.out_of_band_interaction import OutOfBandInteraction
 from app.models.user import User
+from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 

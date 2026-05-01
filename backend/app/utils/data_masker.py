@@ -150,11 +150,13 @@ class DataMasker:
         detections = detect_pii(text)
 
         if detections:
-            self.detection_log.append({
-                "context": context,
-                "types_found": list(detections.keys()),
-                "count": sum(len(v) for v in detections.values()),
-            })
+            self.detection_log.append(
+                {
+                    "context": context,
+                    "types_found": list(detections.keys()),
+                    "count": sum(len(v) for v in detections.values()),
+                }
+            )
             self.redaction_count += sum(len(v) for v in detections.values())
 
         return redact_for_ai_prompt(text)

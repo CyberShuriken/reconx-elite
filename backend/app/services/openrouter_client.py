@@ -16,7 +16,6 @@ from typing import Any
 import google.generativeai as genai
 import httpx
 import redis.asyncio as redis
-
 from app.core.model_registry import (
     GEMINI_CONFIG,
     MODEL_REGISTRY,

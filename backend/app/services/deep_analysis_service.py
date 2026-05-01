@@ -27,9 +27,7 @@ class DeepAnalysisService:
     def __init__(self):
         self.ai_client = get_openrouter_client()
 
-    async def analyze_finding_chains(
-        self, findings: list[dict[str, Any]]
-    ) -> dict[str, Any]:
+    async def analyze_finding_chains(self, findings: list[dict[str, Any]]) -> dict[str, Any]:
         """Analyze exploit chains between findings.
 
         Per Master Prompt - NEMOTRON_SUPER for exploit chaining:
@@ -147,9 +145,7 @@ Provide your chain analysis in JSON format.
             lines.append("")
         return "\n".join(lines)
 
-    def _heuristic_chain_analysis(
-        self, findings: list[dict[str, Any]]
-    ) -> dict[str, Any]:
+    def _heuristic_chain_analysis(self, findings: list[dict[str, Any]]) -> dict[str, Any]:
         """Fallback heuristic chain analysis.
 
         Args:
@@ -193,9 +189,7 @@ Provide your chain analysis in JSON format.
             "escalation_opportunities": escalations,
         }
 
-    async def generate_poc(
-        self, finding: dict[str, Any], base_url: str
-    ) -> dict[str, Any]:
+    async def generate_poc(self, finding: dict[str, Any], base_url: str) -> dict[str, Any]:
         """Generate PoC script for a finding.
 
         Per Master Prompt - QWEN_CODER for PoC generation:
@@ -324,7 +318,7 @@ if __name__ == "__main__":
 
         curl_command = f'curl -X GET "{base_url}{endpoint}" -v'
 
-        nuclei_template = f'''id: {vuln_type}-poc
+        nuclei_template = f"""id: {vuln_type}-poc
 info:
   name: {vuln_type} PoC
   severity: {finding.get("severity", "medium")}
@@ -339,7 +333,7 @@ requests:
       - type: status
         status:
           - 200
-'''
+"""
 
         return {
             "python_script": python_script,

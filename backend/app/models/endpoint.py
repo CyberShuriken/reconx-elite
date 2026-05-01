@@ -1,15 +1,14 @@
+from app.core.database import Base
 from sqlalchemy import (
+    JSON,
+    Boolean,
     Column,
     ForeignKey,
     Integer,
     String,
-    Boolean,
-    JSON,
     UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
-
-from app.core.database import Base
 
 
 class Endpoint(Base):

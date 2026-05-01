@@ -1,19 +1,19 @@
 """API endpoints for exploit validation functionality."""
 
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
-from sqlalchemy.orm import Session
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 from app.core.database import get_db
 from app.core.deps import get_current_user
+from app.models.exploit_validation import ExploitValidation
 from app.models.user import User
 from app.models.vulnerability import Vulnerability
-from app.models.exploit_validation import ExploitValidation
 from app.services.exploit_validator import validator
 from app.tasks.validation_tasks import (
     send_manual_request_task,
     validate_vulnerability_task,
 )
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/validation", tags=["exploit-validation"])
 

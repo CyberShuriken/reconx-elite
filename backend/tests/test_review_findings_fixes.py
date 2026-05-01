@@ -7,10 +7,8 @@ import types
 import unittest
 from unittest.mock import AsyncMock, MagicMock, Mock, patch
 
-from sqlalchemy.sql.elements import TextClause
-
-from app.main import _trusted_hosts_from_origins
 from app.core.logging_config import _ReconXJsonFormatter
+from app.main import _trusted_hosts_from_origins
 from app.models.blind_xss_hit import BlindXssHit
 from app.routers.admin import system_health
 from app.routers.scans import _build_scan_config_from_request
@@ -21,6 +19,7 @@ from app.routers.vulnerabilities import (
 )
 from app.schemas.scan import ScanConfigRequest
 from app.services.blind_xss_service import BlindXssService
+from sqlalchemy.sql.elements import TextClause
 
 
 class TestReviewFindingFixes(unittest.TestCase):

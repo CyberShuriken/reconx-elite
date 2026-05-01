@@ -26,9 +26,7 @@ class ReportGenerationService:
     def __init__(self):
         self.ai_client = get_openrouter_client()
 
-    async def generate_hackerone_report(
-        self, finding: dict[str, Any], target: str
-    ) -> dict[str, Any]:
+    async def generate_hackerone_report(self, finding: dict[str, Any], target: str) -> dict[str, Any]:
         """Generate HackerOne-format report for a finding.
 
         Per Master Prompt - GPT_OSS_120B for Critical/High, GPT_OSS_20B for Low/Medium
@@ -237,9 +235,7 @@ ${100 if severity == 'low' else 500 if severity == 'medium' else 2000 if severit
 
         return report
 
-    async def generate_executive_summary(
-        self, findings: list[dict[str, Any]], stats: dict[str, Any]
-    ) -> str:
+    async def generate_executive_summary(self, findings: list[dict[str, Any]], stats: dict[str, Any]) -> str:
         """Generate executive summary for the scan.
 
         Per Master Prompt - GPT_OSS_120B for executive summaries

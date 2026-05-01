@@ -3,9 +3,6 @@ from __future__ import annotations
 from collections import defaultdict
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session, selectinload
-
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import get_current_user, require_admin
@@ -46,6 +43,8 @@ from app.services.ai_service import (
     write_finding_report,
 )
 from app.services.websocket import get_recent_agent_log_events
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session, selectinload
 
 router = APIRouter(prefix="/api", tags=["verification-api"])
 

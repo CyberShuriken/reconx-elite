@@ -27,9 +27,7 @@ class IntelligenceCorrelationService:
     def __init__(self):
         self.ai_client = get_openrouter_client()
 
-    async def correlate_findings(
-        self, findings: list[dict[str, Any]], scope_pattern: str
-    ) -> dict[str, Any]:
+    async def correlate_findings(self, findings: list[dict[str, Any]], scope_pattern: str) -> dict[str, Any]:
         """Correlate and deduplicate findings.
 
         Per Master Prompt - NEMOTRON_NANO as orchestrator:
@@ -57,9 +55,7 @@ class IntelligenceCorrelationService:
         # Step 4: Prioritization - rank by CVSS
         prioritized = self._prioritize_findings(correlated)
 
-        logger.info(
-            f"Correlation complete: {len(findings)} → {len(prioritized)} findings after deduplication"
-        )
+        logger.info(f"Correlation complete: {len(findings)} → {len(prioritized)} findings after deduplication")
 
         return {
             "original_count": len(findings),
@@ -70,9 +66,7 @@ class IntelligenceCorrelationService:
             "correlations": self._extract_correlations(correlated),
         }
 
-    def _filter_by_scope(
-        self, findings: list[dict[str, Any]], scope_pattern: str
-    ) -> list[dict[str, Any]]:
+    def _filter_by_scope(self, findings: list[dict[str, Any]], scope_pattern: str) -> list[dict[str, Any]]:
         """Filter findings by scope pattern.
 
         Args:
@@ -136,9 +130,7 @@ class IntelligenceCorrelationService:
 
         return deduplicated
 
-    async def _correlate_findings(
-        self, findings: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    async def _correlate_findings(self, findings: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Correlate findings to find relationships.
 
         Args:
@@ -165,9 +157,7 @@ class IntelligenceCorrelationService:
 
             finding["correlation_metadata"] = {
                 "host_findings_count": len(host_findings),
-                "related_findings": [
-                    f.get("id") for f in host_findings if f.get("id") != finding.get("id")
-                ],
+                "related_findings": [f.get("id") for f in host_findings if f.get("id") != finding.get("id")],
             }
 
             correlated.append(finding)
@@ -235,9 +225,7 @@ class IntelligenceCorrelationService:
 
         return correlations
 
-    async def store_intelligence_patterns(
-        self, findings: list[dict[str, Any]], scan_id: str
-    ) -> dict[str, Any]:
+    async def store_intelligence_patterns(self, findings: list[dict[str, Any]], scan_id: str) -> dict[str, Any]:
         """Store effective patterns to intelligence database.
 
         Per Master Prompt - Learning: Store effective payloads and scan patterns

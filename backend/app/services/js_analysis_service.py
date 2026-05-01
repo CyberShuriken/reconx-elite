@@ -18,7 +18,6 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-
 from app.core.tool_registry import get_tools_for_phase
 from app.services.openrouter_client import get_openrouter_client
 
@@ -211,12 +210,12 @@ class JSAnalysisService:
         # Secret patterns from master prompt
         secret_patterns = [
             r'(api[_-]?key|secret|token|password|aws_|AKIA)[\'"]?\s*[:=]\s*[\'"]?([A-Za-z0-9+/]{16,})',
-            r'(Bearer|Basic)\s+([A-Za-z0-9+/=]{20,})',
-            r'(sk_|pk_|live_|test_)[a-zA-Z0-9]{32,}',  # Stripe-like
-            r'(AIza[A-Za-z0-9_-]{35})',  # Google API key
-            r'(xox[baprs]-\d{10,}-\d{10,}-\d{10,}-[a-zA-Z0-9]{32})',  # Slack
-            r'(ghp_[a-zA-Z0-9]{36})',  # GitHub PAT
-            r'(glpat-[a-zA-Z0-9_-]{20})',  # GitLab PAT
+            r"(Bearer|Basic)\s+([A-Za-z0-9+/=]{20,})",
+            r"(sk_|pk_|live_|test_)[a-zA-Z0-9]{32,}",  # Stripe-like
+            r"(AIza[A-Za-z0-9_-]{35})",  # Google API key
+            r"(xox[baprs]-\d{10,}-\d{10,}-\d{10,}-[a-zA-Z0-9]{32})",  # Slack
+            r"(ghp_[a-zA-Z0-9]{36})",  # GitHub PAT
+            r"(glpat-[a-zA-Z0-9_-]{20})",  # GitLab PAT
         ]
 
         for js_file in js_files:
@@ -272,10 +271,7 @@ class JSAnalysisService:
                     endpoint = match.group(1) if len(match.groups()) > 0 else match.group(0)
 
                     # Skip common non-endpoint patterns
-                    if any(
-                        skip in endpoint
-                        for skip in [".js", ".css", ".png", ".jpg", ".svg", ".woff", ".ttf"]
-                    ):
+                    if any(skip in endpoint for skip in [".js", ".css", ".png", ".jpg", ".svg", ".woff", ".ttf"]):
                         continue
 
                     endpoints.append(

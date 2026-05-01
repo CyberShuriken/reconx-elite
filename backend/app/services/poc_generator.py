@@ -16,7 +16,7 @@ from app.core.scope_guard import ScopeGuard
 logger = logging.getLogger(__name__)
 
 # Safety warning template
-SAFETY_WARNING = '''
+SAFETY_WARNING = """
 # SECURITY WARNING - READ BEFORE RUNNING
 # =======================================
 # This script is for authorized security testing only.
@@ -28,7 +28,7 @@ SAFETY_WARNING = '''
 # 2. You understand the legal implications
 # 3. You will not use this for malicious purposes
 #
-'''
+"""
 
 # Python script safety wrapper
 PYTHON_SAFETY_WRAPPER = '''
@@ -51,7 +51,7 @@ def safe_request(func):
 '''
 
 # Bash script safety wrapper
-BASH_SAFETY_WRAPPER = '''
+BASH_SAFETY_WRAPPER = """
 # Scope confirmation function
 confirm_scope() {
     echo ""
@@ -63,7 +63,7 @@ confirm_scope() {
         exit 1
     fi
 }
-'''
+"""
 
 
 def generate_python_poc(
@@ -87,7 +87,7 @@ def generate_python_poc(
     Returns:
         Python script as string
     """
-    scope_check = f'SCOPE_PATTERN = "{scope_pattern}"' if scope_pattern else 'SCOPE_PATTERN = None'
+    scope_check = f'SCOPE_PATTERN = "{scope_pattern}"' if scope_pattern else "SCOPE_PATTERN = None"
 
     script = f'''#!/usr/bin/env python3
 {SAFETY_WARNING}
@@ -177,7 +177,7 @@ def generate_bash_poc(
     Returns:
         Bash script as string
     """
-    script = f'''#!/bin/bash
+    script = f"""#!/bin/bash
 {SAFETY_WARNING}
 
 {BASH_SAFETY_WRAPPER}
@@ -216,7 +216,7 @@ else
     echo "[-] Vulnerability not detected or requires manual verification"
     exit 1
 fi
-'''
+"""
     return script
 
 
@@ -241,7 +241,7 @@ def generate_nuclei_template(
     Returns:
         Nuclei template YAML string
     """
-    template = f'''# ReconX Elite - Nuclei Template
+    template = f"""# ReconX Elite - Nuclei Template
 # {name}
 # Severity: {severity}
 # Auto-generated - Review before use
@@ -265,7 +265,7 @@ http:
       - type: {matcher_type}
         {matcher_type}s:
           - "{matcher_value}"
-'''
+"""
     return template
 
 
@@ -376,13 +376,15 @@ class SafePoCGenerator:
         safety_check = validate_poc_safety(script, self.scope_guard.scope_pattern)
 
         # Log generation
-        self.generation_log.append({
-            "vuln_type": vuln_type,
-            "target": target,
-            "format": output_format,
-            "is_safe": safety_check["is_safe"],
-            "issues": safety_check["issues"],
-        })
+        self.generation_log.append(
+            {
+                "vuln_type": vuln_type,
+                "target": target,
+                "format": output_format,
+                "is_safe": safety_check["is_safe"],
+                "issues": safety_check["issues"],
+            }
+        )
 
         return {
             "script": script,

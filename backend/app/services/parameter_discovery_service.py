@@ -16,7 +16,6 @@ import re
 from typing import Any
 
 import httpx
-
 from app.services.openrouter_client import get_openrouter_client
 
 logger = logging.getLogger(__name__)
@@ -32,9 +31,7 @@ class ParameterDiscoveryService:
     def __init__(self):
         self.ai_client = get_openrouter_client()
 
-    async def discover_parameters(
-        self, root_domain: str, live_hosts: list[str] | None = None
-    ) -> dict[str, Any]:
+    async def discover_parameters(self, root_domain: str, live_hosts: list[str] | None = None) -> dict[str, Any]:
         """Perform complete parameter discovery.
 
         Args:
@@ -230,9 +227,7 @@ class ParameterDiscoveryService:
 
         return matching_urls
 
-    async def _classify_parameters(
-        self, parameters: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    async def _classify_parameters(self, parameters: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Classify parameters by vulnerability class using AI.
 
         Per Master Prompt - GEMMA_JSON for parameter classification.
@@ -328,9 +323,7 @@ Provide your classification in JSON format.
             lines.append(f"- {param['method']} {param['url']}?{param['param_name']}=...")
         return "\n".join(lines)
 
-    def _heuristic_classification(
-        self, parameters: list[dict[str, Any]]
-    ) -> list[dict[str, Any]]:
+    def _heuristic_classification(self, parameters: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Fallback heuristic classification without AI.
 
         Args:
@@ -375,9 +368,7 @@ Provide your classification in JSON format.
 
         return classifications
 
-    async def fuzz_hidden_parameters(
-        self, endpoint: str, method: str = "GET"
-    ) -> list[dict[str, Any]]:
+    async def fuzz_hidden_parameters(self, endpoint: str, method: str = "GET") -> list[dict[str, Any]]:
         """Fuzz for hidden parameters on an endpoint.
 
         Per Master Prompt - arjun for hidden parameter fuzzing.

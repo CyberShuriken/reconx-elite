@@ -7,50 +7,49 @@ import time
 from contextlib import asynccontextmanager
 from urllib.parse import urlparse
 
-from fastapi import FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.responses import HTMLResponse
-from sqlalchemy import text
-from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
-from slowapi import _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from slowapi.middleware import SlowAPIMiddleware
-
 from app import models  # noqa: F401
 from app.core.config import settings
-from app.core.database import db_timeout_handler, SATimeoutError, init_engine, get_db
+from app.core.database import SATimeoutError, db_timeout_handler, get_db, init_engine
 from app.core.exception_handlers import (
     http_exception_handler,
     unhandled_exception_handler,
 )
-from app.core.metrics import http_requests_total, http_request_duration_seconds
+from app.core.metrics import http_request_duration_seconds, http_requests_total
 from app.core.middleware import AuthGuardMiddleware, RequestLoggingMiddleware
 from app.routers import (
     admin,
+    advanced_recon,
     auth,
     blind_xss,
     bookmarks,
+    custom_templates,
+    intelligence,
+    manual_testing,
     notifications,
+    out_of_band,
     payloads,
     reports,
     scans,
     schedules,
     ssrf,
+    system,
     targets,
     ticketing,
+    validation,
+    verification_api,
     vulnerabilities,
     websocket,
-    validation,
-    out_of_band,
-    manual_testing,
-    intelligence,
-    custom_templates,
-    system,
-    advanced_recon,
-    verification_api,
 )
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.responses import HTMLResponse
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.middleware import SlowAPIMiddleware
+from sqlalchemy import text
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.requests import Request
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):

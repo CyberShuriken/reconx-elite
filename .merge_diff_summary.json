@@ -1,0 +1,2532 @@
+{
+  "count": 143,
+  "files": [
+    {
+      "file": ".github/workflows/codeql.yml",
+      "kind": "github-actions",
+      "adds": 4,
+      "rems": 3,
+      "themes": [
+        "ci security"
+      ],
+      "add_lines": [
+        "    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false",
+        "        uses: github/codeql-action/init@v4",
+        "        uses: github/codeql-action/autobuild@v4",
+        "        uses: github/codeql-action/analyze@v4"
+      ],
+      "rem_lines": [
+        "        uses: github/codeql-action/init@v3",
+        "        uses: github/codeql-action/autobuild@v3",
+        "        uses: github/codeql-action/analyze@v3"
+      ]
+    },
+    {
+      "file": ".github/workflows/test.yml",
+      "kind": "github-actions",
+      "adds": 5,
+      "rems": 2,
+      "themes": [],
+      "add_lines": [
+        "            --statistics \\",
+        "            --exit-zero",
+        "        run: mypy backend/app --ignore-missing-imports --no-error-summary || echo 'mypy found issues (non-blocking)'",
+        "        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false",
+        "        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false"
+      ],
+      "rem_lines": [
+        "            --statistics",
+        "        run: mypy backend/app --ignore-missing-imports --no-error-summary"
+      ]
+    },
+    {
+      "file": "backend/agent_browser.py",
+      "kind": "imports",
+      "adds": 3,
+      "rems": 3,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from dataclasses import asdict, dataclass",
+        "from typing import Any, Dict, List, Optional, Tuple",
+        "    from playwright.async_api import Browser, BrowserContext, Page, async_playwright"
+      ],
+      "rem_lines": [
+        "from typing import Any, Dict, List, Optional, Tuple",
+        "from dataclasses import dataclass, asdict",
+        "    from playwright.async_api import async_playwright, Browser, BrowserContext, Page"
+      ]
+    },
+    {
+      "file": "backend/agentic_orchestrator.py",
+      "kind": "imports",
+      "adds": 4,
+      "rems": 4,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from backend.predictive_sandbox import PredictiveSandbox",
+        "from backend.recon.context_tree import ContextTree",
+        "from backend.recon.recon_pipeline import ReconPipeline",
+        "from backend.utils.cvss4_calculator import CVSS4Calculator"
+      ],
+      "rem_lines": [
+        "from backend.recon.recon_pipeline import ReconPipeline",
+        "from backend.recon.context_tree import ContextTree",
+        "from backend.predictive_sandbox import PredictiveSandbox",
+        "from backend.utils.cvss4_calculator import CVSS4Calculator"
+      ]
+    },
+    {
+      "file": "backend/ai_router.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from typing import Any, Dict, List, Optional, Tuple"
+      ],
+      "rem_lines": [
+        "from typing import Any, Dict, List, Optional, Tuple"
+      ]
+    },
+    {
+      "file": "backend/alembic/env.py",
+      "kind": "alembic",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "import sys"
+      ],
+      "rem_lines": [
+        "import sys"
+      ]
+    },
+    {
+      "file": "backend/alembic/versions/20260401_000001_reconx_elite_baseline.py",
+      "kind": "alembic",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup",
+        "migration tweak"
+      ],
+      "add_lines": [
+        "from alembic import op"
+      ],
+      "rem_lines": [
+        "from alembic import op"
+      ]
+    },
+    {
+      "file": "backend/alembic/versions/20260402_000002_add_payload_opportunities.py",
+      "kind": "alembic",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup",
+        "migration tweak"
+      ],
+      "add_lines": [
+        "from alembic import op"
+      ],
+      "rem_lines": [
+        "from alembic import op"
+      ]
+    },
+    {
+      "file": "backend/alembic/versions/20260403_000003_add_blind_xss_hits.py",
+      "kind": "alembic",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup",
+        "migration tweak"
+      ],
+      "add_lines": [
+        "from alembic import op"
+      ],
+      "rem_lines": [
+        "from alembic import op"
+      ]
+    },
+    {
+      "file": "backend/alembic/versions/20260403_000004_active_scan_unique_index.py",
+      "kind": "alembic",
+      "adds": 2,
+      "rems": 4,
+      "themes": [
+        "migration tweak"
+      ],
+      "add_lines": [
+        "    op.execute(\"\"\"",
+        "        \"\"\")"
+      ],
+      "rem_lines": [
+        "    op.execute(",
+        "        \"\"\"",
+        "        \"\"\"",
+        "    )"
+      ]
+    },
+    {
+      "file": "backend/alembic/versions/20260403_000005_add_target_ai_flag.py",
+      "kind": "alembic",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup",
+        "migration tweak"
+      ],
+      "add_lines": [
+        "from alembic import op"
+      ],
+      "rem_lines": [
+        "from alembic import op"
+      ]
+    },
+    {
+      "file": "backend/alembic/versions/20260405_000006_scan_artifacts_and_pipeline.py",
+      "kind": "alembic",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup",
+        "migration tweak"
+      ],
+      "add_lines": [
+        "from alembic import op"
+      ],
+      "rem_lines": [
+        "from alembic import op"
+      ]
+    },
+    {
+      "file": "backend/alembic/versions/20260405_000007_manual_test_logs.py",
+      "kind": "alembic",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup",
+        "migration tweak"
+      ],
+      "add_lines": [
+        "from alembic import op"
+      ],
+      "rem_lines": [
+        "from alembic import op"
+      ]
+    },
+    {
+      "file": "backend/analyzers/__init__.py",
+      "kind": "imports",
+      "adds": 3,
+      "rems": 3,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from .auth_session_analyzer import analyze_auth_session",
+        "from .business_logic_analyzer import analyze_business_logic",
+        "from .ssrf_analyzer import analyze_ssrf"
+      ],
+      "rem_lines": [
+        "from .ssrf_analyzer import analyze_ssrf",
+        "from .auth_session_analyzer import analyze_auth_session",
+        "from .business_logic_analyzer import analyze_business_logic"
+      ]
+    },
+    {
+      "file": "backend/analyzers/auth_session_analyzer.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "import logging"
+      ],
+      "rem_lines": [
+        "import logging"
+      ]
+    },
+    {
+      "file": "backend/app/circuit_breaker.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from enum import Enum",
+        "from typing import Any, Callable, Optional"
+      ],
+      "rem_lines": [
+        "from enum import Enum",
+        "from typing import Callable, Any, Optional"
+      ]
+    },
+    {
+      "file": "backend/app/config.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from typing import List, Optional",
+        "from pydantic_settings import BaseSettings, SettingsConfigDict"
+      ],
+      "rem_lines": [
+        "from typing import Optional, List",
+        "from pydantic_settings import BaseSettings, SettingsConfigDict"
+      ]
+    },
+    {
+      "file": "backend/app/core/cache.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from redis.exceptions import RedisError"
+      ],
+      "rem_lines": [
+        "from redis.exceptions import RedisError"
+      ]
+    },
+    {
+      "file": "backend/app/core/config.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from pathlib import Path",
+        "from pydantic import Field, field_validator"
+      ],
+      "rem_lines": [
+        "from pathlib import Path",
+        "from pydantic import field_validator, Field"
+      ]
+    },
+    {
+      "file": "backend/app/core/database.py",
+      "kind": "code",
+      "adds": 5,
+      "rems": 6,
+      "themes": [],
+      "add_lines": [
+        "from fastapi import Request",
+        "from fastapi.responses import JSONResponse",
+        "from sqlalchemy.exc import TimeoutError as SATimeoutError",
+        "from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine",
+        "from sqlalchemy.orm import declarative_base, sessionmaker"
+      ],
+      "rem_lines": [
+        "from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine",
+        "from sqlalchemy.exc import TimeoutError as SATimeoutError",
+        "from sqlalchemy.orm import declarative_base, sessionmaker",
+        "from fastapi import Request",
+        "from fastapi.responses import JSONResponse",
+        "    global _async_session_maker"
+      ]
+    },
+    {
+      "file": "backend/app/core/deps.py",
+      "kind": "imports",
+      "adds": 3,
+      "rems": 3,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import get_db",
+        "from app.core.security import decode_token",
+        "from app.models.user import User"
+      ],
+      "rem_lines": [
+        "from app.core.database import get_db",
+        "from app.core.security import decode_token",
+        "from app.models.user import User"
+      ]
+    },
+    {
+      "file": "backend/app/core/metrics.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "    from prometheus_client import Counter, Gauge, Histogram"
+      ],
+      "rem_lines": [
+        "    from prometheus_client import Counter, Histogram, Gauge"
+      ]
+    },
+    {
+      "file": "backend/app/core/middleware.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.security import decode_token"
+      ],
+      "rem_lines": [
+        "from app.core.security import decode_token"
+      ]
+    },
+    {
+      "file": "backend/app/core/security.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from jose import ExpiredSignatureError, JWTError, jwt",
+        "from passlib.context import CryptContext"
+      ],
+      "rem_lines": [
+        "from jose import jwt, JWTError, ExpiredSignatureError",
+        "from passlib.context import CryptContext"
+      ]
+    },
+    {
+      "file": "backend/app/main.py",
+      "kind": "code",
+      "adds": 20,
+      "rems": 20,
+      "themes": [],
+      "add_lines": [
+        "from app.core.database import SATimeoutError, db_timeout_handler, get_db, init_engine",
+        "from app.core.metrics import http_request_duration_seconds, http_requests_total",
+        "    advanced_recon,",
+        "    custom_templates,",
+        "    intelligence,",
+        "    manual_testing,",
+        "    out_of_band,",
+        "    system,",
+        "    vulnerabilities,",
+        "    websocket,",
+        "from fastapi import FastAPI, HTTPException",
+        "from fastapi.middleware.cors import CORSMiddleware",
+        "from fastapi.middleware.trustedhost import TrustedHostMiddleware",
+        "from fastapi.responses import HTMLResponse",
+        "from slowapi import _rate_limit_exceeded_handler",
+        "from slowapi.errors import RateLimitExceeded",
+        "from slowapi.middleware import SlowAPIMiddleware",
+        "from sqlalchemy import text",
+        "from starlette.middleware.base import BaseHTTPMiddleware",
+        "from starlette.requests import Request"
+      ],
+      "rem_lines": [
+        "from fastapi import FastAPI, HTTPException",
+        "from fastapi.middleware.cors import CORSMiddleware",
+        "from fastapi.middleware.trustedhost import TrustedHostMiddleware",
+        "from fastapi.responses import HTMLResponse",
+        "from sqlalchemy import text",
+        "from starlette.middleware.base import BaseHTTPMiddleware",
+        "from starlette.requests import Request",
+        "from slowapi import _rate_limit_exceeded_handler",
+        "from slowapi.errors import RateLimitExceeded",
+        "from slowapi.middleware import SlowAPIMiddleware",
+        "from app.core.database import db_timeout_handler, SATimeoutError, init_engine, get_db",
+        "from app.core.metrics import http_requests_total, http_request_duration_seconds",
+        "    vulnerabilities,",
+        "    websocket,",
+        "    out_of_band,",
+        "    manual_testing,",
+        "    intelligence,",
+        "    custom_templates,",
+        "    system,",
+        "    advanced_recon,"
+      ]
+    },
+    {
+      "file": "backend/app/metrics.py",
+      "kind": "code",
+      "adds": 2,
+      "rems": 2,
+      "themes": [],
+      "add_lines": [
+        "from prometheus_client import CollectorRegistry, Counter, Gauge, Histogram",
+        "    [\"model\", \"type\"],  # token_kind: input or output"
+      ],
+      "rem_lines": [
+        "from prometheus_client import Counter, Histogram, Gauge, CollectorRegistry",
+        "    [\"model\", \"type\"],  # type: input or output"
+      ]
+    },
+    {
+      "file": "backend/app/models/__init__.py",
+      "kind": "code",
+      "adds": 10,
+      "rems": 10,
+      "themes": [],
+      "add_lines": [
+        "    StealthConfig,",
+        "from app.models.audit_log import AuditLog",
+        "from app.models.custom_templates import CustomNucleiTemplate, CustomTemplateResult",
+        "from app.models.exploit_validation import ExploitValidation",
+        "from app.models.learning_models import (",
+        "    HighValueEndpoint,",
+        "    LearningPattern,",
+        "    SuccessfulPayload,",
+        ")",
+        "from app.models.out_of_band_interaction import OutOfBandInteraction"
+      ],
+      "rem_lines": [
+        "    StealthConfig,",
+        "from app.models.custom_templates import CustomNucleiTemplate, CustomTemplateResult",
+        "from app.models.learning_models import (",
+        "    LearningPattern,",
+        "    SuccessfulPayload,",
+        "    HighValueEndpoint,",
+        ")",
+        "from app.models.out_of_band_interaction import OutOfBandInteraction",
+        "from app.models.exploit_validation import ExploitValidation",
+        "from app.models.audit_log import AuditLog"
+      ]
+    },
+    {
+      "file": "backend/app/models/advanced_recon.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/ai_report.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/attack_path.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/audit_log.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/blind_xss_hit.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/bookmark.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/custom_templates.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/endpoint.py",
+      "kind": "code",
+      "adds": 3,
+      "rems": 3,
+      "themes": [],
+      "add_lines": [
+        "from app.core.database import Base",
+        "    JSON,",
+        "    Boolean,"
+      ],
+      "rem_lines": [
+        "    Boolean,",
+        "    JSON,",
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/exploit_validation.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/javascript_asset.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/learning_models.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/manual_test_log.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/notification.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/out_of_band_interaction.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/payload_opportunity.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/refresh_token.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/scan.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/scan_artifact.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/scan_diff.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/scan_log.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/scheduled_scan.py",
+      "kind": "code",
+      "adds": 2,
+      "rems": 2,
+      "themes": [],
+      "add_lines": [
+        "from app.core.database import Base",
+        "    Boolean,"
+      ],
+      "rem_lines": [
+        "    Boolean,",
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/ssrf_signal.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/subdomain.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/target.py",
+      "kind": "code",
+      "adds": 2,
+      "rems": 2,
+      "themes": [],
+      "add_lines": [
+        "from app.core.database import Base",
+        "    String,"
+      ],
+      "rem_lines": [
+        "    String,",
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/user.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/models/vulnerability.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.core.database import Base"
+      ],
+      "rem_lines": [
+        "from app.core.database import Base"
+      ]
+    },
+    {
+      "file": "backend/app/routers/admin.py",
+      "kind": "imports",
+      "adds": 3,
+      "rems": 3,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Request, status",
+        "from sqlalchemy import text",
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Request, status",
+        "from sqlalchemy import text",
+        "from sqlalchemy.orm import Session"
+      ]
+    },
+    {
+      "file": "backend/app/routers/advanced_recon.py",
+      "kind": "code",
+      "adds": 7,
+      "rems": 7,
+      "themes": [
+        "router wiring"
+      ],
+      "add_lines": [
+        "    StealthConfig,",
+        "from app.models.scan import Scan",
+        "from app.models.target import Target",
+        "from app.models.user import User",
+        "from fastapi import APIRouter, Depends, HTTPException",
+        "from pydantic import BaseModel, Field",
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException",
+        "from pydantic import BaseModel, Field",
+        "from sqlalchemy.orm import Session",
+        "from app.models.user import User",
+        "from app.models.target import Target",
+        "from app.models.scan import Scan",
+        "    StealthConfig,"
+      ]
+    },
+    {
+      "file": "backend/app/routers/auth.py",
+      "kind": "imports",
+      "adds": 5,
+      "rems": 5,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Request, status",
+        "from jose import JWTError",
+        "from slowapi import Limiter",
+        "from sqlalchemy import select",
+        "from sqlalchemy.ext.asyncio import AsyncSession"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Request, status",
+        "from jose import JWTError",
+        "from slowapi import Limiter",
+        "from sqlalchemy import select",
+        "from sqlalchemy.ext.asyncio import AsyncSession"
+      ]
+    },
+    {
+      "file": "backend/app/routers/blind_xss.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from fastapi import APIRouter, Depends, Request, Response",
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, Request, Response",
+        "from sqlalchemy.orm import Session"
+      ]
+    },
+    {
+      "file": "backend/app/routers/bookmarks.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Request",
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Request",
+        "from sqlalchemy.orm import Session"
+      ]
+    },
+    {
+      "file": "backend/app/routers/custom_templates.py",
+      "kind": "imports",
+      "adds": 4,
+      "rems": 4,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from app.services.custom_template_engine import template_engine",
+        "from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException",
+        "from pydantic import BaseModel, Field",
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks",
+        "from pydantic import BaseModel, Field",
+        "from sqlalchemy.orm import Session",
+        "from app.services.custom_template_engine import template_engine"
+      ]
+    },
+    {
+      "file": "backend/app/routers/intelligence.py",
+      "kind": "code",
+      "adds": 4,
+      "rems": 4,
+      "themes": [
+        "router wiring"
+      ],
+      "add_lines": [
+        "from app.models.exploit_validation import ExploitValidation",
+        "from fastapi import APIRouter, Depends, HTTPException",
+        "from sqlalchemy.orm import Session",
+        "        HighValueEndpoint,"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException",
+        "from sqlalchemy.orm import Session",
+        "from app.models.exploit_validation import ExploitValidation",
+        "        HighValueEndpoint,"
+      ]
+    },
+    {
+      "file": "backend/app/routers/manual_testing.py",
+      "kind": "imports",
+      "adds": 3,
+      "rems": 3,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException",
+        "from pydantic import BaseModel, Field",
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks",
+        "from pydantic import BaseModel, Field",
+        "from sqlalchemy.orm import Session"
+      ]
+    },
+    {
+      "file": "backend/app/routers/notifications.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Request",
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Request",
+        "from sqlalchemy.orm import Session"
+      ]
+    },
+    {
+      "file": "backend/app/routers/out_of_band.py",
+      "kind": "imports",
+      "adds": 3,
+      "rems": 3,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from app.models.user import User",
+        "from fastapi import APIRouter, Depends, HTTPException, Query, Request",
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Query, Request",
+        "from sqlalchemy.orm import Session",
+        "from app.models.user import User"
+      ]
+    },
+    {
+      "file": "backend/app/routers/payloads.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Request",
+        "from sqlalchemy.orm import Session, selectinload"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Request",
+        "from sqlalchemy.orm import Session, selectinload"
+      ]
+    },
+    {
+      "file": "backend/app/routers/reports.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Request, Response",
+        "from sqlalchemy.orm import Session, selectinload"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Request, Response",
+        "from sqlalchemy.orm import Session, selectinload"
+      ]
+    },
+    {
+      "file": "backend/app/routers/scans.py",
+      "kind": "imports",
+      "adds": 5,
+      "rems": 5,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from app.services.scan_pipeline import pipeline_stage_total",
+        "from fastapi import APIRouter, Depends, HTTPException, Request, status",
+        "from sqlalchemy import and_, select",
+        "from sqlalchemy.exc import IntegrityError",
+        "from sqlalchemy.orm import Session, selectinload"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Request, status",
+        "from sqlalchemy import and_, select",
+        "from sqlalchemy.exc import IntegrityError",
+        "from sqlalchemy.orm import Session, selectinload",
+        "from app.services.scan_pipeline import pipeline_stage_total"
+      ]
+    },
+    {
+      "file": "backend/app/routers/schedules.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Request",
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Request",
+        "from sqlalchemy.orm import Session"
+      ]
+    },
+    {
+      "file": "backend/app/routers/ssrf.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from fastapi import APIRouter, Depends, Request, Response",
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, Request, Response",
+        "from sqlalchemy.orm import Session"
+      ]
+    },
+    {
+      "file": "backend/app/routers/system.py",
+      "kind": "imports",
+      "adds": 5,
+      "rems": 5,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from app.services.ai_service import get_model_status_snapshot, verify_all_models",
+        "from fastapi import APIRouter, Depends, HTTPException",
+        "from sqlalchemy.orm import Session",
+        "        from app.core.config import settings",
+        "        from app.models import Scan, Target, User, Vulnerability"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException",
+        "from sqlalchemy.orm import Session",
+        "from app.services.ai_service import verify_all_models, get_model_status_snapshot",
+        "        from app.core.config import settings",
+        "        from app.models import User, Target, Scan, Vulnerability"
+      ]
+    },
+    {
+      "file": "backend/app/routers/targets.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request",
+        "from sqlalchemy.orm import Session, selectinload"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request",
+        "from sqlalchemy.orm import Session, selectinload"
+      ]
+    },
+    {
+      "file": "backend/app/routers/ticketing.py",
+      "kind": "code",
+      "adds": 8,
+      "rems": 8,
+      "themes": [
+        "router wiring"
+      ],
+      "add_lines": [
+        "from app.core.config import settings",
+        "from app.models.target import Target",
+        "from app.services.audit import log_audit_event",
+        "    JiraConfig,",
+        "    TicketingPlatform,",
+        "    create_vulnerability_ticket,",
+        "from fastapi import APIRouter, Depends, HTTPException, Request, status",
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Request, status",
+        "from sqlalchemy.orm import Session",
+        "from app.models.target import Target",
+        "from app.core.config import settings",
+        "    TicketingPlatform,",
+        "    create_vulnerability_ticket,",
+        "    JiraConfig,",
+        "from app.services.audit import log_audit_event"
+      ]
+    },
+    {
+      "file": "backend/app/routers/validation.py",
+      "kind": "imports",
+      "adds": 4,
+      "rems": 4,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from typing import Any, Dict, List",
+        "from app.models.exploit_validation import ExploitValidation",
+        "from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException",
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks",
+        "from sqlalchemy.orm import Session",
+        "from typing import Dict, Any, List",
+        "from app.models.exploit_validation import ExploitValidation"
+      ]
+    },
+    {
+      "file": "backend/app/routers/verification_api.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Query",
+        "from sqlalchemy.orm import Session, selectinload"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Query",
+        "from sqlalchemy.orm import Session, selectinload"
+      ]
+    },
+    {
+      "file": "backend/app/routers/vulnerabilities.py",
+      "kind": "imports",
+      "adds": 3,
+      "rems": 3,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from app.services.audit import log_audit_event",
+        "from fastapi import APIRouter, Depends, HTTPException, Request",
+        "from sqlalchemy.orm import Session, selectinload"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, HTTPException, Request",
+        "from sqlalchemy.orm import Session, selectinload",
+        "from app.services.audit import log_audit_event"
+      ]
+    },
+    {
+      "file": "backend/app/routers/websocket.py",
+      "kind": "imports",
+      "adds": 3,
+      "rems": 3,
+      "themes": [
+        "import cleanup",
+        "router wiring"
+      ],
+      "add_lines": [
+        "from app.services.websocket import manager, redis_subscriber",
+        "from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect",
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from fastapi import APIRouter, Depends, WebSocket, WebSocketDisconnect",
+        "from sqlalchemy.orm import Session",
+        "from app.services.websocket import manager, redis_subscriber"
+      ]
+    },
+    {
+      "file": "backend/app/schemas/ai_report.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from pydantic import BaseModel"
+      ],
+      "rem_lines": [
+        "from pydantic import BaseModel"
+      ]
+    },
+    {
+      "file": "backend/app/schemas/auth.py",
+      "kind": "imports",
+      "adds": 0,
+      "rems": 0,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [],
+      "rem_lines": []
+    },
+    {
+      "file": "backend/app/schemas/scan.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from pydantic import BaseModel, ConfigDict, Field"
+      ],
+      "rem_lines": [
+        "from pydantic import BaseModel, ConfigDict, Field"
+      ]
+    },
+    {
+      "file": "backend/app/schemas/target.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from pydantic import BaseModel, Field"
+      ],
+      "rem_lines": [
+        "from pydantic import BaseModel, Field"
+      ]
+    },
+    {
+      "file": "backend/app/schemas/vulnerability.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from pydantic import BaseModel, Field"
+      ],
+      "rem_lines": [
+        "from pydantic import BaseModel, Field"
+      ]
+    },
+    {
+      "file": "backend/app/services/advanced_recon_engine.py",
+      "kind": "code",
+      "adds": 1,
+      "rems": 1,
+      "themes": [],
+      "add_lines": [
+        "    StealthConfig,"
+      ],
+      "rem_lines": [
+        "    StealthConfig,"
+      ]
+    },
+    {
+      "file": "backend/app/services/ai_service.py",
+      "kind": "imports",
+      "adds": 0,
+      "rems": 0,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [],
+      "rem_lines": []
+    },
+    {
+      "file": "backend/app/services/ai_template_generator.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.services.ai_service import _get_model_response, _is_ai_enabled"
+      ],
+      "rem_lines": [
+        "from app.services.ai_service import _get_model_response, _is_ai_enabled"
+      ]
+    },
+    {
+      "file": "backend/app/services/audit.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.models.audit_log import AuditLog"
+      ],
+      "rem_lines": [
+        "from app.models.audit_log import AuditLog"
+      ]
+    },
+    {
+      "file": "backend/app/services/blind_xss_service.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from sqlalchemy.orm import Session"
+      ]
+    },
+    {
+      "file": "backend/app/services/custom_template_engine.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "import yaml",
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "import yaml",
+        "from sqlalchemy.orm import Session"
+      ]
+    },
+    {
+      "file": "backend/app/services/exploit_validator.py",
+      "kind": "imports",
+      "adds": 0,
+      "rems": 0,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [],
+      "rem_lines": []
+    },
+    {
+      "file": "backend/app/services/external_notifications.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "import httpx"
+      ],
+      "rem_lines": [
+        "import httpx"
+      ]
+    },
+    {
+      "file": "backend/app/services/intelligence.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.services.ai_service import ORCHESTRATOR_SYSTEM_PROMPT, call_model"
+      ],
+      "rem_lines": [
+        "import logging",
+        "from app.services.ai_service import call_model, ORCHESTRATOR_SYSTEM_PROMPT"
+      ]
+    },
+    {
+      "file": "backend/app/services/intelligence_learning.py",
+      "kind": "code",
+      "adds": 3,
+      "rems": 3,
+      "themes": [],
+      "add_lines": [
+        "from app.models.exploit_validation import ExploitValidation",
+        "    HighValueEndpoint,",
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from sqlalchemy.orm import Session",
+        "    HighValueEndpoint,",
+        "from app.models.exploit_validation import ExploitValidation"
+      ]
+    },
+    {
+      "file": "backend/app/services/logging_service.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from typing import Any, Dict, Optional"
+      ],
+      "rem_lines": [
+        "from typing import Dict, Any, Optional"
+      ]
+    },
+    {
+      "file": "backend/app/services/manual_tester.py",
+      "kind": "imports",
+      "adds": 0,
+      "rems": 0,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [],
+      "rem_lines": []
+    },
+    {
+      "file": "backend/app/services/out_of_band_service.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from sqlalchemy.orm import Session"
+      ]
+    },
+    {
+      "file": "backend/app/services/passive_dns.py",
+      "kind": "imports",
+      "adds": 0,
+      "rems": 0,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [],
+      "rem_lines": []
+    },
+    {
+      "file": "backend/app/services/payload_tester.py",
+      "kind": "imports",
+      "adds": 0,
+      "rems": 0,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [],
+      "rem_lines": []
+    },
+    {
+      "file": "backend/app/services/pdf_generator.py",
+      "kind": "code",
+      "adds": 7,
+      "rems": 7,
+      "themes": [],
+      "add_lines": [
+        "from typing import Any, Dict, List",
+        "from reportlab.lib.colors import HexColor, black, grey, white",
+        "from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT",
+        "from reportlab.lib.pagesizes import A4, letter",
+        "from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet",
+        "    PageBreak,",
+        "    SimpleDocTemplate,"
+      ],
+      "rem_lines": [
+        "from typing import List, Dict, Any",
+        "from reportlab.lib.pagesizes import letter, A4",
+        "from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle",
+        "from reportlab.lib.colors import HexColor, black, white, grey",
+        "    SimpleDocTemplate,",
+        "    PageBreak,",
+        "from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT"
+      ]
+    },
+    {
+      "file": "backend/app/services/scan_artifact_service.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from sqlalchemy.orm import Session"
+      ]
+    },
+    {
+      "file": "backend/app/services/ssrf_service.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from sqlalchemy.orm import Session"
+      ]
+    },
+    {
+      "file": "backend/app/services/system_validator.py",
+      "kind": "code",
+      "adds": 15,
+      "rems": 15,
+      "themes": [],
+      "add_lines": [
+        "from app.core.database import get_sessionmaker",
+        "from sqlalchemy import text",
+        "from sqlalchemy.orm import Session",
+        "                MODEL_MAP,",
+        "                AIReport,",
+        "                CustomNucleiTemplate,",
+        "                HighValueEndpoint,",
+        "                OutOfBandInteraction,",
+        "                Scan,",
+        "                Target,",
+        "                User,",
+        "                Vulnerability,",
+        "                custom_template_engine,",
+        "                manual_tester,",
+        "                out_of_band_service,"
+      ],
+      "rem_lines": [
+        "from sqlalchemy.orm import Session",
+        "from sqlalchemy import text",
+        "from app.core.database import get_sessionmaker",
+        "                MODEL_MAP,",
+        "                User,",
+        "                Target,",
+        "                Scan,",
+        "                Vulnerability,",
+        "                OutOfBandInteraction,",
+        "                HighValueEndpoint,",
+        "                CustomNucleiTemplate,",
+        "                AIReport,",
+        "                out_of_band_service,",
+        "                manual_tester,",
+        "                custom_template_engine,"
+      ]
+    },
+    {
+      "file": "backend/app/services/ticketing.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from typing import Any, Dict, List, Optional"
+      ],
+      "rem_lines": [
+        "from typing import Dict, List, Optional, Any"
+      ]
+    },
+    {
+      "file": "backend/app/services/websocket.py",
+      "kind": "imports",
+      "adds": 4,
+      "rems": 4,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from collections import deque",
+        "from typing import Dict, List, Set",
+        "from fastapi import WebSocket, WebSocketDisconnect",
+        "from sqlalchemy.orm import Session"
+      ],
+      "rem_lines": [
+        "from collections import deque",
+        "from typing import Dict, List, Set",
+        "from fastapi import WebSocket, WebSocketDisconnect",
+        "from sqlalchemy.orm import Session"
+      ]
+    },
+    {
+      "file": "backend/app/tasks/advanced_recon_tasks.py",
+      "kind": "code",
+      "adds": 4,
+      "rems": 4,
+      "themes": [],
+      "add_lines": [
+        "    content_fuzzer,",
+        "    parameter_discovery,",
+        "    stealth_scanner,",
+        "from app.tasks.celery_app import celery_app"
+      ],
+      "rem_lines": [
+        "from app.tasks.celery_app import celery_app",
+        "    stealth_scanner,",
+        "    parameter_discovery,",
+        "    content_fuzzer,"
+      ]
+    },
+    {
+      "file": "backend/app/tasks/learning_tasks.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.models.vulnerability import Vulnerability",
+        "from app.tasks.celery_app import celery_app"
+      ],
+      "rem_lines": [
+        "from app.tasks.celery_app import celery_app",
+        "from app.models.vulnerability import Vulnerability"
+      ]
+    },
+    {
+      "file": "backend/app/tasks/scan_tasks.py",
+      "kind": "code",
+      "adds": 22,
+      "rems": 22,
+      "themes": [],
+      "add_lines": [
+        "from app.models.subdomain import Subdomain",
+        "from app.schemas.scan_modules import parse_modules_from_config",
+        "from app.services.ai_service import (",
+        "    _should_generate_report,",
+        "    analyze_javascript_endpoints,",
+        "    analyze_live_hosts,",
+        "    analyze_nuclei_findings,",
+        "    analyze_subdomains,",
+        "    build_javascript_asset_summaries_for_ai,",
+        "    generate_elite_vulnerability_report,",
+        ")",
+        "from app.services.blind_xss_service import BlindXssService",
+        "from app.services.external_notifications import notification_service",
+        "from app.services.passive_dns import fetch_crtsh_subdomains, run_github_subdomains_cli",
+        "from app.services.websocket import (",
+        "    notify_critical_vulnerability,",
+        "    notify_scan_completed,",
+        "    notify_scan_started,",
+        ")",
+        "from celery import chain",
+        "from sqlalchemy.exc import IntegrityError",
+        "from sqlalchemy.orm import Session, selectinload"
+      ],
+      "rem_lines": [
+        "from celery import chain",
+        "from sqlalchemy.exc import IntegrityError",
+        "from sqlalchemy.orm import Session, selectinload",
+        "from app.models.subdomain import Subdomain",
+        "from app.services.ai_service import (",
+        "    analyze_live_hosts,",
+        "    analyze_subdomains,",
+        "    analyze_javascript_endpoints,",
+        "    analyze_nuclei_findings,",
+        "    build_javascript_asset_summaries_for_ai,",
+        "    generate_elite_vulnerability_report,",
+        "    _should_generate_report,",
+        ")",
+        "from app.services.websocket import (",
+        "    notify_scan_completed,",
+        "    notify_critical_vulnerability,",
+        "    notify_scan_started,",
+        ")",
+        "from app.services.external_notifications import notification_service",
+        "from app.services.blind_xss_service import BlindXssService",
+        "from app.services.passive_dns import fetch_crtsh_subdomains, run_github_subdomains_cli",
+        "from app.schemas.scan_modules import parse_modules_from_config"
+      ]
+    },
+    {
+      "file": "backend/app/tasks/validation_tasks.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.models.vulnerability import Vulnerability"
+      ],
+      "rem_lines": [
+        "from app.models.vulnerability import Vulnerability"
+      ]
+    },
+    {
+      "file": "backend/context_tree.py",
+      "kind": "imports",
+      "adds": 3,
+      "rems": 3,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from dataclasses import asdict, dataclass",
+        "from typing import Any, Dict, List, Optional, Set",
+        "from tech_profiler import TechProfiler"
+      ],
+      "rem_lines": [
+        "from typing import Any, Dict, List, Optional, Set",
+        "from dataclasses import dataclass, asdict",
+        "from tech_profiler import TechProfiler"
+      ]
+    },
+    {
+      "file": "backend/database.py",
+      "kind": "code",
+      "adds": 1,
+      "rems": 1,
+      "themes": [],
+      "add_lines": [
+        "    SATimeoutError,"
+      ],
+      "rem_lines": [
+        "    SATimeoutError,"
+      ]
+    },
+    {
+      "file": "backend/demo_manual_verification.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from pathlib import Path"
+      ],
+      "rem_lines": [
+        "from pathlib import Path"
+      ]
+    },
+    {
+      "file": "backend/exploit_chainer.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from dataclasses import asdict, dataclass",
+        "from typing import Any, Dict, List, Optional, Tuple"
+      ],
+      "rem_lines": [
+        "from typing import Any, Dict, List, Optional, Tuple",
+        "from dataclasses import dataclass, asdict"
+      ]
+    },
+    {
+      "file": "backend/main.py",
+      "kind": "code",
+      "adds": 4,
+      "rems": 4,
+      "themes": [],
+      "add_lines": [
+        "from sqlalchemy import select",
+        "    Finding,",
+        "    Scan,",
+        "    async_session,"
+      ],
+      "rem_lines": [
+        "from sqlalchemy import select",
+        "    Scan,",
+        "    Finding,",
+        "    async_session,"
+      ]
+    },
+    {
+      "file": "backend/manual_verification_processor.py",
+      "kind": "imports",
+      "adds": 4,
+      "rems": 4,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "import json",
+        "from dataclasses import asdict, dataclass",
+        "from pathlib import Path",
+        "from typing import Any, Dict, List, Optional"
+      ],
+      "rem_lines": [
+        "import json",
+        "from pathlib import Path",
+        "from typing import Dict, List, Any, Optional",
+        "from dataclasses import dataclass, asdict"
+      ]
+    },
+    {
+      "file": "backend/mass_scan.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from dataclasses import asdict, dataclass",
+        "from enum import Enum"
+      ],
+      "rem_lines": [
+        "from dataclasses import dataclass, asdict",
+        "from enum import Enum"
+      ]
+    },
+    {
+      "file": "backend/notifications.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from dataclasses import asdict, dataclass",
+        "from typing import Any, Dict, List, Optional, Union"
+      ],
+      "rem_lines": [
+        "from typing import Any, Dict, List, Optional, Union",
+        "from dataclasses import dataclass, asdict"
+      ]
+    },
+    {
+      "file": "backend/phase_2_api_mapper.py",
+      "kind": "code",
+      "adds": 2,
+      "rems": 4,
+      "themes": [],
+      "add_lines": [
+        "        introspection_query = {\"query\": \"\"\"",
+        "            \"\"\"}"
+      ],
+      "rem_lines": [
+        "        introspection_query = {",
+        "            \"query\": \"\"\"",
+        "            \"\"\"",
+        "        }"
+      ]
+    },
+    {
+      "file": "backend/phase_4_5_tactical_strikes.py",
+      "kind": "code",
+      "adds": 3,
+      "rems": 3,
+      "themes": [],
+      "add_lines": [
+        "    analyze_auth_session,",
+        "    analyze_business_logic,",
+        "    analyze_ssrf,"
+      ],
+      "rem_lines": [
+        "    analyze_ssrf,",
+        "    analyze_auth_session,",
+        "    analyze_business_logic,"
+      ]
+    },
+    {
+      "file": "backend/phase_7_markdown_reporter.py",
+      "kind": "code",
+      "adds": 4,
+      "rems": 8,
+      "themes": [],
+      "add_lines": [
+        "                        formatted.append(f\"\"\"#### {title}",
+        "\"\"\")",
+        "            formatted.append(f\"\"\"#### {poc_type}",
+        "\"\"\")"
+      ],
+      "rem_lines": [
+        "                        formatted.append(",
+        "                            f\"\"\"#### {title}",
+        "\"\"\"",
+        "                        )",
+        "            formatted.append(",
+        "                f\"\"\"#### {poc_type}",
+        "\"\"\"",
+        "            )"
+      ]
+    },
+    {
+      "file": "backend/predictive_sandbox.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from dataclasses import asdict, dataclass",
+        "from typing import Any, Dict, List, Optional, Tuple"
+      ],
+      "rem_lines": [
+        "from typing import Any, Dict, List, Optional, Tuple",
+        "from dataclasses import dataclass, asdict"
+      ]
+    },
+    {
+      "file": "backend/recon/recon_pipeline.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from backend.tool_runner import ToolRunner"
+      ],
+      "rem_lines": [
+        "from backend.tool_runner import ToolRunner"
+      ]
+    },
+    {
+      "file": "backend/recon_pipeline.py",
+      "kind": "imports",
+      "adds": 3,
+      "rems": 3,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from dataclasses import asdict, dataclass",
+        "from typing import Any, Dict, List, Optional, Set",
+        "from phase_1_cloud_hunter import CloudHunter"
+      ],
+      "rem_lines": [
+        "from typing import Any, Dict, List, Set, Optional",
+        "from dataclasses import dataclass, asdict",
+        "from phase_1_cloud_hunter import CloudHunter"
+      ]
+    },
+    {
+      "file": "backend/refinement.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from dataclasses import asdict, dataclass",
+        "from enum import Enum"
+      ],
+      "rem_lines": [
+        "from dataclasses import dataclass, asdict",
+        "from enum import Enum"
+      ]
+    },
+    {
+      "file": "backend/reporting/professional_reporter.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from dataclasses import asdict, dataclass",
+        "from typing import Any, Dict, List, Optional, Tuple"
+      ],
+      "rem_lines": [
+        "from typing import Any, Dict, List, Optional, Tuple",
+        "from dataclasses import dataclass, asdict"
+      ]
+    },
+    {
+      "file": "backend/semantic_fuzzer.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from dataclasses import asdict, dataclass",
+        "from typing import Any, Dict, List, Optional, Set, Tuple"
+      ],
+      "rem_lines": [
+        "from typing import Any, Dict, List, Optional, Set, Tuple",
+        "from dataclasses import dataclass, asdict"
+      ]
+    },
+    {
+      "file": "backend/tests/integration/test_api_endpoints.py",
+      "kind": "tests",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup",
+        "test adjustments"
+      ],
+      "add_lines": [
+        "from unittest.mock import AsyncMock, Mock, patch"
+      ],
+      "rem_lines": [
+        "from unittest.mock import Mock, patch, AsyncMock"
+      ]
+    },
+    {
+      "file": "backend/tests/integration/test_full_workflow.py",
+      "kind": "tests",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup",
+        "test adjustments"
+      ],
+      "add_lines": [
+        "from unittest.mock import AsyncMock, patch"
+      ],
+      "rem_lines": [
+        "from unittest.mock import patch, AsyncMock"
+      ]
+    },
+    {
+      "file": "backend/tests/test_api_smoke.py",
+      "kind": "tests",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup",
+        "test adjustments"
+      ],
+      "add_lines": [
+        "from fastapi.testclient import TestClient"
+      ],
+      "rem_lines": [
+        "from fastapi.testclient import TestClient"
+      ]
+    },
+    {
+      "file": "backend/tests/test_domain_service.py",
+      "kind": "tests",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "import sys"
+      ],
+      "rem_lines": [
+        "import sys"
+      ]
+    },
+    {
+      "file": "backend/tests/test_intelligence.py",
+      "kind": "tests",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "import sys"
+      ],
+      "rem_lines": [
+        "import sys"
+      ]
+    },
+    {
+      "file": "backend/tests/test_review_findings_fixes.py",
+      "kind": "tests",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from app.main import _trusted_hosts_from_origins",
+        "from sqlalchemy.sql.elements import TextClause"
+      ],
+      "rem_lines": [
+        "from sqlalchemy.sql.elements import TextClause",
+        "from app.main import _trusted_hosts_from_origins"
+      ]
+    },
+    {
+      "file": "backend/tests/test_scan_parsers.py",
+      "kind": "tests",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "import sys"
+      ],
+      "rem_lines": [
+        "import sys"
+      ]
+    },
+    {
+      "file": "backend/tests/test_security_fixes.py",
+      "kind": "tests",
+      "adds": 8,
+      "rems": 8,
+      "themes": [
+        "import cleanup",
+        "test adjustments"
+      ],
+      "add_lines": [
+        "import json",
+        "import sys",
+        "from datetime import datetime, timedelta, timezone",
+        "from unittest.mock import MagicMock, Mock, patch",
+        "from app.core.config import settings",
+        "from app.core.security import create_access_token, create_refresh_token, decode_token",
+        "from app.services.intelligence import normalize_and_dedupe_urls, normalize_endpoint_url",
+        "        from app.schemas.auth import LoginRequest, RegisterRequest"
+      ],
+      "rem_lines": [
+        "import sys",
+        "from unittest.mock import Mock, patch, MagicMock",
+        "from datetime import datetime, timezone, timedelta",
+        "import json",
+        "from app.core.security import decode_token, create_access_token, create_refresh_token",
+        "from app.services.intelligence import normalize_endpoint_url, normalize_and_dedupe_urls",
+        "from app.core.config import settings",
+        "        from app.schemas.auth import RegisterRequest, LoginRequest"
+      ]
+    },
+    {
+      "file": "backend/tests/test_verification_api.py",
+      "kind": "tests",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup",
+        "test adjustments"
+      ],
+      "add_lines": [
+        "from fastapi import HTTPException",
+        "from fastapi.testclient import TestClient"
+      ],
+      "rem_lines": [
+        "from fastapi import HTTPException",
+        "from fastapi.testclient import TestClient"
+      ]
+    },
+    {
+      "file": "backend/tests/unit/test_ai_router.py",
+      "kind": "tests",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup",
+        "test adjustments"
+      ],
+      "add_lines": [
+        "import pytest"
+      ],
+      "rem_lines": [
+        "import pytest"
+      ]
+    },
+    {
+      "file": "backend/tests/unit/test_recon_pipeline.py",
+      "kind": "tests",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup",
+        "test adjustments"
+      ],
+      "add_lines": [
+        "from unittest.mock import AsyncMock, Mock, patch"
+      ],
+      "rem_lines": [
+        "from unittest.mock import Mock, AsyncMock, patch"
+      ]
+    },
+    {
+      "file": "backend/tests/unit/test_session_manifest.py",
+      "kind": "tests",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup",
+        "test adjustments"
+      ],
+      "add_lines": [
+        "import pytest"
+      ],
+      "rem_lines": [
+        "import pytest"
+      ]
+    },
+    {
+      "file": "backend/tests/unit/test_vulnerability_modules.py",
+      "kind": "tests",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup",
+        "test adjustments"
+      ],
+      "add_lines": [
+        "from unittest.mock import AsyncMock, Mock"
+      ],
+      "rem_lines": [
+        "from unittest.mock import Mock, AsyncMock"
+      ]
+    },
+    {
+      "file": "backend/vulnerability_modules/auth_session.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from dataclasses import asdict, dataclass",
+        "import jwt"
+      ],
+      "rem_lines": [
+        "from dataclasses import dataclass, asdict",
+        "import jwt"
+      ]
+    },
+    {
+      "file": "backend/vulnerability_modules/bac_idor.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from dataclasses import asdict, dataclass"
+      ],
+      "rem_lines": [
+        "from dataclasses import dataclass, asdict"
+      ]
+    },
+    {
+      "file": "backend/vulnerability_modules/business_logic.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from dataclasses import asdict, dataclass"
+      ],
+      "rem_lines": [
+        "from dataclasses import dataclass, asdict"
+      ]
+    },
+    {
+      "file": "backend/vulnerability_modules/injection.py",
+      "kind": "code",
+      "adds": 5,
+      "rems": 9,
+      "themes": [],
+      "add_lines": [
+        "from dataclasses import asdict, dataclass",
+        "        alias_payload = {\"query\": \"\"\"",
+        "            \"\"\"}",
+        "        malformed_payload = {\"query\": \"\"\"",
+        "            \"\"\"}"
+      ],
+      "rem_lines": [
+        "from dataclasses import dataclass, asdict",
+        "        alias_payload = {",
+        "            \"query\": \"\"\"",
+        "            \"\"\"",
+        "        }",
+        "        malformed_payload = {",
+        "            \"query\": \"\"\"",
+        "            \"\"\"",
+        "        }"
+      ]
+    },
+    {
+      "file": "backend/vulnerability_modules/ssrf_misconfig.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from dataclasses import asdict, dataclass"
+      ],
+      "rem_lines": [
+        "from dataclasses import dataclass, asdict"
+      ]
+    },
+    {
+      "file": "backend/vulnerability_modules/xss_bypass.py",
+      "kind": "imports",
+      "adds": 1,
+      "rems": 1,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from dataclasses import asdict, dataclass"
+      ],
+      "rem_lines": [
+        "from dataclasses import dataclass, asdict"
+      ]
+    },
+    {
+      "file": "backend/waf_analyzer.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from typing import Any, Dict, List, Optional, Tuple",
+        "import httpx"
+      ],
+      "rem_lines": [
+        "import httpx",
+        "from typing import Any, Dict, List, Optional, Tuple"
+      ]
+    },
+    {
+      "file": "backend/watchdog.py",
+      "kind": "imports",
+      "adds": 2,
+      "rems": 2,
+      "themes": [
+        "import cleanup"
+      ],
+      "add_lines": [
+        "from dataclasses import asdict, dataclass",
+        "from enum import Enum"
+      ],
+      "rem_lines": [
+        "from dataclasses import dataclass, asdict",
+        "from enum import Enum"
+      ]
+    }
+  ]
+}

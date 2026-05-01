@@ -1,15 +1,15 @@
 """API endpoints for custom Nuclei template management."""
 
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
-from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
 from typing import Dict, List, Optional
 
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models.user import User
-from app.services.custom_template_engine import template_engine
 from app.services.ai_template_generator import template_generator
+from app.services.custom_template_engine import template_engine
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/templates", tags=["custom-templates"])
 

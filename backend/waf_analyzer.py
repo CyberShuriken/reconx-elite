@@ -4,16 +4,16 @@ Implements WAF fingerprinting and stealth configuration for evasive scanning
 """
 
 import asyncio
-import httpx
 import json
 import logging
 import os
 import re
 import time
-from typing import Any, Dict, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
+import httpx
 from ai_router import AIRouter
 from tool_runner import ToolRunner
 from websocket_manager import WebSocketManager

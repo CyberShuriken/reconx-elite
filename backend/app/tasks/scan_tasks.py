@@ -6,10 +6,6 @@ import shlex
 import tempfile
 from datetime import datetime, timedelta, timezone
 
-from celery import chain
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session, selectinload
-
 from app.core.config import settings
 from app.core.database import get_sessionmaker
 from app.models.ai_report import AIReport
@@ -23,10 +19,22 @@ from app.models.scan import Scan
 from app.models.scan_diff import ScanDiff
 from app.models.scan_log import ScanLog
 from app.models.scheduled_scan import ScheduledScan
-from app.models.subdomain import Subdomain
 from app.models.ssrf_signal import SsrfSignal
+from app.models.subdomain import Subdomain
 from app.models.target import Target
 from app.models.vulnerability import Vulnerability
+from app.schemas.scan_modules import parse_modules_from_config
+from app.services.ai_service import (
+    _should_generate_report,
+    analyze_javascript_endpoints,
+    analyze_live_hosts,
+    analyze_nuclei_findings,
+    analyze_subdomains,
+    build_javascript_asset_summaries_for_ai,
+    generate_elite_vulnerability_report,
+)
+from app.services.blind_xss_service import BlindXssService
+from app.services.external_notifications import notification_service
 from app.services.intelligence import (
     analyze_javascript_assets,
     build_subdomain_record,
@@ -37,25 +45,9 @@ from app.services.intelligence import (
     select_javascript_assets,
     synthesize_heuristic_findings,
 )
-from app.services.ai_service import (
-    analyze_live_hosts,
-    analyze_subdomains,
-    analyze_javascript_endpoints,
-    analyze_nuclei_findings,
-    build_javascript_asset_summaries_for_ai,
-    generate_elite_vulnerability_report,
-    _should_generate_report,
-)
-from app.services.websocket import (
-    notify_scan_completed,
-    notify_critical_vulnerability,
-    notify_scan_started,
-)
-from app.services.external_notifications import notification_service
-from app.services.blind_xss_service import BlindXssService
+from app.services.passive_dns import fetch_crtsh_subdomains, run_github_subdomains_cli
 from app.services.payload_generator import PayloadGenerator
 from app.services.payload_tester import OpportunityDetector
-from app.services.passive_dns import fetch_crtsh_subdomains, run_github_subdomains_cli
 from app.services.scan_artifact_service import persist_scan_artifact
 from app.services.scan_pipeline import (
     pipeline_stage_total,
@@ -82,8 +74,15 @@ from app.services.scan_runner import (
 )
 from app.services.ssrf_service import SsrfService
 from app.services.tool_executor import ToolExecutionResult
+from app.services.websocket import (
+    notify_critical_vulnerability,
+    notify_scan_completed,
+    notify_scan_started,
+)
 from app.tasks.celery_app import celery_app
-from app.schemas.scan_modules import parse_modules_from_config
+from celery import chain
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session, selectinload
 
 logger = logging.getLogger(__name__)
 
