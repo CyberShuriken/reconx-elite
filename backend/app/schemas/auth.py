@@ -38,3 +38,7 @@ class TokenResponse(BaseModel):
 
 class RefreshRequest(BaseModel):
     refresh_token: str = Field(min_length=16)
+
+
+class SupabaseExchangeRequest(BaseModel):
+    access_token: str = Field(min_length=16)

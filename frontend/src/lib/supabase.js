@@ -72,11 +72,24 @@ export async function listTargets() {
 
 export async function createTarget(domain) {
   const client = requireSupabase();
-  const { data, error } = await client
+  const {
+    data: { user },
+  } = await client.auth.getUser();
+  const insertPayload = user ? { domain, user_id: user.id } : { domain };
+  let { data, error } = await client
     .from("targets")
-    .insert({ domain })
+    .insert(insertPayload)
     .select("id, domain, notes, created_at")
     .single();
+  if (error && user) {
+    const fallback = await client
+      .from("targets")
+      .insert({ domain })
+      .select("id, domain, notes, created_at")
+      .single();
+    data = fallback.data;
+    error = fallback.error;
+  }
   if (error) throw error;
   return mapTargetRow(data);
 }
@@ -114,4 +127,3 @@ export async function listNotifications() {
   if (error) throw error;
   return data || [];
 }
-

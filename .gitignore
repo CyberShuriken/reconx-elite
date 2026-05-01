@@ -104,6 +104,8 @@ celerybeat.pid
 
 # Environments
 .env
+.env.*
+!.env.example
 .venv
 env/
 venv/
@@ -147,6 +149,14 @@ dmypy.json
 frontend/node_modules/
 frontend/dist/
 frontend/.next
+frontend/.parcel-cache/
+node_modules/
+.parcel-cache/
+
+# Local generated review/merge artifacts
+.merge_branch_diffs.txt
+.merge_diff_summary.json
+.merge_report_rows.md
 
 # Docker
 docker-compose.override.yml
@@ -200,5 +210,7 @@ htmlcov/
 .bandit
 trivy-results.sarif
 trivy-*.sarif
+
+.vercel
 
 .vercel

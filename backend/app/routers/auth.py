@@ -15,6 +15,7 @@ from app.schemas.auth import (
     LoginRequest,
     RefreshRequest,
     RegisterRequest,
+    SupabaseExchangeRequest,
     TokenResponse,
 )
 from app.services.audit import log_audit_event
@@ -130,5 +131,75 @@ async def refresh_token(payload: RefreshRequest, request: Request, db: AsyncSess
         action="token_refreshed",
         user_id=user.id,
         ip_address=request.client.host if request.client else None,
+    )
+    return TokenResponse(access_token=access, refresh_token=refresh)
+
+
+def _supabase_auth_config() -> tuple[str, str]:
+    url = settings.supabase_url or settings.vite_supabase_url
+    key = settings.supabase_publishable_key or settings.vite_supabase_publishable_key
+    if not url or not key:
+        raise HTTPException(status_code=503, detail="Supabase auth bridge is not configured")
+    return url.rstrip("/"), key
+
+
+async def _fetch_supabase_user(access_token: str) -> dict:
+    import httpx
+
+    supabase_url, publishable_key = _supabase_auth_config()
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        response = await client.get(
+            f"{supabase_url}/auth/v1/user",
+            headers={
+                "apikey": publishable_key,
+                "Authorization": f"Bearer {access_token}",
+            },
+        )
+    if response.status_code != 200:
+        raise HTTPException(status_code=401, detail="Invalid Supabase session")
+    data = response.json()
+    if not data.get("id") or not data.get("email"):
+        raise HTTPException(status_code=401, detail="Supabase session is missing user identity")
+    return data
+
+
+@router.post("/supabase/exchange", response_model=TokenResponse)
+@limiter.limit(settings.login_rate_limit)
+async def exchange_supabase_session(
+    payload: SupabaseExchangeRequest,
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
+    """Exchange a verified Supabase session for the backend's JWT pair."""
+
+    supabase_user = await _fetch_supabase_user(payload.access_token)
+    email = supabase_user["email"]
+    metadata = supabase_user.get("user_metadata") or {}
+    role = "admin" if metadata.get("role") == "admin" else "user"
+
+    result = await db.execute(select(User).filter(User.email == email))
+    user = result.scalar_one_or_none()
+    if user:
+        if user.role != role and role == "admin":
+            user.role = role
+    else:
+        user = User(
+            email=email,
+            password_hash=hash_password(f"supabase:{supabase_user['id']}"),
+            role=role,
+        )
+        db.add(user)
+        await db.flush()
+
+    access = create_access_token(str(user.id), user.role)
+    refresh, jti, expires_at = create_refresh_token(str(user.id), user.role)
+    db.add(RefreshToken(user_id=user.id, token_jti=jti, expires_at=expires_at))
+    await db.commit()
+    await log_audit_event(
+        db,
+        action="supabase_session_exchanged",
+        user_id=user.id,
+        ip_address=request.client.host if request.client else None,
+        metadata_json={"email": user.email},
     )
     return TokenResponse(access_token=access, refresh_token=refresh)

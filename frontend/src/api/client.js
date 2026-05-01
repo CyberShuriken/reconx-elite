@@ -13,6 +13,10 @@ function resolveDefaultBackendBaseUrl() {
     return "http://localhost:8000";
   }
 
+  if (window.location.hostname.endsWith("vercel.app")) {
+    return "/api/v1";
+  }
+
   return `http://${window.location.hostname}:8000`;
 }
 

@@ -76,6 +76,13 @@ class Settings(BaseSettings):
 
     gemini_api_key: str = ""
 
+    # Hosted frontend auth bridge. These are safe frontend-compatible values,
+    # not Supabase service-role secrets.
+    supabase_url: str = ""
+    supabase_publishable_key: str = ""
+    vite_supabase_url: str = ""
+    vite_supabase_publishable_key: str = ""
+
     # AI Model Registry - 10-Phase Pipeline Keys
     openrouter_key: str = ""  # Primary: meta-llama/llama-3.3-70b-instruct:free
     or_key_nemotron_nano: str = ""  # Phase 0 Orchestrator: nvidia/llama-3.1-nemotron-nano-8b-instruct:free

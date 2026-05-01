@@ -42,8 +42,25 @@ function loadStoredAuth() {
 
 export function AuthProvider({ children }) {
   const [auth, setAuth] = useState(loadStoredAuth);
+  const [backendAuth, setBackendAuth] = useState(null);
   const [supabaseSession, setSupabaseSession] = useState(null);
   const [isBootstrapping, setIsBootstrapping] = useState(isSupabaseEnabled);
+
+  async function exchangeSupabaseAccessToken(session) {
+    if (!session?.access_token) {
+      setBackendAuth(null);
+      return null;
+    }
+    const { data } = await api.post("/auth/supabase/exchange", {
+      access_token: session.access_token,
+    });
+    const nextAuth = {
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token,
+    };
+    setBackendAuth(nextAuth);
+    return nextAuth;
+  }
 
   useEffect(() => {
     if (isSupabaseEnabled) {
@@ -64,9 +81,15 @@ export function AuthProvider({ children }) {
     let mounted = true;
     localStorage.removeItem(STORAGE_KEY);
 
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       if (mounted) {
-        setSupabaseSession(data.session || null);
+        const session = data.session || null;
+        setSupabaseSession(session);
+        if (session) {
+          await exchangeSupabaseAccessToken(session).catch(() => {
+            if (mounted) setBackendAuth(null);
+          });
+        }
         setIsBootstrapping(false);
       }
     });
@@ -76,7 +99,18 @@ export function AuthProvider({ children }) {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       if (mounted) {
         setSupabaseSession(session || null);
-        setIsBootstrapping(false);
+        if (session) {
+          exchangeSupabaseAccessToken(session)
+            .catch(() => {
+              if (mounted) setBackendAuth(null);
+            })
+            .finally(() => {
+              if (mounted) setIsBootstrapping(false);
+            });
+        } else {
+          setBackendAuth(null);
+          setIsBootstrapping(false);
+        }
       }
     });
 
@@ -90,6 +124,7 @@ export function AuthProvider({ children }) {
     if (isSupabaseEnabled) {
       const result = await signInWithPassword(tokens);
       setSupabaseSession(result.session || null);
+      await exchangeSupabaseAccessToken(result.session);
       return;
     }
 
@@ -104,9 +139,11 @@ export function AuthProvider({ children }) {
       const result = await signUp(tokens);
       if (result.session) {
         setSupabaseSession(result.session);
+        await exchangeSupabaseAccessToken(result.session);
       } else {
         const signInResult = await signInWithPassword(tokens);
         setSupabaseSession(signInResult.session || null);
+        await exchangeSupabaseAccessToken(signInResult.session);
       }
       return;
     }
@@ -117,6 +154,7 @@ export function AuthProvider({ children }) {
     if (isSupabaseEnabled) {
       await signOut();
       setSupabaseSession(null);
+      setBackendAuth(null);
       return;
     }
     setAuth(null);
@@ -138,9 +176,10 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     if (isSupabaseEnabled) {
       setAuthHandlers({
-        getTokens: () => null,
+        getTokens: () => backendAuth,
         refreshTokens: async () => {
-          throw new Error("Supabase mode does not use API token refresh");
+          const { data } = await supabase.auth.getSession();
+          return exchangeSupabaseAccessToken(data.session);
         },
         logout: () => {
           logout().catch(() => {});
@@ -153,7 +192,7 @@ export function AuthProvider({ children }) {
       refreshTokens,
       logout,
     });
-  }, [auth]);
+  }, [auth, backendAuth]);
 
   useEffect(() => {
     if (isSupabaseEnabled || !auth?.refreshToken) {
@@ -178,8 +217,9 @@ export function AuthProvider({ children }) {
       const role = user?.user_metadata?.role || "user";
       return {
         auth: supabaseSession,
-        accessToken: supabaseSession?.access_token ?? null,
-        refreshToken: supabaseSession?.refresh_token ?? null,
+        accessToken: backendAuth?.accessToken ?? null,
+        refreshToken: backendAuth?.refreshToken ?? null,
+        supabaseAccessToken: supabaseSession?.access_token ?? null,
         user: user ? { id: user.id, role, email: user.email || null } : null,
         isAuthenticated: Boolean(user),
         isBootstrapping,
