@@ -1,16 +1,8 @@
-from app.core.database import Base
-from sqlalchemy import (
-    JSON,
-    Boolean,
-    Column,
-    DateTime,
-    ForeignKey,
-    Integer,
-    String,
-    Text,
-    func,
-)
+from sqlalchemy import (JSON, Boolean, Column, DateTime, ForeignKey, Integer,
+                        String, Text, func)
 from sqlalchemy.orm import relationship
+
+from app.core.database import Base
 
 
 class Notification(Base):

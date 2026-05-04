@@ -3,15 +3,10 @@
 from typing import Any
 
 from backend.ai_router import AIRouter
-from backend.analyzers import (
-    analyze_auth_session,
-    analyze_bac_idor,
-    analyze_business_logic,
-    analyze_injection,
-    analyze_misconfiguration,
-    analyze_ssrf,
-    analyze_xss,
-)
+from backend.analyzers import (analyze_auth_session, analyze_bac_idor,
+                               analyze_business_logic, analyze_injection,
+                               analyze_misconfiguration, analyze_ssrf,
+                               analyze_xss)
 
 
 class TacticalStrikesOrchestrator:

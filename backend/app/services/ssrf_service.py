@@ -3,8 +3,9 @@
 import secrets
 from typing import Optional
 
-from app.models.ssrf_signal import SsrfSignal
 from sqlalchemy.orm import Session
+
+from app.models.ssrf_signal import SsrfSignal
 
 
 class SsrfService:

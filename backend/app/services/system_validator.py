@@ -5,11 +5,12 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
+from sqlalchemy import text
+from sqlalchemy.orm import Session
+
 from app.core.config import settings
 from app.core.database import get_sessionmaker
 from app.services.logging_service import reconx_logger
-from sqlalchemy import text
-from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 
@@ -130,11 +131,8 @@ class SystemValidator:
         """Validate AI service configuration and availability."""
 
         try:
-            from app.services.ai_service import (
-                MODEL_MAP,
-                _is_ai_enabled,
-                get_model_status_snapshot,
-            )
+            from app.services.ai_service import (MODEL_MAP, _is_ai_enabled,
+                                                 get_model_status_snapshot)
 
             if not _is_ai_enabled("scan") and not _is_ai_enabled("report"):
                 return {
@@ -164,19 +162,11 @@ class SystemValidator:
 
         try:
             # Test importing all models
-            from app.models import (
-                AIReport,
-                CustomNucleiTemplate,
-                ExploitValidation,
-                HighValueEndpoint,
-                LearningPattern,
-                OutOfBandInteraction,
-                Scan,
-                SuccessfulPayload,
-                Target,
-                User,
-                Vulnerability,
-            )
+            from app.models import (AIReport, CustomNucleiTemplate,
+                                    ExploitValidation, HighValueEndpoint,
+                                    LearningPattern, OutOfBandInteraction,
+                                    Scan, SuccessfulPayload, Target, User,
+                                    Vulnerability)
 
             # Check if all models can be instantiated (basic structure check)
             models_to_check = [
@@ -221,15 +211,10 @@ class SystemValidator:
 
         try:
             # Test importing all services
-            from app.services import (
-                ai_service,
-                custom_template_engine,
-                exploit_validator,
-                intelligence_learning,
-                logging_service,
-                manual_tester,
-                out_of_band_service,
-            )
+            from app.services import (ai_service, custom_template_engine,
+                                      exploit_validator, intelligence_learning,
+                                      logging_service, manual_tester,
+                                      out_of_band_service)
 
             services_to_check = [
                 ("ai_service", ai_service),

@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 import httpx
+
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)

@@ -1,16 +1,8 @@
-from app.core.database import Base
-from sqlalchemy import (
-    JSON,
-    Column,
-    DateTime,
-    ForeignKey,
-    Integer,
-    String,
-    Text,
-    UniqueConstraint,
-    func,
-)
+from sqlalchemy import (JSON, Column, DateTime, ForeignKey, Integer, String,
+                        Text, UniqueConstraint, func)
 from sqlalchemy.orm import relationship
+
+from app.core.database import Base
 
 
 class JavaScriptAsset(Base):

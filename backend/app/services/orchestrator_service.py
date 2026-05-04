@@ -20,6 +20,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 import redis.asyncio as redis
+
 from app.core.model_registry import get_model_config, get_task_role
 from app.services.openrouter_client import get_openrouter_client
 

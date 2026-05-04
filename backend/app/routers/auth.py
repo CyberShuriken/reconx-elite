@@ -1,29 +1,20 @@
 from datetime import datetime, timezone
 
-from app.core.config import settings
-from app.core.database import get_db
-from app.core.security import (
-    create_access_token,
-    create_refresh_token,
-    decode_token,
-    hash_password,
-    verify_password,
-)
-from app.models.refresh_token import RefreshToken
-from app.models.user import User
-from app.schemas.auth import (
-    LoginRequest,
-    RefreshRequest,
-    RegisterRequest,
-    SupabaseExchangeRequest,
-    TokenResponse,
-)
-from app.services.audit import log_audit_event
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from jose import JWTError
 from slowapi import Limiter
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.config import settings
+from app.core.database import get_db
+from app.core.security import (create_access_token, create_refresh_token,
+                               decode_token, hash_password, verify_password)
+from app.models.refresh_token import RefreshToken
+from app.models.user import User
+from app.schemas.auth import (LoginRequest, RefreshRequest, RegisterRequest,
+                              SupabaseExchangeRequest, TokenResponse)
+from app.services.audit import log_audit_event
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

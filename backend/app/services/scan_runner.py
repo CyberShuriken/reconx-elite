@@ -4,14 +4,12 @@ import shutil
 import tempfile
 
 from app.core.config import settings
-from app.services.scan_parser import (
-    parse_gau_output,
-    parse_httpx_enrich_output,
-    parse_httpx_headers_output,
-    parse_httpx_live_output,
-    parse_nuclei_output,
-    parse_subfinder_output,
-)
+from app.services.scan_parser import (parse_gau_output,
+                                      parse_httpx_enrich_output,
+                                      parse_httpx_headers_output,
+                                      parse_httpx_live_output,
+                                      parse_nuclei_output,
+                                      parse_subfinder_output)
 from app.services.tool_executor import ToolExecutionResult, execute_with_retry
 
 

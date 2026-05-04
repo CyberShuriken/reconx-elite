@@ -3,8 +3,9 @@ import logging
 from typing import Any, Optional
 
 import redis.asyncio as aioredis
-from app.core.config import settings
 from redis.exceptions import RedisError
+
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 

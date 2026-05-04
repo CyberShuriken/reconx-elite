@@ -1,23 +1,17 @@
-from app.models.advanced_recon import (
-    DiscoveredParameter,
-    FuzzedEndpoint,
-    SmartWordlist,
-    StealthConfig,
-)
+from app.models.advanced_recon import (DiscoveredParameter, FuzzedEndpoint,
+                                       SmartWordlist, StealthConfig)
 from app.models.ai_report import AIReport
 from app.models.attack_path import AttackPath
 from app.models.audit_log import AuditLog
 from app.models.blind_xss_hit import BlindXssHit
 from app.models.bookmark import Bookmark
-from app.models.custom_templates import CustomNucleiTemplate, CustomTemplateResult
+from app.models.custom_templates import (CustomNucleiTemplate,
+                                         CustomTemplateResult)
 from app.models.endpoint import Endpoint
 from app.models.exploit_validation import ExploitValidation
 from app.models.javascript_asset import JavaScriptAsset
-from app.models.learning_models import (
-    HighValueEndpoint,
-    LearningPattern,
-    SuccessfulPayload,
-)
+from app.models.learning_models import (HighValueEndpoint, LearningPattern,
+                                        SuccessfulPayload)
 from app.models.manual_test_log import ManualTestLog
 from app.models.notification import Notification
 from app.models.out_of_band_interaction import OutOfBandInteraction

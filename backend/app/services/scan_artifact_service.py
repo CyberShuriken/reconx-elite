@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
-from app.models.scan_artifact import ScanArtifact
 from sqlalchemy.orm import Session
+
+from app.models.scan_artifact import ScanArtifact
 
 _PREVIEW_LIMIT = 65_000
 

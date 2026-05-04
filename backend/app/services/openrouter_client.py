@@ -16,12 +16,9 @@ from typing import Any
 import google.generativeai as genai
 import httpx
 import redis.asyncio as redis
-from app.core.model_registry import (
-    GEMINI_CONFIG,
-    MODEL_REGISTRY,
-    RATE_LIMIT_CONFIG,
-    get_model_config,
-)
+
+from app.core.model_registry import (GEMINI_CONFIG, MODEL_REGISTRY,
+                                     RATE_LIMIT_CONFIG, get_model_config)
 
 logger = logging.getLogger(__name__)
 

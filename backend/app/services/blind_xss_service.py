@@ -3,8 +3,9 @@
 import secrets
 from typing import Optional
 
-from app.models.blind_xss_hit import BlindXssHit
 from sqlalchemy.orm import Session
+
+from app.models.blind_xss_hit import BlindXssHit
 
 
 class BlindXssService:

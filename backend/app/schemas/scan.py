@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Literal
 
-from app.schemas.scan_modules import ScanModulesConfig, ScanProfile
 from pydantic import BaseModel, ConfigDict, Field
+
+from app.schemas.scan_modules import ScanModulesConfig, ScanProfile
 
 TemplateCategory = Literal["cves", "exposures", "misconfiguration", "fuzzing"]
 SeverityLevel = Literal["low", "medium", "high", "critical"]

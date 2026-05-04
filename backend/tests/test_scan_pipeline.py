@@ -7,8 +7,10 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from app.services.passive_dns import fetch_crtsh_subdomains, normalize_passive_hosts
-from app.services.scan_pipeline import pipeline_stage_total, resolve_pipeline_stages
+from app.services.passive_dns import (fetch_crtsh_subdomains,
+                                      normalize_passive_hosts)
+from app.services.scan_pipeline import (pipeline_stage_total,
+                                        resolve_pipeline_stages)
 
 
 class ScanPipelineTests(unittest.TestCase):

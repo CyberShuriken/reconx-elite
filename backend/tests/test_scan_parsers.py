@@ -4,7 +4,8 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-from app.services.scan_parser import parse_httpx_enrich_output, parse_nuclei_output
+from app.services.scan_parser import (parse_httpx_enrich_output,
+                                      parse_nuclei_output)
 
 
 class ScanParserTests(unittest.TestCase):

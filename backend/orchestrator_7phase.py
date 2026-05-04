@@ -11,10 +11,8 @@ from backend.phase_1_cloud_hunter import CloudHunter
 from backend.phase_2_api_mapper import APIMapper
 from backend.phase_2_cve_database import CVEDatabase
 from backend.phase_3_dual_session_handler import DualSessionHandler
-from backend.phase_4_5_tactical_strikes import (
-    AdvancedInjectionOrchestrator,
-    TacticalStrikesOrchestrator,
-)
+from backend.phase_4_5_tactical_strikes import (AdvancedInjectionOrchestrator,
+                                                TacticalStrikesOrchestrator)
 from backend.phase_6_poc_generator import POCGenerator
 from backend.phase_7_markdown_reporter import MarkdownReportGenerator
 from backend.session_manifest import SessionManifest

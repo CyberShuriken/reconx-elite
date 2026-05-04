@@ -1,6 +1,8 @@
-from app.core.database import Base
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, Text, func
+from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, Integer, Text,
+                        func)
 from sqlalchemy.orm import relationship
+
+from app.core.database import Base
 
 
 class StealthConfig(Base):

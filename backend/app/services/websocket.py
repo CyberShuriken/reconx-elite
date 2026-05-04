@@ -6,10 +6,11 @@ from enum import Enum
 from typing import Dict, List, Set
 
 import redis.asyncio as redis
-from app.core.config import settings
-from app.models.user import User
 from fastapi import WebSocket, WebSocketDisconnect
 from sqlalchemy.orm import Session
+
+from app.core.config import settings
+from app.models.user import User
 
 logger = logging.getLogger(__name__)
 _AGENT_LOG_HISTORY: deque[dict] = deque(maxlen=250)

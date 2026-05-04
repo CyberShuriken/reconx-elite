@@ -1,7 +1,11 @@
 import asyncio
 import logging
 
-from app.core.cache import build_cache_key, get_cached, invalidate_prefix, set_cached
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy.orm import Session, selectinload
+
+from app.core.cache import (build_cache_key, get_cached, invalidate_prefix,
+                            set_cached)
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import get_current_user
@@ -13,8 +17,6 @@ from app.routers.auth import limiter
 from app.schemas.vulnerability import VulnerabilityOut, VulnerabilityUpdate
 from app.services.ai_service import generate_exploit_draft
 from app.services.audit import log_audit_event
-from fastapi import APIRouter, Depends, HTTPException, Request
-from sqlalchemy.orm import Session, selectinload
 
 logger = logging.getLogger(__name__)
 

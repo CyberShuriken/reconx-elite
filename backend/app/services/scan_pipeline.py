@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from app.core.config import settings
-from app.schemas.scan_modules import ScanModulesConfig, parse_modules_from_config
+from app.schemas.scan_modules import (ScanModulesConfig,
+                                      parse_modules_from_config)
 
 # Stage ids must match task registry keys in scan_tasks.STAGE_REGISTRY
 STANDARD_PIPELINE = ("subfinder", "httpx", "gau", "nuclei")

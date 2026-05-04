@@ -9,13 +9,10 @@ from typing import Dict, List, Optional, Tuple
 from urllib.parse import urljoin, urlparse
 
 import httpx
+
 from app.core.config import settings
-from app.models.advanced_recon import (
-    DiscoveredParameter,
-    FuzzedEndpoint,
-    SmartWordlist,
-    StealthConfig,
-)
+from app.models.advanced_recon import (DiscoveredParameter, FuzzedEndpoint,
+                                       SmartWordlist, StealthConfig)
 
 logger = logging.getLogger(__name__)
 

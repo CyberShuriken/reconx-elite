@@ -1,5 +1,8 @@
 from datetime import datetime, timedelta, timezone
 
+from fastapi import APIRouter, Depends, HTTPException, Request
+from sqlalchemy.orm import Session
+
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import get_current_user
@@ -7,14 +10,9 @@ from app.models.scheduled_scan import ScheduledScan
 from app.models.target import Target
 from app.models.user import User
 from app.routers.auth import limiter
-from app.schemas.scheduled_scan import (
-    ScheduledScanCreate,
-    ScheduledScanOut,
-    ScheduledScanUpdate,
-)
+from app.schemas.scheduled_scan import (ScheduledScanCreate, ScheduledScanOut,
+                                        ScheduledScanUpdate)
 from app.services.audit import log_audit_event
-from fastapi import APIRouter, Depends, HTTPException, Request
-from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/schedules", tags=["schedules"])
 

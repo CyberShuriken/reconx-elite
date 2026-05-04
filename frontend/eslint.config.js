@@ -43,6 +43,7 @@ export default [
         afterEach: "readonly",
         beforeAll: "readonly",
         afterAll: "readonly",
+        test: "readonly",
       },
     },
   },

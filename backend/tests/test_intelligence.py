@@ -4,12 +4,10 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-from app.services.intelligence import (
-    build_subdomain_record,
-    extract_endpoints_from_javascript,
-    extract_secret_like_strings,
-    normalize_and_dedupe_urls,
-)
+from app.services.intelligence import (build_subdomain_record,
+                                       extract_endpoints_from_javascript,
+                                       extract_secret_like_strings,
+                                       normalize_and_dedupe_urls)
 
 
 class IntelligenceTests(unittest.TestCase):

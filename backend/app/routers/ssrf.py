@@ -2,11 +2,12 @@
 
 from typing import Optional
 
+from fastapi import APIRouter, Depends, Request, Response
+from sqlalchemy.orm import Session
+
 from app.core.database import get_db
 from app.models.ssrf_signal import SsrfSignal
 from app.services.ssrf_service import SsrfService
-from fastapi import APIRouter, Depends, Request, Response
-from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/ssrf", tags=["ssrf"])
 

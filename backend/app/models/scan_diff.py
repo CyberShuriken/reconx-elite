@@ -1,6 +1,7 @@
-from app.core.database import Base
 from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, func
 from sqlalchemy.orm import relationship
+
+from app.core.database import Base
 
 
 class ScanDiff(Base):

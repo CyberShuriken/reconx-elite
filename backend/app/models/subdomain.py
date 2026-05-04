@@ -1,14 +1,8 @@
-from app.core.database import Base
-from sqlalchemy import (
-    JSON,
-    Boolean,
-    Column,
-    ForeignKey,
-    Integer,
-    String,
-    UniqueConstraint,
-)
+from sqlalchemy import (JSON, Boolean, Column, ForeignKey, Integer, String,
+                        UniqueConstraint)
 from sqlalchemy.orm import relationship
+
+from app.core.database import Base
 
 
 class Subdomain(Base):

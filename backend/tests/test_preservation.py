@@ -234,6 +234,7 @@ class TestSettingsCorsPreservation:
         Validates: Requirements 3.6
         """
         import os
+
         # Patch env to avoid loading .env file secrets
         with pytest.MonkeyPatch().context() as mp:
             mp.setenv("CORS_ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000")
@@ -243,9 +244,11 @@ class TestSettingsCorsPreservation:
 
             # Re-import Settings to pick up patched env
             import importlib
-            import app.core.config as config_module
+
             # Create a fresh Settings instance with the patched env
             from pydantic_settings import BaseSettings
+
+            import app.core.config as config_module
             from app.core.config import Settings
 
             s = Settings(

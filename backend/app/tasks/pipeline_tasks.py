@@ -22,6 +22,9 @@ import logging
 from datetime import datetime, timezone
 from typing import Any
 
+from celery import chain
+from sqlalchemy.orm import Session, selectinload
+
 from app.core.config import settings
 from app.core.database import get_sessionmaker
 from app.core.model_registry import get_model_config, get_task_role
@@ -29,10 +32,9 @@ from app.core.tool_registry import get_tools_for_phase
 from app.models.scan import Scan
 from app.models.target import Target
 from app.services.openrouter_client import get_openrouter_client
-from app.services.tool_discovery import get_pipeline_adapter, get_tool_discovery_service
+from app.services.tool_discovery import (get_pipeline_adapter,
+                                         get_tool_discovery_service)
 from app.tasks.celery_app import celery_app
-from celery import chain
-from sqlalchemy.orm import Session, selectinload
 
 logger = logging.getLogger(__name__)
 

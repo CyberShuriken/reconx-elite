@@ -1,10 +1,11 @@
 import logging
 import time
 
-from app.core.security import decode_token
 from fastapi import Request, status
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
+
+from app.core.security import decode_token
 
 logger = logging.getLogger("reconx.api")
 
