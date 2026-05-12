@@ -38,6 +38,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES=120
 REFRESH_TOKEN_EXPIRE_MINUTES=10080
 
 CORS_ALLOWED_ORIGINS=https://<vercel-production-domain>
+CORS_ALLOWED_ORIGIN_REGEX=https://.*\.vercel\.app
+FRONTEND_URL=https://<vercel-production-domain>
 HTTPS_BEHIND_PROXY=true
 METRICS_ENABLED=false
 
@@ -122,7 +124,7 @@ Copy the public Railway API domain after the `api` service deploys, then set it
 on the Vercel frontend project:
 
 ```text
-VITE_API_BASE_URL=https://<railway-api-domain>
+VITE_API_URL=https://<railway-api-domain>
 ```
 
 Vercel must also have the Supabase frontend values:

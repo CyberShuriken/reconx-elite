@@ -15,7 +15,6 @@ from urllib.parse import urlparse
 
 import google.generativeai as genai
 import httpx
-
 from app.core.config import settings
 
 logger = logging.getLogger(__name__)
@@ -767,8 +766,10 @@ async def generate_payloads(vuln_type: str, context: dict[str, Any] | None = Non
 
 
 async def analyze_js_content(js_content: str, source_url: str | None = None) -> dict[str, Any]:
-    from app.services.intelligence import (extract_endpoints_from_javascript,
-                                           extract_secret_like_strings)
+    from app.services.intelligence import (
+        extract_endpoints_from_javascript,
+        extract_secret_like_strings,
+    )
 
     hostname = urlparse(source_url).hostname if source_url else None
     scope = {hostname} if hostname else set()

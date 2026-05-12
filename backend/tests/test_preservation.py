@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_cors_app(cors_allowed_origins: str):
     """
     Build a minimal FastAPI app with CORSMiddleware configured exactly as the
@@ -56,6 +57,7 @@ def _make_cors_app(cors_allowed_origins: str):
 # ---------------------------------------------------------------------------
 # Test 2e — CORS allows localhost origins (Requirement 3.6)
 # ---------------------------------------------------------------------------
+
 
 class TestCorsLocalhostPreservation:
     """
@@ -215,6 +217,7 @@ class TestCorsLocalhostPreservation:
 # Test 2e — Settings.cors_allowed_origins_list parses correctly
 # ---------------------------------------------------------------------------
 
+
 class TestSettingsCorsPreservation:
     """
     Verify that Settings.cors_allowed_origins_list correctly parses the
@@ -245,11 +248,11 @@ class TestSettingsCorsPreservation:
             # Re-import Settings to pick up patched env
             import importlib
 
-            # Create a fresh Settings instance with the patched env
-            from pydantic_settings import BaseSettings
-
             import app.core.config as config_module
             from app.core.config import Settings
+
+            # Create a fresh Settings instance with the patched env
+            from pydantic_settings import BaseSettings
 
             s = Settings(
                 cors_allowed_origins="http://localhost:5173,http://localhost:3000",
@@ -260,12 +263,10 @@ class TestSettingsCorsPreservation:
 
         origins = s.cors_allowed_origins_list
         assert "http://localhost:5173" in origins, (
-            f"PRESERVATION FAILURE: http://localhost:5173 not in cors_allowed_origins_list. "
-            f"Got: {origins}"
+            f"PRESERVATION FAILURE: http://localhost:5173 not in cors_allowed_origins_list. " f"Got: {origins}"
         )
         assert "http://localhost:3000" in origins, (
-            f"PRESERVATION FAILURE: http://localhost:3000 not in cors_allowed_origins_list. "
-            f"Got: {origins}"
+            f"PRESERVATION FAILURE: http://localhost:3000 not in cors_allowed_origins_list. " f"Got: {origins}"
         )
 
     def test_cors_allowed_origins_list_strips_whitespace(self):
@@ -290,20 +291,23 @@ class TestSettingsCorsPreservation:
         for origin in origins:
             assert origin == origin.strip(), f"Origin has leading/trailing whitespace: '{origin}'"
 
-    @pytest.mark.parametrize("origins_str,expected", [
-        (
-            "http://localhost:5173",
-            ["http://localhost:5173"],
-        ),
-        (
-            "http://localhost:5173,http://localhost:3000",
-            ["http://localhost:5173", "http://localhost:3000"],
-        ),
-        (
-            "http://localhost:5173,https://reconx-elite-frontend.vercel.app",
-            ["http://localhost:5173", "https://reconx-elite-frontend.vercel.app"],
-        ),
-    ])
+    @pytest.mark.parametrize(
+        "origins_str,expected",
+        [
+            (
+                "http://localhost:5173",
+                ["http://localhost:5173"],
+            ),
+            (
+                "http://localhost:5173,http://localhost:3000",
+                ["http://localhost:5173", "http://localhost:3000"],
+            ),
+            (
+                "http://localhost:5173,https://reconx-elite-frontend.vercel.app",
+                ["http://localhost:5173", "https://reconx-elite-frontend.vercel.app"],
+            ),
+        ],
+    )
     def test_cors_allowed_origins_list_property(self, origins_str, expected):
         """
         Property: cors_allowed_origins_list always returns exactly the origins

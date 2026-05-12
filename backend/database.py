@@ -10,7 +10,13 @@ warnings.warn(
 )
 
 # Re-export for backward compatibility only
-from app.core.database import (Base, SATimeoutError, get_db, get_engine,
-                               get_sessionmaker, init_engine)
+from app.core.database import (
+    Base,
+    SATimeoutError,
+    get_db,
+    get_engine,
+    get_sessionmaker,
+    init_engine,
+)
 
 __all__ = ["Base", "get_db", "get_engine", "get_sessionmaker", "init_engine", "SATimeoutError"]

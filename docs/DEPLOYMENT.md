@@ -49,7 +49,7 @@ docker compose --profile tls up -d
 
 3. **Update Environment**
 ```bash
-VITE_API_BASE_URL=https://yourdomain.com
+VITE_API_URL=https://yourdomain.com
 CORS_ALLOWED_ORIGINS=https://yourdomain.com
 HTTPS_BEHIND_PROXY=true
 ```

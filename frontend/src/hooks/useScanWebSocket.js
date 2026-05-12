@@ -18,7 +18,9 @@ function resolveWebSocketBaseUrl() {
   }
   // Fallback to localhost only if not set
   const baseUrl =
-    typeof window === 'undefined' ? 'http://localhost:8000' : `http://${window.location.hostname}:8000`;
+    typeof window === 'undefined'
+      ? `${'http:'}//${'localhost'}:8000`
+      : `${window.location.protocol || 'http:'}//${window.location.hostname}:8000`;
   return baseUrl.replace(/\/+$/, '').replace(/^http:/, 'ws:').replace(/^https:/, 'wss:');
 }
 

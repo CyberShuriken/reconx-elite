@@ -2,15 +2,14 @@
 
 from typing import Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models.exploit_validation import ExploitValidation
 from app.models.user import User
 from app.models.vulnerability import Vulnerability
 from app.services.intelligence_learning import learning_service
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/intelligence", tags=["intelligence-learning"])
 
@@ -215,8 +214,11 @@ async def learn_from_vulnerability(
 async def get_learning_statistics(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """Get learning statistics for the current user."""
 
-    from app.models.learning_models import (HighValueEndpoint, LearningPattern,
-                                            SuccessfulPayload)
+    from app.models.learning_models import (
+        HighValueEndpoint,
+        LearningPattern,
+        SuccessfulPayload,
+    )
 
     # Pattern statistics
     total_patterns = db.query(LearningPattern).filter(LearningPattern.user_id == current_user.id).count()

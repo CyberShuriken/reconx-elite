@@ -12,10 +12,14 @@ import shutil
 from typing import Any
 
 import redis.asyncio as redis
-
-from app.core.tool_registry import (ToolAvailabilityReport, get_all_tools,
-                                    get_install_hint, get_required_tools,
-                                    get_tools_for_phase, is_tool_required)
+from app.core.tool_registry import (
+    ToolAvailabilityReport,
+    get_all_tools,
+    get_install_hint,
+    get_required_tools,
+    get_tools_for_phase,
+    is_tool_required,
+)
 
 logger = logging.getLogger(__name__)
 

@@ -7,12 +7,14 @@ from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
-from sqlalchemy.orm import Session
-
 from app.models.exploit_validation import ExploitValidation
-from app.models.learning_models import (HighValueEndpoint, LearningPattern,
-                                        SuccessfulPayload)
+from app.models.learning_models import (
+    HighValueEndpoint,
+    LearningPattern,
+    SuccessfulPayload,
+)
 from app.models.vulnerability import Vulnerability
+from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 

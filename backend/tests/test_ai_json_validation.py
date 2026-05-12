@@ -24,10 +24,12 @@ if "google.generativeai" not in sys.modules:
     _mock_genai.GenerativeModel = _GenerativeModel
     sys.modules["google.generativeai"] = _mock_genai
 
-from app.services.ai_service import (_merge_high_value_targets_by_url,
-                                     _merge_potential_leaks,
-                                     _validate_ai_scan_response,
-                                     build_javascript_asset_summaries_for_ai)
+from app.services.ai_service import (
+    _merge_high_value_targets_by_url,
+    _merge_potential_leaks,
+    _validate_ai_scan_response,
+    build_javascript_asset_summaries_for_ai,
+)
 
 
 class ValidateAiScanResponseTests(unittest.TestCase):

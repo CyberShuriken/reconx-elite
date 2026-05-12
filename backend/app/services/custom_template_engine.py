@@ -8,12 +8,10 @@ from datetime import datetime, timezone
 from typing import Dict, List, Optional, Tuple
 
 import yaml
-from sqlalchemy.orm import Session
-
 from app.core.config import settings
-from app.models.custom_templates import (CustomNucleiTemplate,
-                                         CustomTemplateResult)
+from app.models.custom_templates import CustomNucleiTemplate, CustomTemplateResult
 from app.services.tool_executor import execute_with_retry
+from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
 

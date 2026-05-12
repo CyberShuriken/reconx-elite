@@ -18,7 +18,6 @@ from pathlib import Path
 from typing import Any
 
 import httpx
-
 from app.core.tool_registry import get_tools_for_phase
 from app.services.openrouter_client import get_openrouter_client
 

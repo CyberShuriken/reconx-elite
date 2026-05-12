@@ -7,7 +7,7 @@ ReconX Elite uses Vercel for the static React frontend only.
 - Use the Vercel project named `reconx-elite-frontend`.
 - The duplicate Vercel project named `reconx-elite` should not receive production deploys.
 - The Python API, Celery workers, Redis, and database must run outside Vercel.
-- Production API traffic must go to the Railway backend through `VITE_API_BASE_URL`.
+- Production API traffic must go to the Railway backend through `VITE_API_URL`.
 
 ## Required Vercel Environment Variables
 
@@ -16,14 +16,17 @@ Set these on `reconx-elite-frontend` for Production, Preview, and Development as
 ```text
 VITE_SUPABASE_URL
 VITE_SUPABASE_PUBLISHABLE_KEY
-VITE_API_BASE_URL
+VITE_API_URL
 ```
 
-`VITE_API_BASE_URL` must be the Railway API origin, for example:
+`VITE_API_URL` must be the Railway API origin, for example:
 
 ```text
 https://reconx-elite-api.up.railway.app
 ```
+
+`VITE_API_BASE_URL` remains supported as a compatibility alias, but new Vercel
+projects should use `VITE_API_URL`.
 
 Do not add OpenRouter, Gemini, database, JWT, Redis, or service-role secrets to the frontend Vercel project.
 

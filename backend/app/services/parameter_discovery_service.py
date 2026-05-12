@@ -16,7 +16,6 @@ import re
 from typing import Any
 
 import httpx
-
 from app.services.openrouter_client import get_openrouter_client
 
 logger = logging.getLogger(__name__)

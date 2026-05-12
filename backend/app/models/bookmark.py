@@ -1,8 +1,14 @@
-from sqlalchemy import (Column, DateTime, ForeignKey, Integer, String,
-                        UniqueConstraint, func)
-from sqlalchemy.orm import relationship
-
 from app.core.database import Base
+from sqlalchemy import (
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    UniqueConstraint,
+    func,
+)
+from sqlalchemy.orm import relationship
 
 
 class Bookmark(Base):

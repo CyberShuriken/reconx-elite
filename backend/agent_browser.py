@@ -17,8 +17,7 @@ from tool_runner import ToolRunner
 from websocket_manager import WebSocketManager
 
 try:
-    from playwright.async_api import (Browser, BrowserContext, Page,
-                                      async_playwright)
+    from playwright.async_api import Browser, BrowserContext, Page, async_playwright
 
     PLAYWRIGHT_AVAILABLE = True
 except ImportError:

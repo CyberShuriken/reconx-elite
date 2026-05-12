@@ -11,8 +11,14 @@ from pydantic import BaseModel
 from sqlalchemy import select
 
 from backend.ai_router import AIRouter
-from backend.database import (AgentLog, Finding, Scan, async_session,
-                              create_all_tables, get_db)
+from backend.database import (
+    AgentLog,
+    Finding,
+    Scan,
+    async_session,
+    create_all_tables,
+    get_db,
+)
 from backend.orchestrator_7phase import SevenPhaseOrchestrator
 from backend.tool_runner import ToolRunner
 from backend.websocket_manager import WebSocketManager

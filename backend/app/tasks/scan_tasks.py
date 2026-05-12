@@ -6,10 +6,6 @@ import shlex
 import tempfile
 from datetime import datetime, timedelta, timezone
 
-from celery import chain
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session, selectinload
-
 from app.core.config import settings
 from app.core.database import get_sessionmaker
 from app.models.ai_report import AIReport
@@ -28,44 +24,65 @@ from app.models.subdomain import Subdomain
 from app.models.target import Target
 from app.models.vulnerability import Vulnerability
 from app.schemas.scan_modules import parse_modules_from_config
-from app.services.ai_service import (_should_generate_report,
-                                     analyze_javascript_endpoints,
-                                     analyze_live_hosts,
-                                     analyze_nuclei_findings,
-                                     analyze_subdomains,
-                                     build_javascript_asset_summaries_for_ai,
-                                     generate_elite_vulnerability_report)
+from app.services.ai_service import (
+    _should_generate_report,
+    analyze_javascript_endpoints,
+    analyze_live_hosts,
+    analyze_nuclei_findings,
+    analyze_subdomains,
+    build_javascript_asset_summaries_for_ai,
+    generate_elite_vulnerability_report,
+)
 from app.services.blind_xss_service import BlindXssService
 from app.services.external_notifications import notification_service
-from app.services.intelligence import (analyze_javascript_assets,
-                                       build_subdomain_record,
-                                       filter_nuclei_targets,
-                                       normalize_and_dedupe_urls,
-                                       normalize_endpoint_url,
-                                       rank_attack_paths,
-                                       select_javascript_assets,
-                                       synthesize_heuristic_findings)
-from app.services.passive_dns import (fetch_crtsh_subdomains,
-                                      run_github_subdomains_cli)
+from app.services.intelligence import (
+    analyze_javascript_assets,
+    build_subdomain_record,
+    filter_nuclei_targets,
+    normalize_and_dedupe_urls,
+    normalize_endpoint_url,
+    rank_attack_paths,
+    select_javascript_assets,
+    synthesize_heuristic_findings,
+)
+from app.services.passive_dns import fetch_crtsh_subdomains, run_github_subdomains_cli
 from app.services.payload_generator import PayloadGenerator
 from app.services.payload_tester import OpportunityDetector
 from app.services.scan_artifact_service import persist_scan_artifact
-from app.services.scan_pipeline import (pipeline_stage_total,
-                                        resolve_pipeline_stages,
-                                        stage_index_and_total)
-from app.services.scan_runner import (check_headers, run_dalfox_url,
-                                      run_ffuf_dirs, run_ffuf_dns, run_gau,
-                                      run_gowitness_screenshots, run_httpx,
-                                      run_httpx_enrich, run_katana,
-                                      run_masscan_hosts, run_nmap_ports,
-                                      run_nuclei, run_sqlmap_batch,
-                                      run_subfinder, run_wafw00f_sample,
-                                      run_waybackurls)
+from app.services.scan_pipeline import (
+    pipeline_stage_total,
+    resolve_pipeline_stages,
+    stage_index_and_total,
+)
+from app.services.scan_runner import (
+    check_headers,
+    run_dalfox_url,
+    run_ffuf_dirs,
+    run_ffuf_dns,
+    run_gau,
+    run_gowitness_screenshots,
+    run_httpx,
+    run_httpx_enrich,
+    run_katana,
+    run_masscan_hosts,
+    run_nmap_ports,
+    run_nuclei,
+    run_sqlmap_batch,
+    run_subfinder,
+    run_wafw00f_sample,
+    run_waybackurls,
+)
 from app.services.ssrf_service import SsrfService
 from app.services.tool_executor import ToolExecutionResult
-from app.services.websocket import (notify_critical_vulnerability,
-                                    notify_scan_completed, notify_scan_started)
+from app.services.websocket import (
+    notify_critical_vulnerability,
+    notify_scan_completed,
+    notify_scan_started,
+)
 from app.tasks.celery_app import celery_app
+from celery import chain
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session, selectinload
 
 logger = logging.getLogger(__name__)
 
@@ -345,8 +362,7 @@ def _create_vulnerabilities(db: Session, scan_id: int, vulnerabilities: list[dic
             try:
                 # Async learning will be handled in background
                 # For now, we'll queue it as a background task
-                from app.tasks.learning_tasks import \
-                    learn_from_vulnerability_task
+                from app.tasks.learning_tasks import learn_from_vulnerability_task
 
                 learn_from_vulnerability_task.delay(user_id, vuln.id)
             except Exception as e:
@@ -1818,7 +1834,9 @@ async def _run_advanced_recon_stages(db: Session, scan: Scan, target: Target) ->
 
             # Run parameter discovery
             from app.services.advanced_recon_engine import (
-                parameter_discovery, stealth_scanner)
+                parameter_discovery,
+                stealth_scanner,
+            )
 
             param_discovery = parameter_discovery()
 

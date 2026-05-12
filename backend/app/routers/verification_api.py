@@ -3,9 +3,6 @@ from __future__ import annotations
 from collections import defaultdict
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session, selectinload
-
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import get_current_user, require_admin
@@ -13,27 +10,41 @@ from app.models.scan import Scan
 from app.models.target import Target
 from app.models.user import User
 from app.models.vulnerability import Vulnerability
-from app.schemas.verification import (AgentLogEventOut,
-                                      AgentLogHistoryResponse,
-                                      ChainAnalysisRequest,
-                                      ChainAnalysisResponse, FindingsResponse,
-                                      HostGroupState, HostTriageRequest,
-                                      HostTriageResponse,
-                                      JavaScriptAnalysisRequest,
-                                      JavaScriptAnalysisResponse,
-                                      JavaScriptAnalysisState,
-                                      ModelStatusResponse,
-                                      PayloadGenerationRequest,
-                                      PayloadGenerationResponse,
-                                      ReportWriteRequest, ReportWriteResponse,
-                                      SeverityRequest, SeverityResponse,
-                                      VerificationFinding, VerificationState)
-from app.services.ai_service import (analyze_finding_chains,
-                                     analyze_js_content, generate_payloads,
-                                     get_model_status_snapshot,
-                                     rate_finding_severity, triage_hosts,
-                                     verify_all_models, write_finding_report)
+from app.schemas.verification import (
+    AgentLogEventOut,
+    AgentLogHistoryResponse,
+    ChainAnalysisRequest,
+    ChainAnalysisResponse,
+    FindingsResponse,
+    HostGroupState,
+    HostTriageRequest,
+    HostTriageResponse,
+    JavaScriptAnalysisRequest,
+    JavaScriptAnalysisResponse,
+    JavaScriptAnalysisState,
+    ModelStatusResponse,
+    PayloadGenerationRequest,
+    PayloadGenerationResponse,
+    ReportWriteRequest,
+    ReportWriteResponse,
+    SeverityRequest,
+    SeverityResponse,
+    VerificationFinding,
+    VerificationState,
+)
+from app.services.ai_service import (
+    analyze_finding_chains,
+    analyze_js_content,
+    generate_payloads,
+    get_model_status_snapshot,
+    rate_finding_severity,
+    triage_hosts,
+    verify_all_models,
+    write_finding_report,
+)
 from app.services.websocket import get_recent_agent_log_events
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session, selectinload
 
 router = APIRouter(prefix="/api", tags=["verification-api"])
 

@@ -7,9 +7,41 @@ import time
 from contextlib import asynccontextmanager
 from urllib.parse import urlparse
 
+from app import models  # noqa: F401
+from app.core.config import settings
+from app.core.database import SATimeoutError, db_timeout_handler, get_db, init_engine
+from app.core.exception_handlers import (
+    http_exception_handler,
+    unhandled_exception_handler,
+)
+from app.core.metrics import http_request_duration_seconds, http_requests_total
+from app.core.middleware import AuthGuardMiddleware, RequestLoggingMiddleware
+from app.routers import (
+    admin,
+    advanced_recon,
+    auth,
+    blind_xss,
+    bookmarks,
+    custom_templates,
+    intelligence,
+    manual_testing,
+    notifications,
+    out_of_band,
+    payloads,
+    reports,
+    scans,
+    schedules,
+    ssrf,
+    system,
+    targets,
+    ticketing,
+    validation,
+    verification_api,
+    vulnerabilities,
+    websocket,
+)
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import HTMLResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -17,21 +49,6 @@ from slowapi.middleware import SlowAPIMiddleware
 from sqlalchemy import text
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-
-from app import models  # noqa: F401
-from app.core.config import settings
-from app.core.database import (SATimeoutError, db_timeout_handler, get_db,
-                               init_engine)
-from app.core.exception_handlers import (http_exception_handler,
-                                         unhandled_exception_handler)
-from app.core.metrics import http_request_duration_seconds, http_requests_total
-from app.core.middleware import AuthGuardMiddleware, RequestLoggingMiddleware
-from app.routers import (admin, advanced_recon, auth, blind_xss, bookmarks,
-                         custom_templates, intelligence, manual_testing,
-                         notifications, out_of_band, payloads, reports, scans,
-                         schedules, ssrf, system, targets, ticketing,
-                         validation, verification_api, vulnerabilities,
-                         websocket)
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -87,10 +104,7 @@ allowed_origins = settings.cors_allowed_origins_list or ["http://localhost:5173"
 if "*" in allowed_origins:
     raise RuntimeError("CORS wildcard origin is not allowed when credentials are enabled")
 
-# Add regex for Vercel preview deployments if not already set
-if not settings.cors_allowed_origin_regex:
-    # Allow any *.vercel.app subdomain for preview deployments
-    settings.cors_allowed_origin_regex = r"https://.*\.vercel\.app"
+allowed_origin_regex = settings.cors_allowed_origin_regex or r"https://.*\.vercel\.app"
 
 
 def _trusted_hosts_from_origins(origins: list[str]) -> list[str]:
@@ -109,18 +123,13 @@ def _trusted_hosts_from_origins(origins: list[str]) -> list[str]:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_origin_regex=settings.cors_allowed_origin_regex or None,
+    allow_origin_regex=allowed_origin_regex,
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "Accept"],
     max_age=3600,
 )
 if settings.https_behind_proxy:
-    trusted_hosts = _trusted_hosts_from_origins(allowed_origins) or [
-        "localhost",
-        "127.0.0.1",
-    ]
-    app.add_middleware(TrustedHostMiddleware, allowed_hosts=trusted_hosts)
     from fastapi.middleware import HTTPSRedirectMiddleware
 
     app.add_middleware(HTTPSRedirectMiddleware)
@@ -211,7 +220,7 @@ async def health():
             database_status = "connected"
     except Exception as e:
         database_status = f"error: {type(e).__name__}"
-    
+
     return {
         "status": "ok",
         "database": database_status,
@@ -219,7 +228,7 @@ async def health():
             "railway_environment": settings.__dict__.get("railway_environment", "unknown"),
             "frontend_url": settings.frontend_url or "not_set",
             "port": "8000",
-        }
+        },
     }
 
 
@@ -230,5 +239,5 @@ async def cors_test(request: Request):
         "status": "ok",
         "request_origin": request.headers.get("origin", "(none)"),
         "allowed_origins": allowed_origins,
-        "allowed_origin_regex": settings.cors_allowed_origin_regex or None,
+        "allowed_origin_regex": allowed_origin_regex,
     }

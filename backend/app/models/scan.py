@@ -1,9 +1,7 @@
-from sqlalchemy import (JSON, Column, DateTime, ForeignKey, Integer, String,
-                        Text, func)
+from app.core.database import Base
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String, Text, func
 from sqlalchemy.ext.mutable import MutableDict
 from sqlalchemy.orm import relationship
-
-from app.core.database import Base
 
 
 class Scan(Base):

@@ -16,10 +16,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from app.core.config import settings
 from app.core.database import get_engine, get_sessionmaker
 from app.core.middleware import AuthGuardMiddleware
-from app.core.security import (create_access_token, create_refresh_token,
-                               decode_token)
-from app.services.intelligence import (normalize_and_dedupe_urls,
-                                       normalize_endpoint_url)
+from app.core.security import create_access_token, create_refresh_token, decode_token
+from app.services.intelligence import normalize_and_dedupe_urls, normalize_endpoint_url
 
 
 class TestJWTSecurity(unittest.TestCase):

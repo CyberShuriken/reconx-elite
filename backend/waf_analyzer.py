@@ -14,7 +14,6 @@ from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
-
 from ai_router import AIRouter
 from tool_runner import ToolRunner
 from websocket_manager import WebSocketManager

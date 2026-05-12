@@ -1,8 +1,7 @@
 /**
  * Bug Condition Exploration Tests - Task 1
  *
- * These tests MUST FAIL on unfixed code. Failure confirms the bugs exist.
- * DO NOT fix the code when these tests fail -- that is the expected outcome.
+ * Regression tests for production deployment env handling.
  *
  * Requirements: 1.1, 1.2, 1.3, 1.4, 1.6
  */
@@ -37,10 +36,8 @@ describe('Test 1a -- API client falls back to Vercel hostname:8000 (Defect 1)', 
             configurable: true,
         });
 
-        // Ensure VITE_API_URL is unset (simulates Vercel build without the var)
-        delete import.meta.env.VITE_API_URL;
-        // Ensure VITE_API_URL is set to the Railway URL (the correct production value)
-        import.meta.env.VITE_API_URL = RAILWAY_URL;
+        delete process.env.VITE_API_BASE_URL;
+        process.env.VITE_API_URL = RAILWAY_URL;
 
         // Reset module registry so client.js re-evaluates with the new env
         jest.resetModules();
@@ -52,7 +49,8 @@ describe('Test 1a -- API client falls back to Vercel hostname:8000 (Defect 1)', 
             writable: true,
             configurable: true,
         });
-        delete import.meta.env.VITE_API_URL;
+        delete process.env.VITE_API_URL;
+        delete process.env.VITE_API_BASE_URL;
         jest.resetModules();
     });
 
@@ -107,10 +105,9 @@ describe('Test 1d -- WebSocket hook falls back to Vercel hostname:8000 (Defect 5
             configurable: true,
         });
 
-        // Ensure VITE_API_URL is unset (simulates Vercel build without the var)
-        delete import.meta.env.VITE_API_URL;
-        // Ensure VITE_WS_URL is set to the Railway WebSocket URL (the correct production value)
-        import.meta.env.VITE_WS_URL = RAILWAY_WS_URL;
+        delete process.env.VITE_API_URL;
+        delete process.env.VITE_API_BASE_URL;
+        process.env.VITE_WS_URL = RAILWAY_WS_URL;
 
         // Reset module registry so useScanWebSocket.js re-evaluates with the new env
         jest.resetModules();
@@ -122,7 +119,7 @@ describe('Test 1d -- WebSocket hook falls back to Vercel hostname:8000 (Defect 5
             writable: true,
             configurable: true,
         });
-        delete import.meta.env.VITE_WS_URL;
+        delete process.env.VITE_WS_URL;
         jest.resetModules();
     });
 
@@ -146,29 +143,10 @@ describe('Test 1d -- WebSocket hook falls back to Vercel hostname:8000 (Defect 5
         // The FIXED behavior reads VITE_WS_URL:
         //   result = "wss://reconx-elite-backend.up.railway.app"    <- CORRECT
 
-        // Replicate the UNFIXED resolveWebSocketBaseUrl() logic to document the counterexample
-        const unfixedConfiguredUrl =
-            import.meta.env.VITE_API_BASE_URL === '/api/v1' ? '' : import.meta.env.VITE_API_BASE_URL;
+        const { WS_BASE_URL } = await import('../config/api.js');
 
-        const unfixedBaseUrl =
-            unfixedConfiguredUrl ||
-            (typeof window === 'undefined'
-                ? 'http://localhost:8000'
-                : `http://${window.location.hostname}:8000`);
-
-        const unfixedWsUrl = unfixedBaseUrl
-            .replace(/\/+$/, '')
-            .replace(/^http:/, 'ws:')
-            .replace(/^https:/, 'wss:');
-
-        // COUNTEREXAMPLE: the unfixed code produces this wrong URL
-        // This assertion PASSES (documents the bug exists)
-        expect(unfixedWsUrl).toBe(`ws://${VERCEL_HOSTNAME}:8000`);
-
-        // FINAL ASSERTION that FAILS on unfixed code:
-        // The unfixed URL must NOT contain the Vercel hostname.
-        // On unfixed code this FAILS because unfixedWsUrl = "ws://reconx-elite-frontend.vercel.app:8000"
-        // After the fix, the hook reads VITE_WS_URL so this assertion will PASS.
-        expect(unfixedWsUrl).not.toContain(VERCEL_HOSTNAME);
+        expect(WS_BASE_URL).toBe(RAILWAY_WS_URL);
+        expect(WS_BASE_URL).not.toContain(VERCEL_HOSTNAME);
+        expect(WS_BASE_URL).not.toContain(':8000');
     });
 });

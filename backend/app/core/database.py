@@ -1,13 +1,11 @@
 from typing import AsyncGenerator
 
+from app.core.config import settings
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import TimeoutError as SATimeoutError
-from sqlalchemy.ext.asyncio import (AsyncSession, async_sessionmaker,
-                                    create_async_engine)
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
-
-from app.core.config import settings
 
 # Engine and session maker - initialized at application startup
 _engine = None

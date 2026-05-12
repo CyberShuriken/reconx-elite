@@ -1,9 +1,5 @@
 from typing import Dict, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
-from pydantic import BaseModel, Field
-from sqlalchemy.orm import Session
-
 from app.core.config import settings
 from app.core.database import get_db
 from app.core.deps import get_current_user
@@ -12,9 +8,16 @@ from app.models.user import User
 from app.models.vulnerability import Vulnerability
 from app.routers.auth import limiter
 from app.services.audit import log_audit_event
-from app.services.ticketing import (GitHubConfig, GitLabConfig, JiraConfig,
-                                    TicketingPlatform,
-                                    create_vulnerability_ticket)
+from app.services.ticketing import (
+    GitHubConfig,
+    GitLabConfig,
+    JiraConfig,
+    TicketingPlatform,
+    create_vulnerability_ticket,
+)
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from pydantic import BaseModel, Field
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/ticketing", tags=["ticketing"])
 

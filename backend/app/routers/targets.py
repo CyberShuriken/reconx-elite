@@ -1,11 +1,6 @@
 import asyncio
 import logging
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
-
 from app.core.cache import build_cache_key, get_cached, invalidate, set_cached
 from app.core.config import settings
 from app.core.database import get_db
@@ -14,10 +9,13 @@ from app.models.scan import Scan
 from app.models.target import Target
 from app.models.user import User
 from app.routers.auth import limiter
-from app.schemas.target import (TargetCreate, TargetListItemOut, TargetOut,
-                                TargetUpdate)
+from app.schemas.target import TargetCreate, TargetListItemOut, TargetOut, TargetUpdate
 from app.services.audit import log_audit_event
 from app.services.domain import normalize_domain
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 logger = logging.getLogger(__name__)
 
